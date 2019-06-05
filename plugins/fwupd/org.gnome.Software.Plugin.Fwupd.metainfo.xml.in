@@ -2,7 +2,7 @@
 <!-- Copyright 2013-2016 Richard Hughes <richard@hughsie.com> -->
 <component type="addon">
   <id>org.gnome.Software.Plugin.Fwupd</id>
-  <extends>org.gnome.Software.desktop</extends>
+  <extends>kr.gooroom.Software.desktop</extends>
   <name>Firmware Upgrade Support</name>
   <summary>Provides support for firmware upgrades</summary>
   <url type="homepage">http://www.fwupd.org</url>

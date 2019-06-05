@@ -15,7 +15,7 @@ gdbus_src = gnome.gdbus_codegen(
   namespace : 'Gs'
 )
 
-gnome_software_sources = [
+gooroom_software_sources = [
   'gs-app-addon-row.c',
   'gs-app-folder-dialog.c',
   'gs-application.c',
@@ -69,7 +69,7 @@ gnome_software_sources = [
   'gs-vendor.c'
 ]
 
-gnome_software_dependencies = [
+gooroom_software_dependencies = [
   appstream_glib,
   gio_unix,
   gmodule,
@@ -81,42 +81,42 @@ gnome_software_dependencies = [
 ]
 
 if get_option('packagekit')
-  gnome_software_sources += [
+  gooroom_software_sources += [
     'gs-dbus-helper.c',
   ]
-  gnome_software_sources += gnome.gdbus_codegen(
+  gooroom_software_sources += gnome.gdbus_codegen(
     'gs-packagekit-generated',
     'org.freedesktop.PackageKit.xml',
     interface_prefix : 'org.freedesktop.',
     namespace : 'Gs'
   )
-  gnome_software_sources += gnome.gdbus_codegen(
+  gooroom_software_sources += gnome.gdbus_codegen(
     'gs-packagekit-modify2-generated',
     'org.freedesktop.PackageKit.Modify2.xml',
     interface_prefix : 'org.freedesktop.',
     namespace : 'Gs'
   )
-  gnome_software_dependencies += [packagekit]
+  gooroom_software_dependencies += [packagekit]
 endif
 
 if get_option('gnome_desktop')
-  gnome_software_dependencies += [gnome_desktop]
+  gooroom_software_dependencies += [gnome_desktop]
 endif
 
 if get_option('gspell')
-  gnome_software_dependencies += [gspell]
+  gooroom_software_dependencies += [gspell]
 endif
 
 executable(
-  'gnome-software',
+  'gooroom-software',
   resources_src,
   gdbus_src,
-  sources : gnome_software_sources,
+  sources : gooroom_software_sources,
   include_directories : [
     include_directories('..'),
     include_directories('../lib'),
   ],
-  dependencies : gnome_software_dependencies,
+  dependencies : gooroom_software_dependencies,
   link_with : [
     libgnomesoftware
   ],
@@ -126,7 +126,7 @@ executable(
 )
 
 executable(
-  'gnome-software-restarter',
+  'gooroom-software-restarter',
   sources : 'gs-restarter.c',
   include_directories : [
     include_directories('..'),
@@ -147,7 +147,7 @@ resources_editor_src = gnome.compile_resources(
 )
 
 executable(
-  'gnome-software-editor',
+  'gooroom-software-editor',
   resources_editor_src,
   sources : [
     'gs-app-tile.c',
@@ -163,7 +163,7 @@ executable(
     include_directories('..'),
     include_directories('../lib'),
   ],
-  dependencies : gnome_software_dependencies,
+  dependencies : gooroom_software_dependencies,
   link_with : [
     libgnomesoftware
   ],
@@ -179,8 +179,8 @@ cdata.set('bindir', join_paths(get_option('prefix'),
 
 # replace @bindir@
 configure_file(
-  input : 'org.gnome.Software.service.in',
-  output : 'org.gnome.Software.service',
+  input : 'kr.gooroom.Software.service.in',
+  output : 'kr.gooroom.Software.service',
   install: true,
   install_dir: join_paths(get_option('datadir'), 'dbus-1/services'),
   configuration : cdata
@@ -188,8 +188,8 @@ configure_file(
 
 # replace @bindir@
 configure_file(
-  input : 'gnome-software-service.desktop.in',
-  output : 'gnome-software-service.desktop',
+  input : 'gooroom-software-service.desktop.in',
+  output : 'gooroom-software-service.desktop',
   install: true,
   install_dir: join_paths(get_option('sysconfdir'), 'xdg/autostart'),
   configuration : cdata
@@ -197,8 +197,8 @@ configure_file(
 
 # replace @bindir@
 i18n.merge_file(
-  input: 'org.gnome.Software.desktop.in',
-  output: 'org.gnome.Software.desktop',
+  input: 'kr.gooroom.Software.desktop.in',
+  output: 'kr.gooroom.Software.desktop',
   type: 'desktop',
   po_dir: join_paths(meson.source_root(), 'po'),
   install: true,
@@ -206,8 +206,8 @@ i18n.merge_file(
 )
 
 i18n.merge_file(
-  input: 'org.gnome.Software.Editor.desktop.in',
-  output: 'org.gnome.Software.Editor.desktop',
+  input: 'kr.gooroom.Software.Editor.desktop.in',
+  output: 'kr.gooroom.Software.Editor.desktop',
   type: 'desktop',
   po_dir: join_paths(meson.source_root(), 'po'),
   install: true,
@@ -215,15 +215,15 @@ i18n.merge_file(
 )
 
 i18n.merge_file(
-  input: 'gnome-software-local-file.desktop.in',
-  output: 'gnome-software-local-file.desktop',
+  input: 'gooroom-software-local-file.desktop.in',
+  output: 'gooroom-software-local-file.desktop',
   type: 'desktop',
   po_dir: join_paths(meson.source_root(), 'po'),
   install: true,
   install_dir: join_paths(get_option('datadir'), 'applications')
 )
 
-install_data('org.gnome.Software-search-provider.ini',
+install_data('kr.gooroom.Software-search-provider.ini',
              install_dir : 'share/gnome-shell/search-providers')
 
 if get_option('man')
@@ -269,8 +269,8 @@ endif
 if get_option('packagekit')
   # replace @bindir@
   configure_file(
-    input : 'org.freedesktop.PackageKit.service.in',
-    output : 'org.freedesktop.PackageKit.service',
+    input : 'org.freedesktop.GooroomSoftware.service.in',
+    output : 'org.freedesktop.GooroomSoftware.service',
     install: true,
     install_dir: join_paths(get_option('datadir'), 'dbus-1', 'services'),
     configuration : cdata

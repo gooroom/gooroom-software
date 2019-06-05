@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Gooroom Software
+Exec=@bindir@/gooroom-software --gapplication-service
+OnlyShowIn=GNOME;Unity;
+NoDisplay=true

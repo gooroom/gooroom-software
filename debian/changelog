@@ -1,3 +1,9 @@
+gooroom-software (3.30.6-5) unstable; urgency=medium
+
+  * Initial release
+
+ -- Gooroom <gooroom@gooroom.kr>  Tue, 05 Jun 2019 12:00:00 -0500
+
 gnome-software (3.30.6-5) unstable; urgency=medium
 
   * Cherry-pick 7 Snap patches via Ubuntu

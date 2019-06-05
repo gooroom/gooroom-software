@@ -1,4 +1,4 @@
-Source: gnome-software
+Source: gooroom-software
 Section: gnome
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
@@ -35,24 +35,24 @@ Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-software
 Vcs-Git: https://salsa.debian.org/gnome-team/gnome-software.git
 Homepage: https://wiki.gnome.org/Apps/Software
 
-Package: gnome-software
+Package: gooroom-software
 Architecture: any
 Depends: appstream,
          apt-config-icons,
-         gnome-software-common (= ${source:Version}),
+         gooroom-software-common (= ${source:Version}),
          gsettings-desktop-schemas (>= 3.18),
          libgtk3-perl,
          packagekit (>= 1.1.11),
          software-properties-gtk,
          ${misc:Depends},
          ${shlibs:Depends}
-Replaces: gnome-packagekit-session (<< 3.16.0-2~)
-Breaks: gnome-packagekit-session (<< 3.16.0-2~)
+Replaces: gooroom-packagekit-session (<< 3.16.0-2~)
+Breaks: gooroom-packagekit-session (<< 3.16.0-2~)
 Conflicts: sessioninstaller
 Recommends: ${plugin:Recommends},
             fwupd [linux-any]
 Suggests: apt-config-icons-hidpi,
-          gnome-software-plugin-flatpak [amd64 arm64 armel armhf i386 mips mipsel mips64el ppc64el s390x hppa powerpc powerpcspe ppc64],
+          gooroom-software-plugin-flatpak [amd64 arm64 armel armhf i386 mips mipsel mips64el ppc64el s390x hppa powerpc powerpcspe ppc64],
           ${plugin:Suggests}
 Description: Software Center for GNOME
  Software lets you install and update applications and system extensions.
@@ -63,7 +63,7 @@ Description: Software Center for GNOME
  appdata plugin provides additional metadata from locally installed data in the
  appdata format.
 
-Package: gnome-software-common
+Package: gooroom-software-common
 Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
@@ -78,10 +78,10 @@ Description: Software Center for GNOME (common files)
  .
  This package contains the architecture-independent files.
 
-Package: gnome-software-plugin-flatpak
+Package: gooroom-software-plugin-flatpak
 Architecture: amd64 arm64 armel armhf i386 mips mips64el ppc64el s390x hppa powerpc powerpcspe ppc64
 Depends: flatpak,
-         gnome-software (= ${binary:Version}),
+         gooroom-software (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
 Description: Flatpak support for GNOME Software
@@ -95,15 +95,15 @@ Description: Flatpak support for GNOME Software
  .
  This package contains the Flatpak plugin.
 
-Package: gnome-software-plugin-snap
+Package: gooroom-software-plugin-snap
 Architecture: amd64 arm64 armel armhf i386 ppc64el s390x
-Depends: gnome-software (= ${binary:Version}),
+Depends: gooroom-software (= ${binary:Version}),
          snapd [amd64 arm64 armel armhf i386 ppc64el],
          ${misc:Depends},
          ${shlibs:Depends}
 Recommends: snapd [s390x]
-Breaks: gnome-software (<< 3.22.3)
-Replaces: gnome-software (<< 3.22.3)
+Breaks: gooroom-software (<< 3.22.3)
+Replaces: gooroom-software (<< 3.22.3)
 Description: Snap support for GNOME Software
  Software lets you install and update applications and system extensions.
  .
@@ -115,19 +115,19 @@ Description: Snap support for GNOME Software
  .
  This package contains the Snap plugin.
 
-Package: gnome-packagekit-session
+Package: gooroom-packagekit-session
 Architecture: all
 Section: oldlibs
-Depends: gnome-software (>= ${source:Version}),
+Depends: gooroom-software (>= ${source:Version}),
          ${misc:Depends}
-Description: Transitional package (gnome-packagekit-session -> gnome-software)
+Description: Transitional package (gnome-packagekit-session -> gooroom-software)
  Transitional dummy package replacing gnome-packagekit-session with
- gnome-software.
+ gooroom-software.
  .
  The PackageKit session interface is no separate component anymore, but built
  into GNOME-Software.
 
-Package: gnome-software-dev
+Package: gooroom-software-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
@@ -136,14 +136,14 @@ Depends: libappstream-glib-dev (>= 0.7.14),
          libgtk-3-dev (>= 3.22.4),
          libsoup2.4-dev (>= 2.52.0),
          ${misc:Depends}
-Suggests: gnome-software-doc
+Suggests: gooroom-software-doc
 Description: Software Center for GNOME - development files
  Software lets you install and update applications and system extensions.
  .
  This package contains headers and other files required when compiling external
  plugins for use with Software.
 
-Package: gnome-software-doc
+Package: gooroom-software-doc
 Section: doc
 Architecture: all
 Multi-Arch: foreign

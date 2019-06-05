@@ -14,8 +14,8 @@ pkconf.set('includedir',
 pkconf.set('GS_PLUGIN_API_VERSION', gs_plugin_api_version)
 pkconf.set('VERSION', meson.project_version())
 configure_file(
-  input : 'gnome-software.pc.in',
-  output : 'gnome-software.pc',
+  input : 'gooroom-software.pc.in',
+  output : 'gooroom-software.pc',
   install: true,
   install_dir: join_paths(get_option('libdir'), 'pkgconfig'),
   configuration : pkconf
@@ -50,7 +50,7 @@ install_headers([
     'gs-price.h',
     'gs-utils.h'
   ],
-  subdir : 'gnome-software'
+  subdir : 'gooroom-software'
 )
 
 librarydeps = [
@@ -97,7 +97,7 @@ libgnomesoftware = static_library(
 )
 
 executable(
-  'gnome-software-cmd',
+  'gooroom-software-cmd',
   sources : [
     'gs-cmd.c',
   ],

@@ -1,17 +1,18 @@
 [Desktop Entry]
-Name=Banner Designer
-Comment=Design the featured banners for GNOME Software
+Name=Software
+Comment=Add, remove or update software on this computer
 # Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-Icon=org.gnome.Software
-Exec=gnome-software-editor
-NoDisplay=true
+Icon=kr.gooroom.Software
+Exec=gooroom-software %U
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;System;PackageManager;
 # Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-Keywords=AppStream;Software;App;
+Keywords=Updates;Upgrade;Sources;Repositories;Preferences;Install;Uninstall;Program;Software;App;Store;
 StartupNotify=true
+MimeType=x-scheme-handler/appstream;x-scheme-handler/apt;x-scheme-handler/snap;
 X-GNOME-Bugzilla-Bugzilla=GNOME
 X-GNOME-Bugzilla-Product=gnome-software
-X-GNOME-Bugzilla-Component=editor
+X-GNOME-Bugzilla-Component=gnome-software
 X-GNOME-UsesNotifications=true
+DBusActivatable=true

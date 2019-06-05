@@ -1,7 +1,7 @@
-data/appdata/org.gnome.Software.appdata.xml.in
-data/org.gnome.software.external-appstream.policy.in
-data/org.gnome.software.gschema.xml
-src/gnome-software-local-file.desktop.in
+data/appdata/kr.gooroom.Software.appdata.xml.in
+data/kr.gooroom.software.external-appstream.policy.in
+data/kr.gooroom.software.gschema.xml
+src/gooroom-software-local-file.desktop.in
 src/gnome-software.ui
 src/gs-app-addon-row.c
 src/gs-app-folder-dialog.c
@@ -75,8 +75,8 @@ src/gs-updates-page.ui
 src/gs-updates-section.c
 src/gs-upgrade-banner.c
 src/gs-upgrade-banner.ui
-src/org.gnome.Software.desktop.in
-src/org.gnome.Software.Editor.desktop.in
+src/kr.gooroom.Software.desktop.in
+src/kr.gooroom.Software.Editor.desktop.in
 plugins/core/gs-desktop-common.c
 plugins/core/gs-plugin-generic-updates.c
 plugins/core/gs-plugin-rewrite-resource.c

@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=kr.gooroom.Software
+Exec=@bindir@/gooroom-software --gapplication-service

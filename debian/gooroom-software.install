@@ -1,0 +1,11 @@
+etc/xdg/autostart/
+usr/bin/gooroom-software
+usr/bin/gooroom-software-editor
+usr/lib/*/gooroom-software/gooroom-software-cmd
+usr/lib/*/gooroom-software/gooroom-software-restarter
+usr/lib/*/gr-plugins-*/*.so
+usr/share/applications/
+usr/share/dbus-1/
+usr/share/glib-2.0/schemas/
+usr/share/gnome-shell/
+usr/share/metainfo/

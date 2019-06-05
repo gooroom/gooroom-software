@@ -1,0 +1,5 @@
+debian/source_gooroom-software.py /usr/share/apport/package-hooks
+usr/share/app-info/xmls
+usr/share/gooroom-software/
+usr/share/icons/
+usr/share/locale/

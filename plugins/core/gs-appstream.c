@@ -491,13 +491,13 @@ gs_appstream_refine_app (GsPlugin *plugin,
 	/* is compatible */
 	req = as_app_get_require_by_value (item,
 					   AS_REQUIRE_KIND_ID,
-					   "org.gnome.Software.desktop");
+					   "kr.gooroom.Software.desktop");
 	if (req != NULL) {
 		if (!as_require_version_compare (req, PACKAGE_VERSION, &error_local)) {
 			g_set_error (error,
 				     GS_PLUGIN_ERROR,
 				     GS_PLUGIN_ERROR_NOT_SUPPORTED,
-				     "not for this gnome-software: %s",
+				     "not for this gooroom-software: %s",
 				     error_local->message);
 			return FALSE;
 		}

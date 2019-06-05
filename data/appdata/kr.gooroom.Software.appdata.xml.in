@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2013-2016 Richard Hughes <richard@hughsie.com> -->
 <component type="desktop">
-  <id>org.gnome.Software.desktop</id>
+  <id>kr.gooroom.Software.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0+</project_license>
-  <name>GNOME Software</name>
+  <name>Gooroom Software</name>
   <summary>Application manager for GNOME</summary>
   <description>
     <p>
@@ -1218,7 +1218,7 @@
     </release>
   </releases>
   <provides>
-    <id>gnome-software.desktop</id>
+    <id>gooroom-software.desktop</id>
   </provides>
   <kudos>
     <kudo>AppMenu</kudo>
@@ -1235,7 +1235,7 @@
   <update_contact>richard_at_hughsie.com</update_contact>
   <compulsory_for_desktop>GNOME</compulsory_for_desktop>
   <project_group>GNOME</project_group>
-  <translation type="gettext">gnome-software</translation>
+  <translation type="gettext">gooroom-software</translation>
   <developer_name>The GNOME Project</developer_name>
   <content_rating type="oars-1.0">
     <content_attribute id="violence-cartoon">none</content_attribute>

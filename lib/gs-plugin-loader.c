@@ -1770,7 +1770,7 @@ load_install_queue (GsPluginLoader *plugin_loader, GError **error)
 
 	/* load from file */
 	file = g_build_filename (g_get_user_data_dir (),
-				 "gnome-software",
+				 "gooroom-software",
 				 "install-queue",
 				 NULL);
 	if (!g_file_test (file, G_FILE_TEST_EXISTS))
@@ -1838,7 +1838,7 @@ save_install_queue (GsPluginLoader *plugin_loader)
 
 	/* save file */
 	file = g_build_filename (g_get_user_data_dir (),
-				 "gnome-software",
+				 "gooroom-software",
 				 "install-queue",
 				 NULL);
 	if (!gs_mkdir_parent (file, &error)) {
@@ -1867,7 +1867,7 @@ add_app_to_install_queue (GsPluginLoader *plugin_loader, GsApp *app)
 
 	gs_app_set_state (app, AS_APP_STATE_QUEUED_FOR_INSTALL);
 	id = g_idle_add (emit_pending_apps_idle, g_object_ref (plugin_loader));
-	g_source_set_name_by_id (id, "[gnome-software] emit_pending_apps_idle");
+	g_source_set_name_by_id (id, "[gooroom-software] emit_pending_apps_idle");
 	save_install_queue (plugin_loader);
 
 	/* recursively queue any addons */
@@ -1895,7 +1895,7 @@ remove_app_from_install_queue (GsPluginLoader *plugin_loader, GsApp *app)
 	if (ret) {
 		gs_app_set_state (app, AS_APP_STATE_AVAILABLE);
 		id = g_idle_add (emit_pending_apps_idle, g_object_ref (plugin_loader));
-		g_source_set_name_by_id (id, "[gnome-software] emit_pending_apps_idle");
+		g_source_set_name_by_id (id, "[gooroom-software] emit_pending_apps_idle");
 		save_install_queue (plugin_loader);
 
 		/* recursively remove any queued addons */
@@ -2293,7 +2293,7 @@ gs_plugin_loader_plugin_dir_changed_cb (GFileMonitor *monitor,
 	/* add app */
 	gs_plugin_event_set_action (event, GS_PLUGIN_ACTION_SETUP);
 	app = gs_plugin_loader_app_create (plugin_loader,
-		"system/*/*/*/org.gnome.Software.desktop/*");
+		"system/*/*/*/kr.gooroom.Software.desktop/*");
 	if (app != NULL)
 		gs_plugin_event_set_app (event, app);
 
@@ -2424,7 +2424,7 @@ gs_plugin_loader_setup (GsPluginLoader *plugin_loader,
 	/* use the default, but this requires a 'make install' */
 	if (priv->locations->len == 0) {
 		g_autofree gchar *filename = NULL;
-		filename = g_strdup_printf ("gs-plugins-%s", GS_PLUGIN_API_VERSION);
+		filename = g_strdup_printf ("gr-plugins-%s", GS_PLUGIN_API_VERSION);
 		g_ptr_array_add (priv->locations, g_build_filename (LIBDIR, filename, NULL));
 	}
 

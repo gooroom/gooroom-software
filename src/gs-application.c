@@ -338,7 +338,7 @@ about_activated (GSimpleAction *action,
 	gtk_about_dialog_set_authors (dialog, authors);
 	gtk_about_dialog_set_copyright (dialog, copyright);
 	gtk_about_dialog_set_license_type (dialog, GTK_LICENSE_GPL_2_0);
-	gtk_about_dialog_set_logo_icon_name (dialog, "org.gnome.Software");
+	gtk_about_dialog_set_logo_icon_name (dialog, "kr.gooroom.Software");
 	gtk_about_dialog_set_translator_credits (dialog, _("translator-credits"));
 	gtk_about_dialog_set_version (dialog, VERSION);
 	gtk_about_dialog_set_program_name (dialog, g_get_application_name ());
@@ -919,7 +919,7 @@ gs_application_startup (GApplication *application)
 #ifdef HAVE_PACKAGEKIT
 	GS_APPLICATION (application)->dbus_helper = gs_dbus_helper_new ();
 #endif
-	settings = g_settings_new ("org.gnome.software");
+	settings = g_settings_new ("kr.gooroom.software");
 	GS_APPLICATION (application)->settings = settings;
 	g_signal_connect_swapped (settings, "changed",
 				  G_CALLBACK (gs_application_settings_changed_cb),
@@ -1106,7 +1106,7 @@ GsApplication *
 gs_application_new (void)
 {
 	return g_object_new (GS_APPLICATION_TYPE,
-			     "application-id", "org.gnome.Software",
+			     "application-id", "kr.gooroom.Software",
 			     "flags", G_APPLICATION_HANDLES_OPEN,
 			     "inactivity-timeout", 12000,
 			     NULL);

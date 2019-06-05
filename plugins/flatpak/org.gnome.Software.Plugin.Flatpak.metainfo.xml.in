@@ -2,7 +2,7 @@
 <!-- Copyright 2013-2016 Richard Hughes <richard@hughsie.com> -->
 <component type="addon">
   <id>org.gnome.Software.Plugin.Flatpak</id>
-  <extends>org.gnome.Software.desktop</extends>
+  <extends>kr.gooroom.Software.desktop</extends>
   <name>Flatpak Support</name>
   <summary>Flatpak is a framework for desktop applications on Linux</summary>
   <url type="homepage">http://flatpak.org/</url>

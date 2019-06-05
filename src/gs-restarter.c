@@ -24,9 +24,9 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 
-#define GS_BINARY_NAME			"gnome-software"
-#define GS_DBUS_BUS_NAME		"org.gnome.Software"
-#define GS_DBUS_OBJECT_PATH		"/org/gnome/Software"
+#define GS_BINARY_NAME			"gooroom-software"
+#define GS_DBUS_BUS_NAME		"kr.gooroom.Software"
+#define GS_DBUS_OBJECT_PATH		"/kr/gooroom/Software"
 #define GS_DBUS_INTERFACE_NAME		"org.gtk.Actions"
 
 typedef struct {

@@ -43,9 +43,9 @@ struct {
 		"outline-style: dashed;\n"
 		"outline-offset: 2px;\n"
 		"background:"
-		" url('@datadir@/gnome-software/featured-builder.png')"
+		" url('@datadir@/gooroom-software/featured-builder.png')"
 		" left center / 100% auto no-repeat,"
-		" url('@datadir@/gnome-software/featured-builder-bg.jpg')"
+		" url('@datadir@/gooroom-software/featured-builder-bg.jpg')"
 		" center / cover no-repeat;" },
 	{ NULL, NULL }
 };

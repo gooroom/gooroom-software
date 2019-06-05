@@ -18,9 +18,9 @@ install_data([
   'featured-weather.png',
   'featured-weather-bg.png'
   ],
-  install_dir : 'share/gnome-software'
+  install_dir : 'share/gooroom-software'
 )
 
-install_data('org.gnome.Software.Featured.xml',
+install_data('kr.gooroom.Software.Featured.xml',
   install_dir : 'share/app-info/xmls'
 )

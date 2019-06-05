@@ -1,4 +1,4 @@
-project('gnome-software', 'c',
+project('gooroom-software', 'c',
   version : '3.30.6',
   license : 'GPL-2.0+',
   default_options : ['warning_level=1', 'c_std=c99'],
@@ -16,7 +16,7 @@ gs_plugin_api_version = '12'
 conf.set_quoted('GS_PLUGIN_API_VERSION', gs_plugin_api_version)
 
 # install docs
-install_data('README.md', install_dir : 'share/doc/gnome-software')
+#install_data('README.md', install_dir : 'share/doc/gooroom-software')
 
 # get suported warning flags
 test_args = [
@@ -242,4 +242,4 @@ if meson.version().version_compare('<0.41.0')
 endif
 
 # FIXME: remove when https://github.com/mesonbuild/meson/issues/837 fixed
-meson.add_install_script('meson_post_install.sh')
+#meson.add_install_script('meson_post_install.sh')

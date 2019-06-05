@@ -2,7 +2,7 @@
 <!-- Copyright 2013-2016 Richard Hughes <richard@hughsie.com> -->
 <component type="addon">
   <id>org.gnome.Software.Plugin.Odrs</id>
-  <extends>org.gnome.Software.desktop</extends>
+  <extends>kr.gooroom.Software.desktop</extends>
   <name>Open Desktop Ratings Support</name>
   <summary>ODRS is a service providing user reviews of applications</summary>
   <url type="homepage">https://odrs.gnome.org/</url>

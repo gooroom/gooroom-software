@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: gnome-software
+Upstream-Name: gooroom-software
 Source: https://download.gnome.org/sources/gnome-software/
 
 Files: *
@@ -24,7 +24,7 @@ Files: data/assets/featured-mypaint.png
 Copyright: Richard Hughes <richard@hughsie.com>
 License: CC-BY-SA-3.0
 
-Files: ./data/appdata/org.gnome.Software.appdata.xml.in
+Files: ./data/appdata/kr.gooroom.Software.appdata.xml.in
  ./plugins/*/*.metainfo.*
 Copyright: 2013-2016, Richard Hughes <richard@hughsie.com>
 License: CC0-1.0
