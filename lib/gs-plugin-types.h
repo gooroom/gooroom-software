@@ -153,6 +153,7 @@ typedef enum {
  * @GS_PLUGIN_REFINE_FLAGS_REQUIRE_ORIGIN_UI:		Require the origin for UI
  * @GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME:		Require the runtime
  * @GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS:		Require screenshot information
+ * @GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS:		Require channel information
  *
  * The refine flags.
  **/
@@ -184,6 +185,7 @@ typedef enum {
 #define GS_PLUGIN_REFINE_FLAGS_REQUIRE_ORIGIN_UI	((guint64) 1 << 24)
 #define GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME		((guint64) 1 << 25)
 #define GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS	((guint64) 1 << 26)
+#define GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS		((guint64) 1 << 28)
 typedef guint64 GsPluginRefineFlags;
 
 /**
@@ -251,6 +253,7 @@ typedef enum {
  * @GS_PLUGIN_ACTION_DESTROY:			Destroy the plugin
  * @GS_PLUGIN_ACTION_PURCHASE:			Purchase an app
  * @GS_PLUGIN_ACTION_DOWNLOAD:			Download an application
+ * @GS_PLUGIN_ACTION_SWITCH_CHANNEL:		Switch app channel
  *
  * The plugin action.
  **/
@@ -299,6 +302,7 @@ typedef enum {
 	GS_PLUGIN_ACTION_DESTROY,
 	GS_PLUGIN_ACTION_PURCHASE,
 	GS_PLUGIN_ACTION_DOWNLOAD,
+	GS_PLUGIN_ACTION_SWITCH_CHANNEL,
 	/*< private >*/
 	GS_PLUGIN_ACTION_LAST
 } GsPluginAction;

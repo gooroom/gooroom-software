@@ -588,6 +588,11 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 	}
 }
 
+static void
+gs_details_page_set_sensitive (GtkWidget *widget, gboolean is_active)
+{
+}
+
 static gboolean
 gs_details_page_history_cb (GtkLabel *label,
                             gchar *uri,
@@ -645,6 +650,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	const gchar *tmp;
 	gchar **menu_path;
 	guint64 updated;
+	GsChannel *channel;
 	g_autoptr(GError) error = NULL;
     GPtrArray *categories;
     const gchar *category_name;
@@ -729,6 +735,13 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->button_details_license_unknown, FALSE);
 	}
 	
+    /* set channel */
+	channel = gs_app_get_active_channel (self->app);
+	gtk_widget_set_visible (self->label_details_channel_title, TRUE);
+	gtk_widget_set_visible (self->button_details_channel, channel != NULL);
+	if (channel != NULL) {
+		gtk_button_set_label (GTK_BUTTON (self->button_details_channel), gs_channel_get_name (channel));
+	}
 	/* refresh size information */
 	gs_details_page_refresh_size (self);
 
@@ -1238,7 +1251,8 @@ gs_details_page_set_local_file (GsDetailsPage *self, GFile *file)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RELATED |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PERMISSIONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS, 
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS |
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS,
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
@@ -1266,7 +1280,8 @@ gs_details_page_set_url (GsDetailsPage *self, const gchar *url)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RELATED |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PERMISSIONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS,
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS |
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS |
 							 GS_PLUGIN_REFINE_FLAGS_ALLOW_PACKAGES,
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
@@ -1294,7 +1309,8 @@ gs_details_page_load (GsDetailsPage *self)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ADDONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS, 
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS |
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS,
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
@@ -1402,6 +1418,164 @@ gs_details_page_app_cancel_button_cb (GtkWidget *widget, GsDetailsPage *self)
 	 * having to pretend to remove the app */
 	if (gs_app_get_state (self->app) == AS_APP_STATE_QUEUED_FOR_INSTALL)
 		gs_details_page_remove_app (self);
+}
+
+typedef struct {
+	GsDetailsPage	*self;
+	GsChannel	*channel;
+} GsDetailsPageChannelHelper;
+
+static void
+gs_details_page_channel_helper_free (GsDetailsPageChannelHelper *helper)
+{
+	g_object_unref (helper->self);
+	g_object_unref (helper->channel);
+	g_free (helper);
+}
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GsDetailsPageChannelHelper, gs_details_page_channel_helper_free);
+
+static void
+gs_page_channel_switch_refine_cb (GObject *source,
+                                  GAsyncResult *res,
+                                  gpointer user_data)
+{
+	g_autoptr(GsDetailsPageChannelHelper) helper = (GsDetailsPageChannelHelper *) user_data;
+	GsDetailsPage *self = helper->self;
+	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source);
+	gboolean ret;
+	g_autoptr(GError) error = NULL;
+
+	ret = gs_plugin_loader_job_action_finish (plugin_loader,
+						  res,
+						  &error);
+	if (g_error_matches (error,
+			     GS_PLUGIN_ERROR,
+			     GS_PLUGIN_ERROR_CANCELLED)) {
+		g_debug ("%s", error->message);
+		return;
+	}
+	if (!ret) {
+		g_warning ("failed to refine %s: %s",
+			   gs_app_get_id (self->app),
+			   error->message);
+		return;
+	}
+
+	gs_details_page_refresh_all (self);
+}
+
+static void
+gs_page_channel_switched_cb (GObject *source,
+                             GAsyncResult *res,
+                             gpointer user_data)
+{
+	g_autoptr(GsDetailsPageChannelHelper) helper = (GsDetailsPageChannelHelper *) user_data;
+	GsDetailsPage *self = helper->self;
+	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source);
+	gboolean ret;
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+	g_autoptr(GError) error = NULL;
+
+	ret = gs_plugin_loader_job_action_finish (plugin_loader,
+						  res,
+						  &error);
+	if (g_error_matches (error,
+			     GS_PLUGIN_ERROR,
+			     GS_PLUGIN_ERROR_CANCELLED)) {
+		g_debug ("%s", error->message);
+		return;
+	}
+	if (!ret) {
+		g_warning ("failed to switch channel %s: %s",
+		           gs_app_get_id (self->app),
+		           error->message);
+		return;
+	}
+
+	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_REFINE,
+					 "app", self->app,
+					 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_VERSION,
+					 NULL);
+	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+					    self->app_cancellable,
+					    gs_page_channel_switch_refine_cb,
+					    g_steal_pointer (&helper));
+}
+
+static void
+gs_details_page_switch_channel_cb (GtkWidget *widget, gpointer user_data)
+{
+	g_autoptr(GsDetailsPageChannelHelper) helper = (GsDetailsPageChannelHelper *) user_data;
+	GsDetailsPage *self = helper->self;
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+
+	gtk_widget_hide (self->popover_channel);
+
+	gs_app_set_active_channel (self->app, helper->channel);
+
+	switch (gs_app_get_state (self->app)) {
+	case AS_APP_STATE_INSTALLED:
+	case AS_APP_STATE_UPDATABLE:
+	case AS_APP_STATE_UPDATABLE_LIVE:
+		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_SWITCH_CHANNEL,
+						 "app", self->app,
+						 "channel", helper->channel,
+						 NULL);
+		gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+						    self->app_cancellable,
+						    gs_page_channel_switched_cb,
+						    g_steal_pointer (&helper));
+		break;
+	default:
+		break;
+	}
+	gs_details_page_refresh_all (self);
+}
+
+static void
+gs_details_page_channel_cb (GtkWidget *widget, GsDetailsPage *self)
+{
+	GPtrArray *channels;
+	guint i;
+
+	gs_container_remove_all (GTK_CONTAINER (self->grid_popover_channel));
+	channels = gs_app_get_channels (self->app);
+	for (i = 0; i < channels->len; i++) {
+		GsChannel *channel = g_ptr_array_index (channels, i);
+		const gchar *version;
+		GtkWidget *label;
+		GtkWidget *button;
+
+		version = gs_channel_get_version (channel);
+
+		label = gtk_label_new (gs_channel_get_name (channel));
+		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+		gs_details_page_set_sensitive (label, version != NULL);
+		gtk_widget_show (label);
+		gtk_grid_attach (GTK_GRID (self->grid_popover_channel), label, 0, i, 1, 1);
+
+		label = gtk_label_new (version == NULL ? "—" : version);
+		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+		gs_details_page_set_sensitive (label, version != NULL);
+		gtk_widget_show (label);
+		gtk_grid_attach (GTK_GRID (self->grid_popover_channel), label, 1, i, 1, 1);
+
+		if (version != NULL && channel != gs_app_get_active_channel (self->app)) {
+			GsDetailsPageChannelHelper *helper = g_new0 (GsDetailsPageChannelHelper, 1);
+
+			button = gtk_button_new_with_label (_("Switch"));
+			gtk_widget_show (button);
+			gtk_grid_attach (GTK_GRID (self->grid_popover_channel), button, 2, i, 1, 1);
+			helper->self = g_object_ref (self);
+			helper->channel = g_object_ref (channel);
+			g_signal_connect (button, "clicked",
+					  G_CALLBACK (gs_details_page_switch_channel_cb),
+					  helper);
+		}
+	}
+
+	gtk_widget_show (self->popover_channel);
 }
 
 static void
@@ -1691,6 +1865,9 @@ gs_details_page_setup (GsPage *page,
 			  self);
 	g_signal_connect (self->button_details_launch, "clicked",
 			  G_CALLBACK (gs_details_page_app_launch_button_cb),
+			  self);
+	g_signal_connect (self->button_details_channel, "clicked",
+			  G_CALLBACK (gs_details_page_channel_cb),
 			  self);
 	g_signal_connect (self->button_details_license_free, "clicked",
 			  G_CALLBACK (gs_details_page_license_free_cb),
