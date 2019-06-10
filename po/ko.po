@@ -320,7 +320,7 @@ msgstr "설치함(_I)"
 #. Translators: A label for a button to show only updates which are available to install.
 #: src/gnome-software.ui:167
 msgid "_Updates"
-msgstr "업데이트(_U)"
+msgstr "업데이트"
 
 #: src/gnome-software.ui:263
 msgid "Search"
@@ -535,7 +535,7 @@ msgstr "업데이트"
 #: src/gs-app-row.c:200 src/gs-app-row.c:209 src/gs-page.c:754
 #: src/gs-repos-dialog.c:336
 msgid "Remove"
-msgstr "제거"
+msgstr "삭제"
 
 #. TRANSLATORS: during the update the device
 #. * will restart into a special update-only mode
@@ -1367,11 +1367,11 @@ msgstr "실행(_L)"
 #. TRANSLATORS: button text in the header when an application can be erased
 #: src/gs-details-page.c:393 src/gs-details-page.ui:241
 msgid "_Remove"
-msgstr "제거(_R)"
+msgstr "삭제(_R)"
 
 #: src/gs-details-page.c:461
 msgid "Removing…"
-msgstr "제거 중…"
+msgstr "삭제 중…"
 
 #. TRANSLATORS: This is a label on top of the app's progress
 #. * bar to inform the user that the app should be installed soon
@@ -2011,7 +2011,7 @@ msgstr "하위 객체 사이의 공간"
 #: src/gs-history-dialog.c:83
 msgctxt "app status"
 msgid "Removed"
-msgstr "제거함"
+msgstr "삭제함"
 
 #. TRANSLATORS: this is the status in the history UI,
 #. * where we are showing the application was installed
@@ -2184,12 +2184,12 @@ msgstr "분류"
 #. Translators: This is a heading for software which has been featured ('picked') by the distribution.
 #: src/gs-overview-page.ui:326
 msgid "Editor’s Picks"
-msgstr "편집자 추천"
+msgstr "에디터 추천"
 
 #. Translators: This is a heading for software which has been recently released upstream.
 #: src/gs-overview-page.ui:364
 msgid "Recent Releases"
-msgstr "최근 릴리스"
+msgstr "신규 앱"
 
 #: src/gs-overview-page.ui:451
 msgid "No Application Data Found"
@@ -2704,7 +2704,7 @@ msgstr "검색 페이지"
 
 #: src/gs-search-page.ui:54
 msgid "No Application Found"
-msgstr "프로그램이 없습니다"
+msgstr "검색결과가 없습니다."
 
 #: src/gs-shell.c:724
 #, c-format
@@ -3281,7 +3281,7 @@ msgstr[0] "프로그램 %u개 설치를 끝내려면 다시 시작해야합니�
 #. TRANSLATORS: for the notification title
 #: src/gs-update-monitor.c:211
 msgid "Restart Required"
-msgstr "다시 시작 필요"
+msgstr "재시동이 필요함"
 
 #. TRANSLATORS: this is when the current OS version goes end-of-life
 #: src/gs-update-monitor.c:415 src/gs-updates-page.ui:46
@@ -3617,7 +3617,7 @@ msgstr "통합 펌웨어"
 #. * app updates that require a reboot to apply
 #: src/gs-updates-section.c:364
 msgid "Requires Restart"
-msgstr "다시 시작 필요"
+msgstr "재시동이 필요함"
 
 #. TRANSLATORS: This is the header for online runtime and
 #. * app updates, typically flatpaks or snaps
@@ -4241,6 +4241,46 @@ msgstr "스팀 지원"
 #: plugins/steam/org.gnome.Software.Plugin.Steam.metainfo.xml.in:7
 msgid "The ultimate entertainment platform from Valve"
 msgstr "Valve사의 최고의 엔터테인먼트 플랫폼"
+
+#: src/gnome-software.ui
+msgid "Software Center"
+msgstr "소프트웨어 센터"
+
+#: src/gnome-software.ui
+msgid "_Home"
+msgstr "홈"
+
+#: src/gnome-software.ui
+msgid "_Categorys"
+msgstr "카테고리"
+
+#: src/gnome-software.ui
+msgid "_Deletes"
+msgstr "앱 삭제"
+
+#: src/gs-overview-page.ui
+msgid "Popular Apps"
+msgstr "인기 앱"
+
+#: src/gs-overview-page.ui
+msgid "More"
+msgstr "더보기"
+
+#: src/gs-detail-page.ui
+msgid "App Info"
+msgstr "앱 정보"
+
+#: src/gs-detail-page.ui
+msgid "Similar Apps"
+msgstr "관련 앱"
+
+#: src/gs-app-row.c
+msgid "Intergrated Update"
+msgstr "통합 업데이트"
+
+#: src/gs-app-row.ui
+msgid "Show Detail"
+msgstr "업데이트 내용보기"
 
 #~ msgid "_Restart & Update"
 #~ msgstr "다시 시작하고 업데이트(_R)"

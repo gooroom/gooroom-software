@@ -3,6 +3,7 @@
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -611,10 +612,6 @@ set_selection_mode (GsInstalledPage *self, gboolean selection_mode)
 		gtk_widget_show (self->button_select);
 		widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "buttonbox_main"));
 		gtk_widget_hide (widget);
-		widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "header_selection_menu_button"));
-		gtk_widget_show (widget);
-		widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "header_selection_label"));
-		gtk_label_set_label (GTK_LABEL (widget), _("Click on items to select them"));
 	} else {
 		gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (header), TRUE);
 		gtk_style_context_remove_class (context, "selection-mode");
@@ -623,8 +620,6 @@ set_selection_mode (GsInstalledPage *self, gboolean selection_mode)
 		gtk_widget_show (self->button_select);
 		widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "buttonbox_main"));
 		gtk_widget_show (widget);
-		widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "header_selection_menu_button"));
-		gtk_widget_hide (widget);
 	}
 
 	children = gtk_container_get_children (GTK_CONTAINER (self->list_box_install));
@@ -883,7 +878,7 @@ gs_installed_page_init (GsInstalledPage *self)
 	self->sizegroup_desc = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 	self->sizegroup_button = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
-	self->settings = g_settings_new ("org.gnome.software");
+	self->settings = g_settings_new ("kr.gooroom.software");
 	g_signal_connect_swapped (self->settings, "changed",
 				  G_CALLBACK (gs_shell_settings_changed_cb),
 				  self);

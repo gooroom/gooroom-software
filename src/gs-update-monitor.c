@@ -3,6 +3,7 @@
  * Copyright (C) 2013-2018 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom,kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -1032,7 +1033,7 @@ gs_update_monitor_init (GsUpdateMonitor *monitor)
 {
 	GNetworkMonitor *network_monitor;
 	g_autoptr(GError) error = NULL;
-	monitor->settings = g_settings_new ("org.gnome.software");
+	monitor->settings = g_settings_new ("kr.gooroom.software");
 
 	/* cleanup at startup */
 	monitor->cleanup_notifications_id =

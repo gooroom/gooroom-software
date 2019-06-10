@@ -3,6 +3,7 @@
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -797,7 +798,7 @@ gs_repos_dialog_init (GsReposDialog *dialog)
 	gtk_widget_init_template (GTK_WIDGET (dialog));
 
 	dialog->cancellable = g_cancellable_new ();
-	dialog->settings = g_settings_new ("org.gnome.software");
+	dialog->settings = g_settings_new ("kr.gooroom.software");
 
 	os_name = get_os_name ();
 

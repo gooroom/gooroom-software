@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.10 -->
+  <template class="GsFeatureTileSmall" parent="GsAppTile">
+    <property name="visible">True</property>
+    <property name="halign">fill</property>
+    <style>
+      <class name="featured-tile"/>
+    </style>
+    <child>
+      <object class="GtkStack" id="stack">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkImage" id="waiting">
+            <property name="visible">True</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
+            <property name="width_request">230</property>
+            <property name="height_request">160</property>
+            <property name="pixel-size">48</property>
+            <property name="icon-name">software-app-empty</property>
+            <style>
+              <class name="overview-featured"/>
+            </style>
+          </object>
+          <packing>
+            <property name="name">waiting</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>  
+            <child>
+              <object class="GtkEventBox" id="box">
+                <property name="width_request">230</property>
+                <property name="height_request">120</property>
+                <property name="visible">True</property>
+                <property name="hexpand">True</property>
+                <style>
+                  <class name="overview-featured-app-box"/>
+                </style>
+              </object>
+              <packing>
+                <property name="name">content</property>
+                <property name="position">0</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="title">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes"/>
+                <style>
+                  <class name="overview-featured-app-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="name">content</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

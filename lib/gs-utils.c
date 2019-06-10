@@ -185,7 +185,7 @@ gs_utils_get_cache_filename (const gchar *kind,
 		g_autofree gchar *cachefn = NULL;
 		cachefn = g_build_filename (LOCALSTATEDIR,
 					    "cache",
-					    "gnome-software",
+					    "gooroom-software",
 		                            kind,
 					    basename,
 					    NULL);
@@ -199,7 +199,7 @@ gs_utils_get_cache_filename (const gchar *kind,
 	if ((flags & GS_UTILS_CACHE_FLAG_WRITEABLE) == 0) {
 		g_autofree gchar *cachefn = NULL;
 		cachefn = g_build_filename (DATADIR,
-					    "gnome-software",
+					    "gooroom-software",
 					    "cache",
 					    kind,
 					    basename,
@@ -213,7 +213,7 @@ gs_utils_get_cache_filename (const gchar *kind,
 	/* create the cachedir in a per-release location, creating
 	 * if it does not already exist */
 	cachedir = g_build_filename (g_get_user_cache_dir (),
-				     "gnome-software",
+				     "gooroom-software",
 				     kind,
 				     NULL);
 	cachedir_file = g_file_new_for_path (cachedir);
@@ -260,7 +260,7 @@ gs_utils_get_user_hash (GError **error)
 	if (!g_file_get_contents ("/etc/machine-id", &data, NULL, error))
 		return NULL;
 
-	salted = g_strdup_printf ("gnome-software[%s:%s]",
+	salted = g_strdup_printf ("gooroom-software[%s:%s]",
 				  g_get_user_name (), data);
 	return g_compute_checksum_for_string (G_CHECKSUM_SHA1, salted, -1);
 }
@@ -1194,4 +1194,51 @@ gs_utils_parse_evr (const gchar *evr,
 	return TRUE;
 }
 
+/**
+ * gs_utils_desktop_category_label:
+ * @name: gnome category name
+ *
+ * Returns: Desktop category name
+ **/
+const gchar *
+gs_utils_get_desktop_category_label (const gchar *name)
+{
+    const gchar *desktop_name = NULL;
+
+    if (g_strcmp0 (name, "AudioVideo") == 0) {
+        desktop_name = g_strdup ("Audio & Video");
+    }
+    else if (g_strcmp0 (name, "Development") == 0){
+        desktop_name = g_strdup ("Developer Tools");
+    }
+    else if (g_strcmp0 (name, "Education") == 0){
+        desktop_name = g_strdup ("Education & Science");
+    }
+    else if (g_strcmp0 (name, "Science") == 0){
+        desktop_name = g_strdup ("Education & Science");
+    }
+    else if (g_strcmp0 (name, "Game") == 0){
+        desktop_name = g_strdup ("Games");
+    }
+    else if (g_strcmp0 (name, "Graphics") == 0){
+        desktop_name = g_strdup ("Graphics & Photography");
+    }
+    else if (g_strcmp0 (name, "Office") == 0){
+        desktop_name = g_strdup ("Productivity");
+    }
+    else if (g_strcmp0 (name, "Network") == 0){
+        desktop_name = g_strdup ("Communication & News");
+    }
+    else if (g_strcmp0 (name, "Reference") == 0){
+        desktop_name = g_strdup ("Reference");
+    }
+    else if (g_strcmp0 (name, "Utility") == 0){
+        desktop_name = g_strdup ("Utilities");
+    }
+    else {
+        return NULL;
+    }
+    
+    return desktop_name;
+}
 /* vim: set noexpandtab: */

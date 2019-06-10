@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2015 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2016-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -208,7 +209,7 @@ gs_app_notify_unavailable (GsApp *app, GtkWindow *parent)
 	}
 
 	/* check if the user has already dismissed */
-	settings = g_settings_new ("org.gnome.software");
+	settings = g_settings_new ("kr.gooroom.software");
 	if (!g_settings_get_boolean (settings, "prompt-for-nonfree"))
 		return GTK_RESPONSE_OK;
 

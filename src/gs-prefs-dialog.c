@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
  * Copyright (C) 2018 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -63,7 +64,7 @@ gs_prefs_dialog_init (GsPrefsDialog *dialog)
 	gtk_widget_init_template (GTK_WIDGET (dialog));
 
 	dialog->cancellable = g_cancellable_new ();
-	dialog->settings = g_settings_new ("org.gnome.software");
+	dialog->settings = g_settings_new ("kr.gooroom.software");
 	g_settings_bind (dialog->settings,
 			 "download-updates-notify",
 			 dialog->switch_updates_notify,

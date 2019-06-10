@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
  * Copyright (C) 2017 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -1172,7 +1173,7 @@ main (int argc, char *argv[])
 	as_store_set_add_flags (self->store_global, AS_STORE_ADD_FLAG_USE_UNIQUE_ID);
 
 	/* are we already activated? */
-	self->application = gtk_application_new ("org.gnome.Software.Editor",
+	self->application = gtk_application_new ("kr.gooroom.Software.Editor",
 						 G_APPLICATION_HANDLES_COMMAND_LINE);
 	g_signal_connect (self->application, "startup",
 			  G_CALLBACK (gs_editor_startup_cb), self);

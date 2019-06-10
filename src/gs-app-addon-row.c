@@ -3,6 +3,7 @@
  * Copyright (C) 2012-2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2016 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -26,6 +27,7 @@
 #include <glib/gi18n.h>
 
 #include "gs-app-addon-row.h"
+#include "gs-progress-button.h"
 
 struct _GsAppAddonRow
 {
@@ -36,6 +38,7 @@ struct _GsAppAddonRow
 	GtkWidget	*description_label;
 	GtkWidget	*label;
 	GtkWidget	*checkbox;
+	GtkWidget	*button;
 };
 
 G_DEFINE_TYPE (GsAppAddonRow, gs_app_addon_row, GTK_TYPE_LIST_BOX_ROW)
@@ -50,6 +53,15 @@ checkbox_toggled (GtkWidget *widget, GsAppAddonRow *row)
 {
 	g_object_notify (G_OBJECT (row), "selected");
 }
+
+static void
+button_clicked (GtkWidget *widget, GsAppAddonRow *row)
+{
+	gboolean selected = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (row->checkbox));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (row->checkbox), !selected);
+	g_object_notify (G_OBJECT (row), "selected");
+}
+
 
 /**
  * gs_app_addon_row_get_summary:
@@ -74,6 +86,93 @@ gs_app_addon_row_get_summary (GsAppAddonRow *row)
 	return g_string_new (escaped);
 }
 
+static void
+gs_app_row_refresh_button (GsAppAddonRow *row)
+{
+    GtkStyleContext *context;
+    /* update the state label */
+	switch (gs_app_get_state (row->app)) {
+	case AS_APP_STATE_QUEUED_FOR_INSTALL:
+		gtk_widget_set_visible (row->button, TRUE);
+        gtk_button_set_label (GTK_BUTTON (row->button), _("Pending"));
+		break;
+    case AS_APP_STATE_AVAILABLE:
+    case AS_APP_STATE_AVAILABLE_LOCAL:
+        gtk_widget_set_visible (row->button, TRUE);
+        gtk_button_set_label (GTK_BUTTON (row->button), _("Install"));
+        break;
+	case AS_APP_STATE_UPDATABLE:
+	case AS_APP_STATE_UPDATABLE_LIVE:
+	case AS_APP_STATE_INSTALLED:
+		gtk_widget_set_visible (row->button, TRUE);
+        gtk_button_set_label (GTK_BUTTON (row->button), _("Installed"));
+		break;
+	case AS_APP_STATE_INSTALLING:
+		gtk_widget_set_visible (row->button, TRUE);
+        gtk_button_set_label (GTK_BUTTON (row->button), _("Installing"));
+		break;
+	case AS_APP_STATE_REMOVING:
+		gtk_widget_set_visible (row->button, TRUE);
+        gtk_button_set_label (GTK_BUTTON (row->button), _("Removing"));
+		break;
+	default:
+		gtk_widget_set_visible (row->button, FALSE);
+		break;
+	}
+
+    /* visible */
+    switch (gs_app_get_state (row->app)) {
+    case AS_APP_STATE_UNAVAILABLE:
+    case AS_APP_STATE_QUEUED_FOR_INSTALL:
+    case AS_APP_STATE_AVAILABLE:
+    case AS_APP_STATE_AVAILABLE_LOCAL:
+    case AS_APP_STATE_UPDATABLE_LIVE:
+    case AS_APP_STATE_INSTALLING:
+    case AS_APP_STATE_REMOVING:
+		gtk_widget_set_visible (row->button, TRUE);
+        break;
+    case AS_APP_STATE_UPDATABLE:
+    case AS_APP_STATE_INSTALLED:
+        gtk_widget_set_visible (row->button,
+                    !gs_app_has_quirk (row->app,
+                     AS_APP_QUIRK_REMOVABLE_HARDWARE));
+        break;
+    default:
+        gtk_widget_set_visible (row->button, FALSE);
+        break;
+    }
+    /* colorful */
+    context = gtk_widget_get_style_context (row->button);
+    switch (gs_app_get_state (row->app)) {
+    case AS_APP_STATE_UPDATABLE:
+    case AS_APP_STATE_INSTALLED:
+    case AS_APP_STATE_UPDATABLE_LIVE:
+        gtk_style_context_remove_class (context, "app-row-app-button-ing");
+        gtk_style_context_add_class (context, "app-row-app-button-remove");
+        break;
+    case AS_APP_STATE_INSTALLING:
+    case AS_APP_STATE_REMOVING:
+        gtk_style_context_remove_class (context, "app-row-app-button-remove");
+        gtk_style_context_add_class (context, "app-row-app-button-ing");
+        break;
+    default:
+        gtk_style_context_remove_class (context, "app-row-app-button-ing");
+        gtk_style_context_remove_class (context, "app-row-app-button-remove");
+        break;
+    }
+
+    /* always insensitive when in selection mode */
+    switch (gs_app_get_state (row->app)) {
+    case AS_APP_STATE_INSTALLING:
+    case AS_APP_STATE_REMOVING:
+      gtk_widget_set_sensitive (row->button, FALSE);
+      break;
+    default:
+      gtk_widget_set_sensitive (row->button, TRUE);
+      break;
+    }
+}
+
 void
 gs_app_addon_row_refresh (GsAppAddonRow *row)
 {
@@ -88,33 +187,8 @@ gs_app_addon_row_refresh (GsAppAddonRow *row)
 	gtk_label_set_markup (GTK_LABEL (row->description_label), str->str);
 	gtk_label_set_label (GTK_LABEL (row->name_label),
 			     gs_app_get_name (row->app));
-
-	/* update the state label */
-	switch (gs_app_get_state (row->app)) {
-	case AS_APP_STATE_QUEUED_FOR_INSTALL:
-		gtk_widget_set_visible (row->label, TRUE);
-		gtk_label_set_label (GTK_LABEL (row->label), _("Pending"));
-		break;
-	case AS_APP_STATE_UPDATABLE:
-	case AS_APP_STATE_UPDATABLE_LIVE:
-	case AS_APP_STATE_INSTALLED:
-		gtk_widget_set_visible (row->label, TRUE);
-		gtk_label_set_label (GTK_LABEL (row->label), _("Installed"));
-		break;
-	case AS_APP_STATE_INSTALLING:
-		gtk_widget_set_visible (row->label, TRUE);
-		gtk_label_set_label (GTK_LABEL (row->label), _("Installing"));
-		break;
-	case AS_APP_STATE_REMOVING:
-		gtk_widget_set_visible (row->label, TRUE);
-		gtk_label_set_label (GTK_LABEL (row->label), _("Removing"));
-		break;
-	default:
-		gtk_widget_set_visible (row->label, FALSE);
-		break;
-	}
-
-	/* update the checkbox */
+	
+    /* update the checkbox */
 	g_signal_handlers_block_by_func (row->checkbox, checkbox_toggled, row);
 	switch (gs_app_get_state (row->app)) {
 	case AS_APP_STATE_QUEUED_FOR_INSTALL:
@@ -145,6 +219,19 @@ gs_app_addon_row_refresh (GsAppAddonRow *row)
 		break;
 	}
 	g_signal_handlers_unblock_by_func (row->checkbox, checkbox_toggled, row);
+	g_signal_handlers_block_by_func (row->button, button_clicked, row);
+    switch (gs_app_get_state (row->app)) {
+    case AS_APP_STATE_INSTALLING:
+        gs_progress_button_set_progress (GS_PROGRESS_BUTTON (row->button),
+                                         gs_app_get_progress (row->app));
+        gs_progress_button_set_show_progress (GS_PROGRESS_BUTTON (row->button), TRUE);
+        break;
+    default:
+        gs_progress_button_set_show_progress (GS_PROGRESS_BUTTON (row->button), FALSE);
+        break;
+    }
+    gs_app_row_refresh_button (row);
+	g_signal_handlers_unblock_by_func (row->button, button_clicked, row);
 }
 
 GsApp *
@@ -247,8 +334,8 @@ gs_app_addon_row_class_init (GsAppAddonRowClass *klass)
 
 	gtk_widget_class_bind_template_child (widget_class, GsAppAddonRow, name_label);
 	gtk_widget_class_bind_template_child (widget_class, GsAppAddonRow, description_label);
-	gtk_widget_class_bind_template_child (widget_class, GsAppAddonRow, label);
 	gtk_widget_class_bind_template_child (widget_class, GsAppAddonRow, checkbox);
+	gtk_widget_class_bind_template_child (widget_class, GsAppAddonRow, button);
 }
 
 static void
@@ -256,9 +343,8 @@ gs_app_addon_row_init (GsAppAddonRow *row)
 {
 	gtk_widget_set_has_window (GTK_WIDGET (row), FALSE);
 	gtk_widget_init_template (GTK_WIDGET (row));
-
-	g_signal_connect (row->checkbox, "toggled",
-			  G_CALLBACK (checkbox_toggled), row);
+    g_signal_connect (row->button, "clicked",
+			  G_CALLBACK (button_clicked), row);
 }
 
 void

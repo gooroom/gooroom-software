@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2015-2017 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom,kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -50,6 +51,8 @@ GsAppList	*gs_updates_section_get_list		(GsUpdatesSection	*self);
 void		 gs_updates_section_add_app		(GsUpdatesSection	*self,
 							 GsApp			*app);
 void		 gs_updates_section_remove_all		(GsUpdatesSection	*self);
+void		 gs_updates_section_update_all		(GsUpdatesSection	*self);
+void		 gs_updates_section_update  		(GsUpdatesSection	*self);
 void		 gs_updates_section_set_size_groups	(GsUpdatesSection	*self,
 							 GtkSizeGroup		*image,
 							 GtkSizeGroup		*name,

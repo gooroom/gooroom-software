@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2015-2017 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -743,7 +744,7 @@ bus_gotten_cb (GObject      *source_object,
 	                  G_CALLBACK (handle_modify2_install_printer_drivers), dbus_helper);
 
 	/* Look up our own localized name and export it as a property on the bus */
-	app_info = g_desktop_app_info_new ("org.gnome.Software.desktop");
+	app_info = g_desktop_app_info_new ("kr.gooroom.Software.desktop");
 	if (app_info != NULL) {
 		const gchar *app_name = g_app_info_get_name (G_APP_INFO (app_info));
 		if (app_name != NULL)

@@ -1,7 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2015 Rafał Lużyński <digitalfreak@lingonborough.com>
- * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
+ * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -20,30 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef GS_HIDING_BOX_H_
-#define GS_HIDING_BOX_H_
+#ifndef GS_FEATURE_TILE_SMALL_H
+#define GS_FEATURE_TILE_SMALL_H
 
-#include <gtk/gtk.h>
+#include "gs-app-tile.h"
 
 G_BEGIN_DECLS
 
-#define GS_TYPE_HIDING_BOX (gs_hiding_box_get_type ())
+#define GS_TYPE_FEATURE_TILE_SMALL (gs_feature_tile_small_get_type ())
 
-G_DECLARE_FINAL_TYPE (GsHidingBox, gs_hiding_box, GS, HIDING_BOX, GtkContainer)
+G_DECLARE_FINAL_TYPE (GsFeatureTileSmall, gs_feature_tile_small, GS, FEATURE_TILE_SMALL, GsAppTile)
 
-GtkWidget	*gs_hiding_box_new		(void);
-void		 gs_hiding_box_set_spacing	(GsHidingBox	*box,
-						 gint		 spacing);
-gint		 gs_hiding_box_get_spacing	(GsHidingBox	*box);
-
-void		 gs_hiding_box_set_vspacing	(GsHidingBox	*box,
-						 gint		 spacing);
-gint		 gs_hiding_box_get_vspacing	(GsHidingBox	*box);
-
-gint		 gs_hiding_box_get_actual_height (GsHidingBox	*box);
+GtkWidget	*gs_feature_tile_small_new			(GsApp		*app);
 
 G_END_DECLS
 
-#endif /* GS_HIDING_BOX_H_ */
+#endif /* GS_FEATURE_TILE_SMALL_H */
 
 /* vim: set noexpandtab: */

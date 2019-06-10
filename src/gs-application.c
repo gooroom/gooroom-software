@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2013-2018 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -661,7 +662,7 @@ _copy_file_to_cache (GFile *file_src, GError **error)
 
 	/* get destination location */
 	filename = g_file_get_path (file_src);
-	cache_dir = g_dir_make_tmp ("gnome-software-XXXXXX", error);
+	cache_dir = g_dir_make_tmp ("gooroom-software-XXXXXX", error);
 	if (cache_dir == NULL)
 		return NULL;
 	basename = g_file_get_basename (file_src);
@@ -999,7 +1000,7 @@ gs_application_handle_local_options (GApplication *app, GVariantDict *options)
 		g_setenv ("GNOME_SOFTWARE_PREFER_LOCAL", "true", TRUE);
 
 	if (g_variant_dict_contains (options, "version")) {
-		g_print ("gnome-software " VERSION "\n");
+		g_print ("gooroom-software " VERSION "\n");
 		return 0;
 	}
 

@@ -23,44 +23,40 @@
           </packing>
         </child>
         <child>
-          <object class="GtkGrid" id="noresults_grid_search">
+          <object class="GtkBox" id="noresults_box_search">
             <property name="visible">True</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="halign">center</property>
             <property name="valign">center</property>
-            <property name="row-spacing">12</property>
-            <property name="column-spacing">12</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
-            <child>
-              <object class="GtkImage" id="noresults_icon">
-                <property name="visible">True</property>
-                <property name="icon_name">kr.gooroom.Software-symbolic</property>
-                <property name="pixel-size">64</property>
-                <style>
-                  <class name="dim-label"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
+            <property name="spacing">12</property>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel" id="noresults_label">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">No Application Found</property>
-                <property name="halign">start</property>
+                <property name="halign">center</property>
                 <property name="valign">center</property>
-                <attributes>
-                  <attribute name="scale" value="1.4"/>
-                </attributes>
+                <style>
+                  <class name="search-noresult"/>
+                  <class name="search-noresult-title"/>
+                </style>
               </object>
               <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="noresults_value">
+                <property name="visible">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <style>
+                  <class name="search-noresult"/>
+                </style>
+              </object>
+              <packing>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -75,6 +71,9 @@
             <property name="hscrollbar_policy">never</property>
             <property name="vscrollbar_policy">automatic</property>
             <property name="shadow_type">none</property>
+            <style>
+              <class name="default-box"/>
+            </style>
             <child>
               <object class="GsFixedSizeBin" id="gs_fixed_bin">
                 <property name="visible">True</property>

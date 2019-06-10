@@ -4228,6 +4228,46 @@ msgstr "Steam Support"
 msgid "The ultimate entertainment platform from Valve"
 msgstr "The ultimate entertainment platform from Valve"
 
+#: src/gnome-software.ui
+msgid "Software Center"
+msgstr "Software Center"
+
+#: src/gnome-software.ui
+msgid "_Home"
+msgstr "_Home"
+
+#: src/gnome-software.ui
+msgid "_Categorys"
+msgstr "_Category"
+
+#: src/gnome-software.ui
+msgid "_Deletes"
+msgstr "_Deletes"
+
+#: src/gs-oveview-page.ui
+msgid "Popular Apps"
+msgstr "Popular Apps"
+
+#: src/gs-oveview-page.ui
+msgid "More"
+msgstr "More"
+
+#: src/gs-detail-page.ui
+msgid "App Info"
+msgstr "App Info"
+
+#: src/gs-detail-page.ui
+msgid "Similar Apps"
+msgstr "Similar Apps"
+
+#: src/gs-app-row.c
+msgid "Intergrated Update"
+msgstr "Integrated Update"
+
+#: src/gs-app-row.ui
+msgid "Show Detail"
+msgstr "Show Detail"
+
 #~ msgid "The list of extra sources that have been previously enabled"
 #~ msgstr "The list of extra sources that have been previously enabled"
 

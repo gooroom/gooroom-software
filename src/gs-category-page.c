@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -67,21 +68,11 @@ struct _GsCategoryPage
 	GtkWidget	*featured_grid;
 	GtkWidget	*featured_heading;
 	GtkWidget	*header_filter_box;
+	
+    GtkWidget	*category_heading;
 };
 
 G_DEFINE_TYPE (GsCategoryPage, gs_category_page, GS_TYPE_PAGE)
-
-static void
-gs_category_page_switch_to (GsPage *page, gboolean scroll_up)
-{
-	GsCategoryPage *self = GS_CATEGORY_PAGE (page);
-	GtkWidget *widget;
-
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "application_details_header"));
-	gtk_widget_show (widget);
-	gtk_label_set_label (GTK_LABEL (widget), gs_category_get_name (self->category));
-}
-
 static void
 app_tile_clicked (GsAppTile *tile, gpointer data)
 {
@@ -394,6 +385,9 @@ gs_category_page_reload (GsPage *page)
 					    self->cancellable,
 					    gs_category_page_get_apps_cb,
 					    self);
+
+    /* category title label */
+	gtk_label_set_label (GTK_LABEL (self->category_heading), gs_category_get_name (self->category));
 }
 
 static void
@@ -603,7 +597,6 @@ gs_category_page_class_init (GsCategoryPageClass *klass)
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
 	object_class->dispose = gs_category_page_dispose;
-	page_class->switch_to = gs_category_page_switch_to;
 	page_class->reload = gs_category_page_reload;
 	page_class->setup = gs_category_page_setup;
 
@@ -625,6 +618,8 @@ gs_category_page_class_init (GsCategoryPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, featured_grid);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, featured_heading);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, header_filter_box);
+	
+    gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, category_heading);
 }
 
 GsCategoryPage *

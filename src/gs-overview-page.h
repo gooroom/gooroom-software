@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2015-2017 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -41,7 +42,7 @@ struct _GsOverviewPageClass
 GsOverviewPage	*gs_overview_page_new		(void);
 void		 gs_overview_page_set_category	(GsOverviewPage		*self,
 						 const gchar		*category);
-
+GHashTable *gs_overview_page_get_categories (GsOverviewPage *self);
 G_END_DECLS
 
 #endif /* __GS_OVERVIEW_PAGE_H */

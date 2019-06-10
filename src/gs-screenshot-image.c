@@ -3,6 +3,7 @@
  * Copyright (C) 2013-2016 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -609,7 +610,7 @@ gs_screenshot_image_init (GsScreenshotImage *ssimg)
 	AtkObject *accessible;
 
 	ssimg->use_desktop_background = TRUE;
-	ssimg->settings = g_settings_new ("org.gnome.software");
+	ssimg->settings = g_settings_new ("kr.gooroom.software");
 	ssimg->showing_image = FALSE;
 
 	gtk_widget_set_has_window (GTK_WIDGET (ssimg), FALSE);

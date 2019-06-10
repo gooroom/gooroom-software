@@ -66,7 +66,8 @@ gooroom_software_sources = [
   'gs-updates-page.c',
   'gs-updates-section.c',
   'gs-upgrade-banner.c',
-  'gs-vendor.c'
+  'gs-vendor.c',
+  'gs-feature-tile-small.c'
 ]
 
 gooroom_software_dependencies = [
@@ -157,6 +158,7 @@ executable(
     'gs-summary-tile.c',
     'gs-star-widget.c',
     'gs-feature-tile.c',
+    'gs-feature-tile-small.c',
     'gs-upgrade-banner.c',
   ],
   include_directories : [
@@ -228,9 +230,9 @@ install_data('kr.gooroom.Software-search-provider.ini',
 
 if get_option('man')
   xsltproc = find_program('xsltproc')
-  custom_target('manfile-gnome-software',
-    input: 'gnome-software.xml',
-    output: 'gnome-software.1',
+  custom_target('manfile-gooroom-software',
+    input: 'gooroom-software.xml',
+    output: 'gooroom-software.1',
     install: true,
     install_dir: join_paths(get_option('mandir'), 'man1'),
     command: [
@@ -246,9 +248,9 @@ if get_option('man')
       '@INPUT@'
     ]
   )
-  custom_target('manfile-gnome-software-editor',
-    input: 'gnome-software-editor.xml',
-    output: 'gnome-software-editor.1',
+  custom_target('manfile-gooroom-software-editor',
+    input: 'gooroom-software-editor.xml',
+    output: 'gooroom-software-editor.1',
     install: true,
     install_dir: join_paths(get_option('mandir'), 'man1'),
     command: [

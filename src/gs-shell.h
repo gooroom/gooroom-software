@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2014-2017 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -103,6 +104,8 @@ void		 gs_shell_setup			(GsShell	*shell,
 gboolean	 gs_shell_is_active		(GsShell	*shell);
 GtkWindow	*gs_shell_get_window		(GsShell	*shell);
 
+GsCategory  *gs_shell_get_category  (GsShell    *shell,
+                        GPtrArray   *find_categories);
 G_END_DECLS
 
 #endif /* __GS_SHELL_H */

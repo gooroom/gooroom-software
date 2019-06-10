@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2016 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -54,6 +55,8 @@ struct _GsSearchPage
 	GtkWidget		*scrolledwindow_search;
 	GtkWidget		*spinner_search;
 	GtkWidget		*stack_search;
+
+	GtkWidget		*noresults_value;
 };
 
 G_DEFINE_TYPE (GsSearchPage, gs_search_page, GS_TYPE_PAGE)
@@ -101,7 +104,7 @@ gs_search_page_get_search_cb (GObject *source_object,
 	GtkWidget *app_row;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
-
+    g_autofree gchar *label = NULL;
 	/* don't do the delayed spinner */
 	gs_search_page_waiting_cancel (self);
 
@@ -111,16 +114,20 @@ gs_search_page_get_search_cb (GObject *source_object,
 			g_debug ("search cancelled");
 			return;
 		}
-		g_warning ("failed to get search apps: %s", error->message);
 		gs_stop_spinner (GTK_SPINNER (self->spinner_search));
 		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_search), "no-results");
+        label = g_strdup_printf ("'%s'", self->value);
+        gtk_label_set_label (GTK_LABEL (self->noresults_value), label);
+		g_warning ("failed to get search apps: %s", error->message);
 		return;
 	}
 
 	/* no results */
 	if (gs_app_list_length (list) == 0) {
-		g_debug ("no search results to show");
 		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_search), "no-results");
+        label = g_strdup_printf ("'%s'", self->value);
+        gtk_label_set_label (GTK_LABEL (self->noresults_value), label);
+		g_debug ("no search results to show");
 		return;
 	}
 
@@ -496,6 +503,7 @@ gs_search_page_class_init (GsSearchPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsSearchPage, scrolledwindow_search);
 	gtk_widget_class_bind_template_child (widget_class, GsSearchPage, spinner_search);
 	gtk_widget_class_bind_template_child (widget_class, GsSearchPage, stack_search);
+	gtk_widget_class_bind_template_child (widget_class, GsSearchPage, noresults_value);
 }
 
 static void

@@ -3,6 +3,7 @@
  * Copyright (C) 2012-2016 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -26,7 +27,6 @@
 #include <glib/gi18n.h>
 
 #include "gs-app-row.h"
-#include "gs-star-widget.h"
 #include "gs-progress-button.h"
 #include "gs-common.h"
 #include "gs-folders.h"
@@ -38,19 +38,15 @@ typedef struct
 	GtkWidget	*name_box;
 	GtkWidget	*name_label;
 	GtkWidget	*version_label;
-	GtkWidget	*star;
-	GtkWidget	*folder_label;
-	GtkWidget	*description_box;
-	GtkWidget	*description_label;
-	GtkWidget	*button_box;
 	GtkWidget	*button;
 	GtkWidget	*spinner;
 	GtkWidget	*label;
 	GtkWidget	*checkbox;
-	GtkWidget	*label_warning;
-	GtkWidget	*label_origin;
-	GtkWidget	*label_installed;
 	GtkWidget	*label_app_size;
+	GtkWidget	*label_app_date;
+	GtkWidget	*label_app_desc;
+	GtkWidget	*button_app_detail;
+	GtkWidget	*sub_box;
 	gboolean	 colorful;
 	gboolean	 show_folders;
 	gboolean	 show_buttons;
@@ -115,45 +111,11 @@ gs_app_row_get_description (GsAppRow *app_row)
 	return g_string_new (tmp);
 }
 
-static gchar *
-gs_app_row_format_version_update (GsApp *app)
-{
-	const gchar *tmp;
-	const gchar *version_current = NULL;
-	const gchar *version_update = NULL;
-
-	/* current version */
-	tmp = gs_app_get_version_ui (app);
-	if (tmp != NULL && tmp[0] != '\0')
-		version_current = tmp;
-
-	/* update version */
-	tmp = gs_app_get_update_version_ui (app);
-	if (tmp != NULL && tmp[0] != '\0')
-		version_update = tmp;
-
-	/* have both */
-	if (version_current != NULL && version_update != NULL &&
-	    g_strcmp0 (version_current, version_update) != 0) {
-		return g_strdup_printf ("%s ▶ %s",
-					version_current,
-					version_update);
-	}
-
-	/* just update */
-	if (version_update)
-		return g_strdup (version_update);
-
-	/* we have nothing, nada, zilch */
-	return NULL;
-}
-
 static void
 gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 {
 	GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
 	GtkStyleContext *context;
-
 	/* disabled */
 	if (!priv->show_buttons) {
 		gtk_widget_set_visible (priv->button, FALSE);
@@ -188,6 +150,18 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 		 * allows the application to be easily installed */
 		gtk_button_set_label (GTK_BUTTON (priv->button), _("Install"));
 		break;
+	case AS_APP_STATE_UPDATABLE:
+		gtk_widget_set_visible (priv->button, TRUE);
+        if (priv->show_update) {
+			/* TRANSLATORS: this is a button in the updates panel
+			 * that allows the app to be easily updated live */
+			gtk_button_set_label (GTK_BUTTON (priv->button), _("Intergrated Update"));
+		} else {
+			/* TRANSLATORS: this is a button next to the search results that
+			 * allows the application to be easily removed */
+			gtk_button_set_label (GTK_BUTTON (priv->button), _("Remove"));
+		}
+		break;
 	case AS_APP_STATE_UPDATABLE_LIVE:
 		gtk_widget_set_visible (priv->button, TRUE);
 		if (priv->show_update) {
@@ -200,7 +174,6 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 			gtk_button_set_label (GTK_BUTTON (priv->button), _("Remove"));
 		}
 		break;
-	case AS_APP_STATE_UPDATABLE:
 	case AS_APP_STATE_INSTALLED:
 		if (!gs_app_has_quirk (priv->app, AS_APP_QUIRK_COMPULSORY))
 			gtk_widget_set_visible (priv->button, TRUE);
@@ -224,6 +197,7 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 		break;
 	}
 
+    gtk_widget_set_visible (priv->button, TRUE);
 	/* visible */
 	switch (gs_app_get_state (priv->app)) {
 	case AS_APP_STATE_UNAVAILABLE:
@@ -237,15 +211,14 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 		break;
 	case AS_APP_STATE_UPDATABLE:
 	case AS_APP_STATE_INSTALLED:
-		gtk_widget_set_visible (priv->button,
+  	    gtk_widget_set_visible (priv->button,
 					!gs_app_has_quirk (priv->app,
-							   AS_APP_QUIRK_COMPULSORY));
+							   AS_APP_QUIRK_REMOVABLE_HARDWARE));
 		break;
 	default:
 		gtk_widget_set_visible (priv->button, FALSE);
 		break;
 	}
-
 	/* colorful */
 	context = gtk_widget_get_style_context (priv->button);
 	if (!priv->colorful) {
@@ -253,11 +226,14 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
 	} else {
 		switch (gs_app_get_state (priv->app)) {
 		case AS_APP_STATE_UPDATABLE:
+	    case AS_APP_STATE_UPDATABLE_LIVE:
+			gtk_style_context_add_class (context, "app-row-app-button-update");
+            break;
 		case AS_APP_STATE_INSTALLED:
-		case AS_APP_STATE_UPDATABLE_LIVE:
 			gtk_style_context_add_class (context, "destructive-action");
 			break;
 		default:
+			gtk_style_context_remove_class (context, "app-row-button-update");
 			gtk_style_context_remove_class (context, "destructive-action");
 			break;
 		}
@@ -285,9 +261,11 @@ gs_app_row_refresh (GsAppRow *app_row)
 	GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
 	GtkStyleContext *context;
 	GString *str = NULL;
-	const gchar *tmp;
 	gboolean missing_search_result;
 	guint64 size = 0;
+	g_autofree gchar *version_lbl = NULL;
+	const gchar *version = NULL;
+	const gchar *ver = g_strdup (_("Version"));
 
 	if (priv->app == NULL)
 		return;
@@ -307,56 +285,6 @@ gs_app_row_refresh (GsAppRow *app_row)
 		gs_progress_button_set_show_progress (GS_PROGRESS_BUTTON (priv->button), FALSE);
 		break;
 	}
-
-	/* join the description lines */
-	str = gs_app_row_get_description (app_row);
-	if (str != NULL) {
-		as_utils_string_replace (str, "\n", " ");
-		gtk_label_set_label (GTK_LABEL (priv->description_label), str->str);
-		g_string_free (str, TRUE);
-	} else {
-		gtk_label_set_text (GTK_LABEL (priv->description_label), NULL);
-	}
-
-	/* add warning */
-	if (gs_app_has_quirk (priv->app, AS_APP_QUIRK_REMOVABLE_HARDWARE)) {
-		gtk_label_set_text (GTK_LABEL (priv->label_warning),
-				    /* TRANSLATORS: during the update the device
-				     * will restart into a special update-only mode */
-				    _("Device cannot be used during update."));
-		gtk_widget_show (priv->label_warning);
-	}
-
-	/* where did this app come from */
-	if (priv->show_source) {
-		tmp = gs_app_get_origin_hostname (priv->app);
-		if (tmp != NULL) {
-			g_autofree gchar *origin_tmp = NULL;
-			/* TRANSLATORS: this refers to where the app came from */
-			origin_tmp = g_strdup_printf ("%s: %s", _("Source"), tmp);
-			gtk_label_set_label (GTK_LABEL (priv->label_origin), origin_tmp);
-		}
-		gtk_widget_set_visible (priv->label_origin, tmp != NULL);
-	} else {
-		gtk_widget_set_visible (priv->label_origin, FALSE);
-	}
-
-	/* installed tag */
-	if (!priv->show_buttons) {
-		switch (gs_app_get_state (priv->app)) {
-		case AS_APP_STATE_UPDATABLE:
-		case AS_APP_STATE_UPDATABLE_LIVE:
-		case AS_APP_STATE_INSTALLED:
-			gtk_widget_set_visible (priv->label_installed, TRUE);
-			break;
-		default:
-			gtk_widget_set_visible (priv->label_installed, FALSE);
-			break;
-		}
-	} else {
-		gtk_widget_set_visible (priv->label_installed, FALSE);
-	}
-
 	/* name */
 	if (g_strcmp0 (gs_app_get_branch (priv->app), "master") == 0) {
 		g_autofree gchar *name = NULL;
@@ -368,66 +296,44 @@ gs_app_row_refresh (GsAppRow *app_row)
 		gtk_label_set_label (GTK_LABEL (priv->name_label),
 				     gs_app_get_name (priv->app));
 	}
+
 	if (priv->show_update) {
-		g_autofree gchar *verstr = NULL;
-		verstr = gs_app_row_format_version_update (priv->app);
-		gtk_label_set_label (GTK_LABEL (priv->version_label), verstr);
-		gtk_widget_set_visible (priv->version_label, verstr != NULL);
-		gtk_widget_hide (priv->star);
+	    version = gs_app_get_update_version_ui (priv->app);
 	} else {
-		gtk_widget_hide (priv->version_label);
-		if (missing_search_result || gs_app_get_rating (priv->app) <= 0) {
-			gtk_widget_hide (priv->star);
-		} else {
-			gtk_widget_show (priv->star);
-			gtk_widget_set_sensitive (priv->star, FALSE);
-			gs_star_widget_set_rating (GS_STAR_WIDGET (priv->star),
-						   gs_app_get_rating (priv->app));
-		}
-		gtk_label_set_label (GTK_LABEL (priv->version_label),
-				     gs_app_get_version_ui (priv->app));
+	    version = gs_app_get_version_ui (priv->app);
 	}
-
-	/* folders */
-	if (priv->show_folders &&
-	    gs_utils_is_current_desktop ("GNOME") &&
-	    g_settings_get_boolean (priv->settings, "show-folder-management")) {
-		g_autoptr(GsFolders) folders = NULL;
-		const gchar *folder;
-		folders = gs_folders_get ();
-		folder = gs_folders_get_app_folder (folders,
-						    gs_app_get_id (priv->app),
-						    gs_app_get_categories (priv->app));
-		if (folder != NULL)
-			folder = gs_folders_get_folder_name (folders, folder);
-		gtk_label_set_label (GTK_LABEL (priv->folder_label), folder);
-		gtk_widget_set_visible (priv->folder_label, folder != NULL);
-	} else {
-		gtk_widget_hide (priv->folder_label);
-	}
-
+    gtk_widget_set_visible (priv->version_label, version != NULL);
+	version_lbl = g_strdup_printf ("%s %s", ver, version);
+    gtk_label_set_label (GTK_LABEL (priv->version_label), version_lbl);
+	
+    /* Detail_button */
+    if (priv->show_update) {
+        gtk_widget_show (priv->button_app_detail);
+	    gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_size);
+	    gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_date);
+    }
 	/* pixbuf */
-	if (gs_app_get_pixbuf (priv->app) != NULL)
-		gs_image_set_from_pixbuf (GTK_IMAGE (priv->image),
-					  gs_app_get_pixbuf (priv->app));
-
+    if (g_strcmp0 (gs_app_get_id (priv->app), "org.gnome.Software.OsUpdate") == 0 ) {
+        gtk_image_set_from_icon_name (GTK_IMAGE (priv->image), "software-os", 48); 
+	    gtk_container_remove (GTK_CONTAINER (priv->name_box), priv->sub_box);
+        gtk_widget_hide (priv->button_app_detail);
+        gtk_widget_show (priv->label_app_desc);
+        gtk_widget_set_margin_top (priv->label_app_desc, 4);
+        gtk_widget_set_margin_bottom (priv->label_app_desc, 0);
+    }
+    else {
+	    if (gs_app_get_pixbuf (priv->app) != NULL) {
+            GdkPixbuf *pixbuf;
+            pixbuf = gdk_pixbuf_scale_simple (gs_app_get_pixbuf (priv->app), 48, 48, GDK_INTERP_BILINEAR);
+		    gs_image_set_from_pixbuf (GTK_IMAGE (priv->image),
+					      pixbuf);
+        }
+    }
 	context = gtk_widget_get_style_context (priv->image);
 	if (missing_search_result)
 		gtk_style_context_add_class (context, "dimmer-label");
 	else
 		gtk_style_context_remove_class (context, "dimmer-label");
-
-	/* pending label */
-	switch (gs_app_get_state (priv->app)) {
-	case AS_APP_STATE_QUEUED_FOR_INSTALL:
-		gtk_widget_set_visible (priv->label, TRUE);
-		gtk_label_set_label (GTK_LABEL (priv->label), _("Pending"));
-		break;
-	default:
-		gtk_widget_set_visible (priv->label, FALSE);
-		break;
-	}
-
 	/* spinner */
 	switch (gs_app_get_state (priv->app)) {
 	case AS_APP_STATE_REMOVING:
@@ -441,18 +347,6 @@ gs_app_row_refresh (GsAppRow *app_row)
 
 	/* button */
 	gs_app_row_refresh_button (app_row, missing_search_result);
-
-	/* hide buttons in the update list, unless the app is live updatable */
-	switch (gs_app_get_state (priv->app)) {
-	case AS_APP_STATE_UPDATABLE_LIVE:
-	case AS_APP_STATE_INSTALLING:
-		gtk_widget_set_visible (priv->button_box, TRUE);
-		break;
-	default:
-		gtk_widget_set_visible (priv->button_box, !priv->show_update);
-		break;
-	}
-
 	/* checkbox */
 	if (priv->selectable) {
 		if (gs_app_get_kind (priv->app) == AS_APP_KIND_DESKTOP ||
@@ -484,6 +378,41 @@ gs_app_row_refresh (GsAppRow *app_row)
 	} else {
 		gtk_widget_hide (priv->label_app_size);
 	}
+
+    /* show the install date */
+    if (!priv->show_update && priv->show_buttons) {
+        g_autoptr(GDateTime) dt = NULL;
+        g_autofree gchar *installed_date = NULL;
+        guint64 installed = gs_app_get_install_date (priv->app);
+        g_autofree gchar *date = NULL;
+        g_autofree gchar *installed_str = g_strdup (_("Installed"));
+        if (installed == 0 || installed == 1) {
+            date = g_strdup_printf ("%s", installed_str); 
+        }
+        else {
+            dt = g_date_time_new_from_unix_utc ((gint64)installed);
+            installed_date = g_date_time_format (dt, "%x");
+            date = g_strdup_printf ("%s %s", installed_date, installed_str);
+        } 
+        gtk_label_set_label (GTK_LABEL (priv->label_app_date), date);
+        gtk_widget_show (priv->label_app_date);
+    }
+    else {
+        gtk_widget_hide (priv->label_app_date);
+    }
+    
+    /* show textview for description */
+    if (priv->show_update) {
+	    str = gs_app_row_get_description (app_row);
+	    if (str != NULL) {
+	    	gtk_label_set_label (GTK_LABEL (priv->label_app_desc), str->str);
+	    	gtk_label_set_line_wrap_mode (GTK_LABEL (priv->label_app_desc), PANGO_WRAP_WORD);
+	    	gtk_label_set_line_wrap (GTK_LABEL (priv->label_app_desc), TRUE);
+	    	g_string_free (str, TRUE);
+	    } else {
+	    	gtk_label_set_text (GTK_LABEL (priv->label_app_desc), NULL);
+	    }
+    }
 }
 
 static void
@@ -529,6 +458,19 @@ settings_changed_cb (GsAppRow *self,
 	    g_strcmp0 (key, "show-folder-management") == 0) {
 		gs_app_row_refresh (self);
 	}
+}
+
+static void
+button_detail_toggled (GtkWidget *widget, GsAppRow *app_row)
+{
+    gboolean visible = FALSE;
+	GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
+    visible = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+    
+    if (visible)
+        gtk_widget_hide (priv->label_app_desc);
+    else
+        gtk_widget_show (priv->label_app_desc);
 }
 
 GsApp *
@@ -668,19 +610,14 @@ gs_app_row_class_init (GsAppRowClass *klass)
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, name_box);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, name_label);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, version_label);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, star);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, folder_label);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, description_box);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, description_label);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, button_box);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, button);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, spinner);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, checkbox);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_warning);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_origin);
-	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_installed);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_app_size);
+	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_app_date);
+	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_app_desc);
+	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, button_app_detail);
+	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, sub_box);
 }
 
 static void
@@ -702,9 +639,7 @@ gs_app_row_init (GsAppRow *app_row)
 
 	gtk_widget_set_has_window (GTK_WIDGET (app_row), FALSE);
 	gtk_widget_init_template (GTK_WIDGET (app_row));
-	gs_star_widget_set_icon_size (GS_STAR_WIDGET (priv->star), 12);
-
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 
 	g_signal_connect (priv->button, "clicked",
 			  G_CALLBACK (button_clicked), app_row);
@@ -713,6 +648,9 @@ gs_app_row_init (GsAppRow *app_row)
 	g_signal_connect_swapped (priv->settings, "changed",
 				  G_CALLBACK (settings_changed_cb),
 				  app_row);
+	g_signal_connect (priv->button_app_detail, "toggled",
+			  G_CALLBACK (button_detail_toggled), app_row);
+
 }
 
 void
@@ -726,7 +664,6 @@ gs_app_row_set_size_groups (GsAppRow *app_row,
 
 	gtk_size_group_add_widget (image, priv->image);
 	gtk_size_group_add_widget (name, priv->name_box);
-	gtk_size_group_add_widget (desc, priv->description_box);
 	gtk_size_group_add_widget (button, priv->button);
 }
 
@@ -783,7 +720,6 @@ void
 gs_app_row_set_show_update (GsAppRow *app_row, gboolean show_update)
 {
 	GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
-
 	priv->show_update = show_update;
 	gs_app_row_refresh (app_row);
 }

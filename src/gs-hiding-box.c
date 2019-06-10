@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
  * Copyright (C) 2015 Rafał Lużyński <digitalfreak@lingonborough.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -27,7 +28,8 @@
 
 enum {
 	PROP_0,
-	PROP_SPACING
+	PROP_SPACING,
+	PROP_VSPACING
 };
 
 struct _GsHidingBox
@@ -36,6 +38,8 @@ struct _GsHidingBox
 
 	GList *children;
 	gint spacing;
+	gint vspacing;
+	gint nvisible;
 };
 
 static void
@@ -71,6 +75,9 @@ gs_hiding_box_set_property (GObject      *object,
 	case PROP_SPACING:
 		gs_hiding_box_set_spacing (box, g_value_get_int (value));
 		break;
+	case PROP_VSPACING:
+		gs_hiding_box_set_vspacing (box, g_value_get_int (value));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -88,6 +95,9 @@ gs_hiding_box_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_SPACING:
 		g_value_set_int (value, box->spacing);
+		break;
+	case PROP_VSPACING:
+		g_value_set_int (value, box->vspacing);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -147,21 +157,24 @@ gs_hiding_box_forall (GtkContainer *container,
 static void
 gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 {
-	GsHidingBox *box = GS_HIDING_BOX (widget);
-	gint nvis_children = 0;
+    GsHidingBox *box = GS_HIDING_BOX (widget);
+    gint nvis_children = 0;
+    gint maximum_height = 0;
 
-	GtkTextDirection direction;
+    GtkTextDirection direction;
 	GtkAllocation child_allocation;
 	GtkRequestedSize *sizes;
 
 	gint size;
 	gint extra = 0;
 	gint n_extra_widgets = 0; /* Number of widgets that receive 1 extra px */
-	gint x = 0, i;
+	gint x = 0, y = 0, i;
 	GList *child;
 	GtkWidget *child_widget;
+	gint childwidget_width, childwidget_height;
 	gint spacing = box->spacing;
-	gint children_size;
+	gint vspacing = box->vspacing;
+	gint children_width;
 	GtkAllocation clip, child_clip;
 
 	gtk_widget_set_allocation (widget, allocation);
@@ -179,19 +192,16 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 	sizes = g_newa (GtkRequestedSize, nvis_children);
 
 	size = allocation->width;
-	children_size = -spacing;
-	/* Retrieve desired size for visible children. */
+	children_width = -spacing;
+    /* Retrieve desired size for visible children. */
 	for (i = 0, child = box->children; child != NULL; child = child->next) {
-
 		child_widget = GTK_WIDGET (child->data);
 		if (!gtk_widget_get_visible (child_widget))
 			continue;
-
 		gtk_widget_get_preferred_width_for_height (child_widget,
 							   allocation->height,
 							   &sizes[i].minimum_size,
 							   &sizes[i].natural_size);
-
 		/* Assert the api is working properly */
 		if (sizes[i].minimum_size < 0)
 			g_error ("GsHidingBox child %s minimum width: %d < 0 for height %d",
@@ -203,30 +213,31 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 				 gtk_widget_get_name (child_widget),
 				 sizes[i].natural_size, sizes[i].minimum_size,
 				 allocation->height);
+        children_width += sizes[i].minimum_size + spacing;
+		if (i > 0 && children_width > allocation->width)
+            break;
 
-		children_size += sizes[i].minimum_size + spacing;
-		if (i > 0 && children_size > allocation->width)
-			break;
-
-		size -= sizes[i].minimum_size;
+        size -= sizes[i].minimum_size;
 		sizes[i].data = child_widget;
-
 		i++;
 	}
 	nvis_children = i;
-
 	/* Bring children up to size first */
 	size = gtk_distribute_natural_allocation (MAX (0, size), (guint) nvis_children, sizes);
 	/* Only now we can subtract the spacings */
 	size -= (nvis_children - 1) * spacing;
-
 	if (nvis_children > 1) {
 		extra = size / nvis_children;
 		n_extra_widgets = size % nvis_children;
+        child_widget = GTK_WIDGET ((box->children)->data);
+        gtk_widget_get_size_request (child_widget, &childwidget_width, &childwidget_height);
 	}
 
-	x = allocation->x;
-	for (i = 0, child = box->children; child != NULL; child = child->next) {
+    x = allocation->x;
+    y = allocation->y;
+    maximum_height = y + (allocation->height - childwidget_height);
+
+    for (i = 0, child = box->children; child != NULL; child = child->next) {
 
 		child_widget = GTK_WIDGET (child->data);
 		if (!gtk_widget_get_visible (child_widget))
@@ -234,17 +245,23 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 
 		/* Hide the overflowing children even if they have visible=TRUE */
 		if (i >= nvis_children) {
-			while (child) {
-				gtk_widget_set_child_visible (child->data, FALSE);
-				child = child->next;
-			}
-			break;
+            i = 0;
+            x = allocation->x;
+            y += childwidget_height + vspacing;
+            if (maximum_height < y)
+            {
+                while (child) {
+                    gtk_widget_set_child_visible (child->data, FALSE);
+                    child = child->next;
+                }
+                break;
+            }
 		}
 
 		child_allocation.x = x;
-		child_allocation.y = allocation->y;
-		child_allocation.width = sizes[i].minimum_size + extra;
-		child_allocation.height = allocation->height;
+		child_allocation.y = y;
+		child_allocation.width = childwidget_width + extra;
+		child_allocation.height = childwidget_height;
 		if (n_extra_widgets) {
 			++child_allocation.width;
 			--n_extra_widgets;
@@ -257,7 +274,7 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 		gtk_widget_set_child_visible (child_widget, TRUE);
 		gtk_widget_size_allocate (child_widget, &child_allocation);
 		x += child_allocation.width + spacing;
-		++i;
+        ++i;
 	}
 
 	/*
@@ -284,6 +301,8 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 		clip.y += allocation->y;
 	}
 	gtk_widget_set_clip (widget, &clip);
+
+    box->nvisible = nvis_children;
 }
 
 static void
@@ -353,6 +372,7 @@ gs_hiding_box_init (GsHidingBox *box)
 	gtk_widget_set_redraw_on_allocate (GTK_WIDGET (box), FALSE);
 
 	box->spacing = 0;
+	box->vspacing = 0;
 }
 
 static void
@@ -373,12 +393,22 @@ gs_hiding_box_class_init (GsHidingBoxClass *class)
 	container_class->remove = gs_hiding_box_remove;
 	container_class->forall = gs_hiding_box_forall;
 
-	g_object_class_install_property (object_class,
+    g_object_class_install_property (object_class,
 		PROP_SPACING,
 		g_param_spec_int ("spacing",
 				/* TRANSLATORS: Here are 2 strings the same as in gtk/gtkbox.c
 				   in GTK+ project. Please use the same translation. */
 				_("Spacing"),
+				_("The amount of space between children"),
+				0, G_MAXINT, 0,
+				G_PARAM_READWRITE|G_PARAM_EXPLICIT_NOTIFY));
+
+	g_object_class_install_property (object_class,
+		PROP_VSPACING,
+		g_param_spec_int ("vspacing",
+				/* TRANSLATORS: Here are 2 strings the same as in gtk/gtkbox.c
+				   in GTK+ project. Please use the same translation. */
+				_("VSpacing"),
 				_("The amount of space between children"),
 				0, G_MAXINT, 0,
 				G_PARAM_READWRITE|G_PARAM_EXPLICIT_NOTIFY));
@@ -435,4 +465,83 @@ gs_hiding_box_get_spacing (GsHidingBox *box)
 	return box->spacing;
 }
 
+/**
+ * gs_hiding_box_set_vspacing:
+ * @box: a #GsHidingBox
+ * @spacing: the number of pixels to put between children
+ *
+ * Sets the #GsHidingBox:vertical spacing property of @box, which is the
+ * number of pixels to place between children of @box.
+ */
+void
+gs_hiding_box_set_vspacing (GsHidingBox *box, gint spacing)
+{
+	g_return_if_fail (GS_IS_HIDING_BOX (box));
+
+	if (box->vspacing != spacing) {
+		box->vspacing = spacing;
+
+		g_object_notify (G_OBJECT (box), "vspacing");
+
+		gtk_widget_queue_resize (GTK_WIDGET (box));
+	}
+}
+
+/**
+ * gs_hiding_box_get_vspacing:
+ * @box: a #GsHidingBox
+ *
+ * Gets the value set by gs_hiding_box_set_spacing().
+ *
+ * Returns: spacing between children
+ **/
+gint
+gs_hiding_box_get_vspacing (GsHidingBox *box)
+{
+	g_return_val_if_fail (GS_IS_HIDING_BOX (box), 0);
+
+	return box->vspacing;
+}
+
+/**
+ * gs_hiding_box_get_actual_height:
+ * @box: a #GsHidingBox
+ *
+ * Returns: actual size
+ **/
+gint
+gs_hiding_box_get_actual_height (GsHidingBox *box)
+{
+    gint nmot = 0;
+    gint nremainder = 0;
+    gint nvis_children = 0;
+    gint actual_height = 0;
+    gint childwidget_width, childwidget_height;
+    GList *child;
+    GtkWidget *child_widget;
+
+    g_return_val_if_fail (GS_IS_HIDING_BOX (box), 0);
+
+    for (child = box->children; child != NULL; child = child->next) {
+		if (gtk_widget_get_visible (child->data))
+			++nvis_children;
+	}
+
+	if (nvis_children == 0)
+		return 0;
+
+    child_widget = GTK_WIDGET ((box->children)->data);
+    gtk_widget_get_size_request (child_widget, &childwidget_width, &childwidget_height);
+
+    nmot = nvis_children / box->nvisible;
+    nremainder = nvis_children %  box->nvisible;
+    actual_height = nmot * (childwidget_height + box->vspacing);
+
+    if (nremainder != 0)
+       actual_height += childwidget_height;
+
+	return actual_height;
+}
 /* vim: set noexpandtab: */
+
+

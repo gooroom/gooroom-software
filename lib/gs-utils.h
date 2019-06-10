@@ -104,6 +104,7 @@ gboolean	 gs_utils_parse_evr		(const gchar	 *evr,
 						 gchar		**out_version,
 						 gchar		**out_release);
 
+const gchar *gs_utils_get_desktop_category_label (const gchar *name);
 G_END_DECLS
 
 #endif /* __GS_UTILS_H */

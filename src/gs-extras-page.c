@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2015-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -151,48 +152,9 @@ build_comma_separated_list (gchar **items)
 	}
 }
 
-static gchar *
-build_title (GsExtrasPage *self)
-{
-	guint i;
-	g_autofree gchar *titles = NULL;
-	g_autoptr(GPtrArray) title_array = NULL;
-
-	title_array = g_ptr_array_new ();
-	for (i = 0; i < self->array_search_data->len; i++) {
-		SearchData *search_data;
-
-		search_data = g_ptr_array_index (self->array_search_data, i);
-		g_ptr_array_add (title_array, search_data->title);
-	}
-	g_ptr_array_add (title_array, NULL);
-
-	titles = build_comma_separated_list ((gchar **) title_array->pdata);
-
-	switch (self->mode) {
-	case GS_EXTRAS_PAGE_MODE_INSTALL_FONTCONFIG_RESOURCES:
-		/* TRANSLATORS: Application window title for fonts installation.
-		   %s will be replaced by name of the script we're searching for. */
-		return g_strdup_printf (ngettext ("Available fonts for the %s script",
-		                                  "Available fonts for the %s scripts",
-		                                  self->array_search_data->len),
-		                        titles);
-		break;
-	default:
-		/* TRANSLATORS: Application window title for codec installation.
-		   %s will be replaced by actual codec name(s) */
-		return g_strdup_printf (ngettext ("Available software for %s",
-		                                  "Available software for %s",
-		                                  self->array_search_data->len),
-		                        titles);
-		break;
-	}
-}
-
 static void
 gs_extras_page_update_ui_state (GsExtrasPage *self)
 {
-	GtkWidget *widget;
 	g_autofree gchar *title = NULL;
 
 	if (gs_shell_get_mode (self->shell) != GS_SHELL_MODE_EXTRAS)
@@ -212,25 +174,8 @@ gs_extras_page_update_ui_state (GsExtrasPage *self)
 		g_assert_not_reached ();
 		break;
 	}
-
-	/* headerbar title */
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "application_details_header"));
-	switch (self->state) {
-	case GS_EXTRAS_PAGE_STATE_LOADING:
-	case GS_EXTRAS_PAGE_STATE_READY:
-		title = build_title (self);
-		gtk_label_set_label (GTK_LABEL (widget), title);
-		break;
-	case GS_EXTRAS_PAGE_STATE_NO_RESULTS:
-	case GS_EXTRAS_PAGE_STATE_FAILED:
-		gtk_label_set_label (GTK_LABEL (widget), _("Unable to Find Requested Software"));
-		break;
-	default:
-		g_assert_not_reached ();
-		break;
-	}
-
-	/* stack */
+	
+    /* stack */
 	switch (self->state) {
 	case GS_EXTRAS_PAGE_STATE_LOADING:
 		gtk_stack_set_visible_child_name (GTK_STACK (self->stack), "spinner");
@@ -1028,18 +973,14 @@ gs_extras_page_switch_to (GsPage *page,
                           gboolean scroll_up)
 {
 	GsExtrasPage *self = GS_EXTRAS_PAGE (page);
-	GtkWidget *widget;
 
 	if (gs_shell_get_mode (self->shell) != GS_SHELL_MODE_EXTRAS) {
 		g_warning ("Called switch_to(codecs) when in mode %s",
 			   gs_shell_get_mode_string (self->shell));
 		return;
 	}
-
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "application_details_header"));
-	gtk_widget_show (widget);
-
-	if (scroll_up) {
+	
+    if (scroll_up) {
 		GtkAdjustment *adj;
 		adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scrolledwindow));
 		gtk_adjustment_set_value (adj, gtk_adjustment_get_lower (adj));

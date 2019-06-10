@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom,kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -35,7 +36,6 @@
 #include "gs-updates-section.h"
 #include "gs-upgrade-banner.h"
 #include "gs-application.h"
-
 #ifdef HAVE_GNOME_DESKTOP
 #include <gdesktop-enums.h>
 #endif
@@ -96,6 +96,9 @@ struct _GsUpdatesPage
 	GtkWidget		*upgrade_banner;
 	GtkWidget		*box_end_of_life;
 	GtkWidget		*label_end_of_life;
+    GtkWidget       *label_updates_restart;
+    GtkWidget       *button_updates_all;
+    GtkWidget       *updates_heading;
 
 	GtkSizeGroup		*sizegroup_image;
 	GtkSizeGroup		*sizegroup_name;
@@ -113,6 +116,11 @@ enum {
 };
 
 G_DEFINE_TYPE (GsUpdatesPage, gs_updates_page, GS_TYPE_PAGE)
+
+enum {
+    SIGNAL_UPDATED,
+    SIGNAL_LAST
+};
 
 static void
 gs_updates_page_set_flag (GsUpdatesPage *self, GsUpdatesPageFlags flag)
@@ -286,29 +294,18 @@ gs_updates_page_get_state_string (GsPluginStatus status)
 static void
 refresh_headerbar_updates_counter (GsUpdatesPage *self)
 {
-	GtkWidget *widget;
 	guint num_updates;
 
 	num_updates = _get_num_updates (self);
-
-	/* update the counter */
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "button_updates_counter"));
+    
+    /* update the title */
 	if (num_updates > 0 &&
 	    gs_plugin_loader_get_allow_updates (self->plugin_loader)) {
+        const gchar *title = g_strdup (_("_Updates")); 
 		g_autofree gchar *text = NULL;
-		text = g_strdup_printf ("%u", num_updates);
-		gtk_label_set_label (GTK_LABEL (widget), text);
-		gtk_widget_show (widget);
-	} else {
-		gtk_widget_hide (widget);
+		text = g_strdup_printf ("%s (%u)", title, num_updates);
+		gtk_label_set_label (GTK_LABEL (self->updates_heading), text);
 	}
-
-	/* update the tab style */
-	if (num_updates > 0 &&
-	    gs_shell_get_mode (self->shell) != GS_SHELL_MODE_UPDATES)
-		gtk_style_context_add_class (gtk_widget_get_style_context (widget), "needs-attention");
-	else
-		gtk_style_context_remove_class (gtk_widget_get_style_context (widget), "needs-attention");
 }
 
 static void
@@ -515,31 +512,21 @@ gs_updates_page_get_updates_cb (GsPluginLoader *plugin_loader,
                                 GAsyncResult *res,
                                 GsUpdatesPage *self)
 {
-	GtkWidget *widget;
+    GsUpdatesSectionKind section;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
+	g_autoptr(GsAppList) ic = NULL;
 
 	self->cache_valid = TRUE;
-
 	/* get the results */
 	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
-	if (list == NULL) {
-		gs_updates_page_clear_flag (self, GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
-		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED))
-			g_warning ("updates-shell: failed to get updates: %s", error->message);
-		gtk_label_set_label (GTK_LABEL (self->label_updates_failed),
-				     error->message);
-		gs_updates_page_set_state (self, GS_UPDATES_PAGE_STATE_FAILED);
-		widget = GTK_WIDGET (gtk_builder_get_object (self->builder,
-							     "button_updates_counter"));
-		gtk_widget_hide (widget);
-		return;
-	}
-
-	/* add the results */
+	
+    /* add the results */
 	for (guint i = 0; i < gs_app_list_length (list); i++) {
 		GsApp *app = gs_app_list_index (list, i);
-		GsUpdatesSectionKind section = _get_app_section (app);
+        if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE)
+           gtk_widget_show (self->label_updates_restart);
+		section = _get_app_section (app);
 		gs_updates_section_add_app (GS_UPDATES_SECTION (self->sections[section]), app);
 	}
 
@@ -939,6 +926,14 @@ gs_updates_page_button_refresh_cb (GtkWidget *widget,
 				  self);
 		gs_shell_modal_dialog_present (self->shell, GTK_DIALOG (dialog));
 	}
+}
+
+static void
+gs_updates_page_button_update_all_clicked(GtkWidget *widget, GsUpdatesPage *self)
+{
+	/* update all existing apps */
+	for (guint i = 0; i < GS_UPDATES_SECTION_KIND_LAST; i++)
+		gs_updates_section_update_all (GS_UPDATES_SECTION (self->sections[i]));
 }
 
 static void
@@ -1385,6 +1380,11 @@ gs_updates_page_setup (GsPage *page,
 	/* set initial state */
 	if (!gs_plugin_loader_get_allow_updates (self->plugin_loader))
 		self->state = GS_UPDATES_PAGE_STATE_MANAGED;
+
+    /* setup update button */
+	g_signal_connect (self->button_updates_all, "clicked",
+			  G_CALLBACK (gs_updates_page_button_update_all_clicked),
+			  self);
 	return TRUE;
 }
 
@@ -1432,7 +1432,7 @@ gs_updates_page_class_init (GsUpdatesPageClass *klass)
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
 	object_class->dispose = gs_updates_page_dispose;
-	page_class->switch_to = gs_updates_page_switch_to;
+    page_class->switch_to = gs_updates_page_switch_to;
 	page_class->reload = gs_updates_page_reload;
 	page_class->setup = gs_updates_page_setup;
 
@@ -1450,6 +1450,9 @@ gs_updates_page_class_init (GsUpdatesPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, upgrade_banner);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, box_end_of_life);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_end_of_life);
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_updates_restart);
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, button_updates_all);
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, updates_heading);
 }
 
 static void
@@ -1460,7 +1463,7 @@ gs_updates_page_init (GsUpdatesPage *self)
 	gtk_widget_init_template (GTK_WIDGET (self));
 
 	self->state = GS_UPDATES_PAGE_STATE_STARTUP;
-	self->settings = g_settings_new ("org.gnome.software");
+	self->settings = g_settings_new ("kr.gooroom.software");
 	self->desktop_settings = g_settings_new ("org.gnome.desktop.interface");
 
 	self->sizegroup_image = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);

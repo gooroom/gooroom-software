@@ -16,7 +16,7 @@ gs_plugin_api_version = '12'
 conf.set_quoted('GS_PLUGIN_API_VERSION', gs_plugin_api_version)
 
 # install docs
-#install_data('README.md', install_dir : 'share/doc/gooroom-software')
+install_data('README.md', install_dir : 'share/doc/gooroom-software')
 
 # get suported warning flags
 test_args = [
@@ -199,6 +199,9 @@ conf.set_quoted('LOCALSTATEDIR',
 conf.set_quoted('LIBEXECDIR',
                 join_paths(get_option('prefix'),
                            get_option('libexecdir')))
+# gooroom set configure
+conf.set('USE_GOOROOM', 1)
+
 configure_file(
   output : 'config.h',
   configuration : conf
@@ -220,7 +223,7 @@ subdir('lib')
 subdir('plugins')
 subdir('src')
 subdir('po')
-subdir('doc')
+#subdir('doc')
 
 if meson.version().version_compare('<0.41.0')
   archiver = find_program('git', required : false)
@@ -242,4 +245,4 @@ if meson.version().version_compare('<0.41.0')
 endif
 
 # FIXME: remove when https://github.com/mesonbuild/meson/issues/837 fixed
-#meson.add_install_script('meson_post_install.sh')
+meson.add_install_script('meson_post_install.sh')

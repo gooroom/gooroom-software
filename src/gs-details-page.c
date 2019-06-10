@@ -3,6 +3,7 @@
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2013 Matthias Clasen <mclasen@redhat.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -39,9 +40,14 @@
 #include "gs-review-histogram.h"
 #include "gs-review-dialog.h"
 #include "gs-review-row.h"
+#include "gs-popular-tile.h"
+#include "gs-hiding-box.h"
 
 /* the number of reviews to show before clicking the 'More Reviews' button */
+#define N_TILES             		4
 #define SHOW_NR_REVIEWS_INITIAL		4
+#define HIDINGBOX_DEFAULT_SIZE_WIDTH    725 
+#define HIDINGBOX_DEFAULT_SIZE_HEIGHT   200 
 
 static void gs_details_page_refresh_all (GsDetailsPage *self);
 
@@ -67,27 +73,21 @@ struct _GsDetailsPage
 	GSettings		*settings;
 
 	GtkWidget		*application_details_icon;
-	GtkWidget		*application_details_summary;
+	GtkWidget		*application_details_category;
+	GtkWidget		*application_details_developer;
 	GtkWidget		*application_details_title;
 	GtkWidget		*box_addons;
 	GtkWidget		*box_details;
 	GtkWidget		*box_details_description;
-	GtkWidget		*box_details_support;
 	GtkWidget		*box_progress;
 	GtkWidget		*box_progress2;
-	GtkWidget		*star;
-	GtkWidget		*label_review_count;
 	GtkWidget		*box_details_screenshot;
-	GtkWidget		*box_details_screenshot_main;
 	GtkWidget		*box_details_screenshot_thumbnails;
 	GtkWidget		*box_details_license_list;
 	GtkWidget		*button_details_launch;
 	GtkWidget		*button_details_add_shortcut;
 	GtkWidget		*button_details_remove_shortcut;
-	GtkWidget		*button_details_website;
-	GtkWidget		*button_donate;
 	GtkWidget		*button_install;
-	GtkWidget		*button_remove;
 	GtkWidget		*button_cancel;
 	GtkWidget		*button_more_reviews;
 	GtkWidget		*infobar_details_app_norepo;
@@ -104,15 +104,14 @@ struct _GsDetailsPage
 	GtkWidget		*button_details_license_free;
 	GtkWidget		*button_details_license_nonfree;
 	GtkWidget		*button_details_license_unknown;
-	GtkWidget		*label_details_origin_title;
-	GtkWidget		*label_details_origin_value;
 	GtkWidget		*label_details_size_installed_title;
 	GtkWidget		*label_details_size_installed_value;
 	GtkWidget		*label_details_size_download_title;
 	GtkWidget		*label_details_size_download_value;
 	GtkWidget		*label_details_updated_title;
 	GtkWidget		*label_details_updated_value;
-	GtkWidget		*label_details_version_value;
+	GtkWidget		*label_details_channel_title;
+	GtkWidget		*button_details_channel;
 	GtkWidget		*label_failed;
 	GtkWidget		*label_license_nonfree_details;
 	GtkWidget		*label_licenses_intro;
@@ -123,21 +122,11 @@ struct _GsDetailsPage
 	GtkWidget		*button_review;
 	GtkWidget		*list_box_reviews;
 	GtkWidget		*scrolledwindow_details;
-	GtkWidget		*spinner_details;
-	GtkWidget		*spinner_remove;
+    GtkWidget		*spinner_details;
 	GtkWidget		*stack_details;
-	GtkWidget		*grid_details_kudo;
-	GtkWidget		*image_details_kudo_docs;
-	GtkWidget		*image_details_kudo_sandboxed;
-	GtkWidget		*image_details_kudo_integration;
-	GtkWidget		*image_details_kudo_translated;
-	GtkWidget		*image_details_kudo_updated;
-	GtkWidget		*label_details_kudo_docs;
-	GtkWidget		*label_details_kudo_sandboxed;
-	GtkWidget		*label_details_kudo_integration;
-	GtkWidget		*label_details_kudo_translated;
-	GtkWidget		*label_details_kudo_updated;
+	GtkWidget		*grid_popover_channel;
 	GtkWidget		*progressbar_top;
+	GtkWidget		*popover_channel;
 	GtkWidget		*popover_license_free;
 	GtkWidget		*popover_license_nonfree;
 	GtkWidget		*popover_license_unknown;
@@ -145,8 +134,10 @@ struct _GsDetailsPage
 	GtkWidget		*label_content_rating_title;
 	GtkWidget		*label_content_rating_message;
 	GtkWidget		*label_content_rating_none;
-	GtkWidget		*button_details_rating_value;
-	GtkWidget		*label_details_rating_title;
+    GtkWidget       *box_similar; 
+    GtkWidget       *similar_heading;	
+    GtkWidget       *similar_more;	
+ 
 };
 
 G_DEFINE_TYPE (GsDetailsPage, gs_details_page, GS_TYPE_PAGE)
@@ -186,55 +177,6 @@ gs_details_page_set_state (GsDetailsPage *self,
 	}
 }
 
-static void
-gs_details_page_update_shortcut_button (GsDetailsPage *self)
-{
-	gboolean add_shortcut_func;
-	gboolean remove_shortcut_func;
-	gboolean has_shortcut;
-
-	gtk_widget_set_visible (self->button_details_add_shortcut,
-				FALSE);
-	gtk_widget_set_visible (self->button_details_remove_shortcut,
-				FALSE);
-
-	if (gs_app_get_kind (self->app) != AS_APP_KIND_DESKTOP)
-		return;
-
-	/* only consider the shortcut button if the app is installed */
-	switch (gs_app_get_state (self->app)) {
-	case AS_APP_STATE_INSTALLED:
-	case AS_APP_STATE_UPDATABLE:
-	case AS_APP_STATE_UPDATABLE_LIVE:
-		break;
-	default:
-		return;
-	}
-
-	add_shortcut_func =
-		gs_plugin_loader_get_plugin_supported (self->plugin_loader,
-						       "gs_plugin_add_shortcut");
-	remove_shortcut_func =
-		gs_plugin_loader_get_plugin_supported (self->plugin_loader,
-						       "gs_plugin_remove_shortcut");
-
-	has_shortcut = gs_app_has_quirk (self->app, AS_APP_QUIRK_HAS_SHORTCUT);
-
-	if (add_shortcut_func) {
-		gtk_widget_set_visible (self->button_details_add_shortcut,
-					!has_shortcut || !remove_shortcut_func);
-		gtk_widget_set_sensitive (self->button_details_add_shortcut,
-					  !has_shortcut);
-	}
-
-	if (remove_shortcut_func) {
-		gtk_widget_set_visible (self->button_details_remove_shortcut,
-					has_shortcut || !add_shortcut_func);
-		gtk_widget_set_sensitive (self->button_details_remove_shortcut,
-					  has_shortcut);
-	}
-}
-
 static gboolean
 app_has_pending_action (GsApp *app)
 {
@@ -255,7 +197,6 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 {
 	GsDetailsPage *self = GS_DETAILS_PAGE (page);
 	AsAppState state;
-	GtkWidget *widget;
 	GsPrice *price;
 	g_autofree gchar *text = NULL;
 	GtkStyleContext *sc;
@@ -266,12 +207,8 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 			   gs_shell_get_mode_string (self->shell));
 		return;
 	}
-
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "application_details_header"));
-	gtk_label_set_label (GTK_LABEL (widget), "");
-	gtk_widget_show (widget);
-
-	/* not set, perhaps file-to-app */
+	
+    /* not set, perhaps file-to-app */
 	if (self->app == NULL)
 		return;
 
@@ -373,47 +310,9 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 		gtk_widget_set_visible (self->button_details_launch, FALSE);
 	}
 
-	/* remove button */
-	if (gs_app_has_quirk (self->app, AS_APP_QUIRK_COMPULSORY) ||
-	    gs_app_get_kind (self->app) == AS_APP_KIND_FIRMWARE) {
-		gtk_widget_set_visible (self->button_remove, FALSE);
-	} else {
-		switch (state) {
-		case AS_APP_STATE_INSTALLED:
-		case AS_APP_STATE_UPDATABLE:
-		case AS_APP_STATE_UPDATABLE_LIVE:
-			gtk_widget_set_visible (self->button_remove, TRUE);
-			gtk_widget_set_sensitive (self->button_remove, TRUE);
-			/* Mark the button as destructive only if Launch is not visible */
-			if (gtk_widget_get_visible (self->button_details_launch))
-				gtk_style_context_remove_class (gtk_widget_get_style_context (self->button_remove), "destructive-action");
-			else
-				gtk_style_context_add_class (gtk_widget_get_style_context (self->button_remove), "destructive-action");
-			/* TRANSLATORS: button text in the header when an application can be erased */
-			gtk_button_set_label (GTK_BUTTON (self->button_remove), _("_Remove"));
-			break;
-		case AS_APP_STATE_AVAILABLE_LOCAL:
-		case AS_APP_STATE_AVAILABLE:
-		case AS_APP_STATE_INSTALLING:
-		case AS_APP_STATE_REMOVING:
-		case AS_APP_STATE_UNAVAILABLE:
-		case AS_APP_STATE_UNKNOWN:
-		case AS_APP_STATE_PURCHASABLE:
-		case AS_APP_STATE_PURCHASING:
-		case AS_APP_STATE_QUEUED_FOR_INSTALL:
-			gtk_widget_set_visible (self->button_remove, FALSE);
-			break;
-		default:
-			g_warning ("App unexpectedly in state %s",
-				   as_app_state_to_string (state));
-			g_assert_not_reached ();
-		}
-	}
-
 	if (app_has_pending_action (self->app)) {
 		gtk_widget_set_visible (self->button_install, FALSE);
 		gtk_widget_set_visible (self->button_details_launch, FALSE);
-		gtk_widget_set_visible (self->button_remove, FALSE);
 	}
 
 	adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scrolledwindow_details));
@@ -515,23 +414,8 @@ gs_details_page_refresh_progress (GsDetailsPage *self)
 		gtk_widget_set_visible (self->progressbar_top, TRUE);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (self->progressbar_top), 0);
 	}
-
-	/* spinner */
-	switch (state) {
-	case AS_APP_STATE_REMOVING:
-		gtk_spinner_start (GTK_SPINNER (self->spinner_remove));
-		gtk_widget_set_visible (self->spinner_remove, TRUE);
-		/* align text together with the spinner if we're showing it */
-		gtk_widget_set_halign (self->box_progress2, GTK_ALIGN_START);
-		break;
-	default:
-		gtk_widget_set_visible (self->spinner_remove, FALSE);
-		gtk_spinner_stop (GTK_SPINNER (self->spinner_remove));
-		gtk_widget_set_halign (self->box_progress2, GTK_ALIGN_CENTER);
-		break;
-	}
-
-	/* progress box */
+	
+    /* progress box */
 	switch (state) {
 	case AS_APP_STATE_REMOVING:
 	case AS_APP_STATE_INSTALLING:
@@ -605,72 +489,12 @@ gs_details_page_notify_state_changed_cb (GsApp *app,
 }
 
 static void
-gs_details_page_screenshot_selected_cb (GtkListBox *list,
-                                        GtkListBoxRow *row,
-                                        GsDetailsPage *self)
-{
-	GsScreenshotImage *ssmain;
-	GsScreenshotImage *ssthumb;
-	AsScreenshot *ss;
-	g_autoptr(GList) children = NULL;
-
-	if (row == NULL)
-		return;
-
-	children = gtk_container_get_children (GTK_CONTAINER (self->box_details_screenshot_main));
-	ssmain = GS_SCREENSHOT_IMAGE (children->data);
-
-	ssthumb = GS_SCREENSHOT_IMAGE (gtk_bin_get_child (GTK_BIN (row)));
-	ss = gs_screenshot_image_get_screenshot (ssthumb);
-	gs_screenshot_image_set_screenshot (ssmain, ss);
-	gs_screenshot_image_load_async (ssmain, NULL);
-}
-
-static void
 gs_details_page_refresh_screenshots (GsDetailsPage *self)
 {
+    guint i;
 	GPtrArray *screenshots;
 	AsScreenshot *ss;
-	GtkWidget *label;
-	GtkWidget *list;
 	GtkWidget *ssimg;
-	guint i;
-
-	/* treat screenshots differently */
-	if (gs_app_get_kind (self->app) == AS_APP_KIND_FONT) {
-		gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
-		gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_main));
-		screenshots = gs_app_get_screenshots (self->app);
-		for (i = 0; i < screenshots->len; i++) {
-			ss = g_ptr_array_index (screenshots, i);
-
-			/* set caption */
-			label = gtk_label_new (as_screenshot_get_caption (ss, NULL));
-			g_object_set (label,
-				      "xalign", 0.0,
-				      "max-width-chars", 10,
-				      "wrap", TRUE,
-				      NULL);
-			gtk_box_pack_start (GTK_BOX (self->box_details_screenshot_main), label, FALSE, FALSE, 0);
-			gtk_widget_set_visible (label, TRUE);
-
-			/* set images */
-			ssimg = gs_screenshot_image_new (self->session);
-			gs_screenshot_image_set_screenshot (GS_SCREENSHOT_IMAGE (ssimg), ss);
-			gs_screenshot_image_set_size (GS_SCREENSHOT_IMAGE (ssimg),
-						      640,
-						      48);
-			gs_screenshot_image_set_use_desktop_background (GS_SCREENSHOT_IMAGE (ssimg), FALSE);
-			gs_screenshot_image_load_async (GS_SCREENSHOT_IMAGE (ssimg), NULL);
-			gtk_box_pack_start (GTK_BOX (self->box_details_screenshot_main), ssimg, FALSE, FALSE, 0);
-			gtk_widget_set_visible (ssimg, TRUE);
-		}
-		gtk_widget_set_visible (self->box_details_screenshot,
-		                        screenshots->len > 0);
-		gtk_widget_set_visible (self->box_details_screenshot_fallback,
-		                        screenshots->len == 0);
-		return;
-	}
 
 	/* fallback warning */
 	screenshots = gs_app_get_screenshots (self->app);
@@ -688,81 +512,30 @@ gs_details_page_refresh_screenshots (GsDetailsPage *self)
 		break;
 	default:
 		gtk_widget_set_visible (self->box_details_screenshot_fallback,
-					screenshots->len == 0);
+					FALSE);
 		break;
 	}
-
 	/* set screenshots */
-	gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_main));
 	gtk_widget_set_visible (self->box_details_screenshot,
 				screenshots->len > 0);
 	if (screenshots->len == 0) {
 		gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
 		return;
 	}
-
-	/* set the default image */
-	ss = g_ptr_array_index (screenshots, 0);
-	ssimg = gs_screenshot_image_new (self->session);
-	gtk_widget_set_can_focus (gtk_bin_get_child (GTK_BIN (ssimg)), FALSE);
-	gs_screenshot_image_set_screenshot (GS_SCREENSHOT_IMAGE (ssimg), ss);
-
-	/* use a slightly larger screenshot if it's the only screenshot */
-	if (screenshots->len == 1) {
-		gs_screenshot_image_set_size (GS_SCREENSHOT_IMAGE (ssimg),
-					      AS_IMAGE_LARGE_WIDTH,
-					      AS_IMAGE_LARGE_HEIGHT);
-	} else {
-		gs_screenshot_image_set_size (GS_SCREENSHOT_IMAGE (ssimg),
-					      AS_IMAGE_NORMAL_WIDTH,
-					      AS_IMAGE_NORMAL_HEIGHT);
-	}
-	gs_screenshot_image_load_async (GS_SCREENSHOT_IMAGE (ssimg), NULL);
-	gtk_box_pack_start (GTK_BOX (self->box_details_screenshot_main), ssimg, FALSE, FALSE, 0);
-	gtk_widget_set_visible (ssimg, TRUE);
-
 	/* set all the thumbnails */
 	gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
-	if (screenshots->len < 2)
-		return;
 
-	list = gtk_list_box_new ();
-	gtk_style_context_add_class (gtk_widget_get_style_context (list), "image-list");
-	gtk_widget_show (list);
-	gtk_box_pack_start (GTK_BOX (self->box_details_screenshot_thumbnails), list, FALSE, FALSE, 0);
 	for (i = 0; i < screenshots->len; i++) {
 		ss = g_ptr_array_index (screenshots, i);
 		ssimg = gs_screenshot_image_new (self->session);
 		gs_screenshot_image_set_screenshot (GS_SCREENSHOT_IMAGE (ssimg), ss);
 		gs_screenshot_image_set_size (GS_SCREENSHOT_IMAGE (ssimg),
-					      AS_IMAGE_THUMBNAIL_WIDTH,
-					      AS_IMAGE_THUMBNAIL_HEIGHT);
-		gtk_style_context_add_class (gtk_widget_get_style_context (ssimg),
-					     "screenshot-image-thumb");
+					      300,
+					      187.5);
 		gs_screenshot_image_load_async (GS_SCREENSHOT_IMAGE (ssimg), NULL);
-		gtk_list_box_insert (GTK_LIST_BOX (list), ssimg, -1);
+	    gtk_box_pack_start (GTK_BOX (self->box_details_screenshot_thumbnails), ssimg, FALSE, FALSE, 0);
 		gtk_widget_set_visible (ssimg, TRUE);
 	}
-
-	gtk_list_box_set_selection_mode (GTK_LIST_BOX (list), GTK_SELECTION_BROWSE);
-	gtk_list_box_select_row (GTK_LIST_BOX (list),
-				 gtk_list_box_get_row_at_index (GTK_LIST_BOX (list), 0));
-	g_signal_connect (list, "row-selected",
-			  G_CALLBACK (gs_details_page_screenshot_selected_cb),
-			  self);
-}
-
-static void
-gs_details_page_website_cb (GtkWidget *widget, GsDetailsPage *self)
-{
-	gs_shell_show_uri (self->shell,
-	                   gs_app_get_url (self->app, AS_URL_KIND_HOMEPAGE));
-}
-
-static void
-gs_details_page_donate_cb (GtkWidget *widget, GsDetailsPage *self)
-{
-	gs_shell_show_uri (self->shell, gs_app_get_url (self->app, AS_URL_KIND_DONATION));
 }
 
 static void
@@ -812,18 +585,6 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 					     "application-details-webapp-warning");
 		gtk_box_pack_start (GTK_BOX (self->box_details_description),
 				    label, FALSE, FALSE, 0);
-	}
-}
-
-static void
-gs_details_page_set_sensitive (GtkWidget *widget, gboolean is_active)
-{
-	GtkStyleContext *style_context;
-	style_context = gtk_widget_get_style_context (widget);
-	if (!is_active) {
-		gtk_style_context_add_class (style_context, "dim-label");
-	} else {
-		gtk_style_context_remove_class (style_context, "dim-label");
 	}
 }
 
@@ -881,35 +642,51 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	GsAppList *history;
 	GdkPixbuf *pixbuf = NULL;
 	GList *addons;
-	GtkWidget *widget;
 	const gchar *tmp;
-	gboolean ret;
 	gchar **menu_path;
-	guint64 kudos;
 	guint64 updated;
-	guint64 user_integration_bf;
-	gboolean show_support_box = FALSE;
 	g_autoptr(GError) error = NULL;
+    GPtrArray *categories;
+    const gchar *category_name;
 
 	/* change widgets */
 	tmp = gs_app_get_name (self->app);
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "application_details_header"));
 	if (tmp != NULL && tmp[0] != '\0') {
 		gtk_label_set_label (GTK_LABEL (self->application_details_title), tmp);
-		gtk_label_set_label (GTK_LABEL (widget), tmp);
 		gtk_widget_set_visible (self->application_details_title, TRUE);
 	} else {
 		gtk_widget_set_visible (self->application_details_title, FALSE);
-		gtk_label_set_label (GTK_LABEL (widget), "");
 	}
-	tmp = gs_app_get_summary (self->app);
-	if (tmp != NULL && tmp[0] != '\0') {
-		gtk_label_set_label (GTK_LABEL (self->application_details_summary), tmp);
-		gtk_widget_set_visible (self->application_details_summary, TRUE);
-	} else {
-		gtk_widget_set_visible (self->application_details_summary, FALSE);
-	}
+    
+    menu_path = gs_app_get_menu_path (self->app);
+	if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
+        categories = gs_app_get_categories (self->app);
+        if (categories) {
+            const gchar *category = g_ptr_array_index (categories, 0);
+            const gchar *desktop_name = gs_utils_get_desktop_category_label (category);
+            if (desktop_name == NULL && categories->len > 1) {
+                category = g_ptr_array_index (categories, 1);
+                desktop_name = gs_utils_get_desktop_category_label (category);
+            }
+            category_name = g_strdup (_(desktop_name));
+		    gtk_label_set_label (GTK_LABEL (self->application_details_category), category_name);
+		    gtk_widget_set_visible (self->application_details_category, TRUE);
+        }
 
+	} else {
+		gtk_label_set_label (GTK_LABEL (self->application_details_category),menu_path[0]);
+		gtk_widget_set_visible (self->application_details_category, TRUE);
+	}
+	
+    tmp = gs_app_get_developer_name (self->app);
+	if (tmp == NULL)
+		tmp = gs_app_get_project_group (self->app);
+	if (tmp != NULL) {
+		gtk_label_set_label (GTK_LABEL (self->application_details_developer), tmp);
+		gtk_widget_set_visible (self->application_details_developer, TRUE);
+	} else {
+		gtk_widget_set_visible (self->application_details_developer, FALSE);
+	}
 	/* set the description */
 	tmp = gs_app_get_description (self->app);
 	gs_details_page_set_description (self, tmp);
@@ -923,36 +700,20 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->application_details_icon, FALSE);
 	}
 
-	tmp = gs_app_get_url (self->app, AS_URL_KIND_HOMEPAGE);
-	if (tmp != NULL && tmp[0] != '\0') {
-		gtk_widget_set_visible (self->button_details_website, TRUE);
-		show_support_box = TRUE;
-	} else {
-		gtk_widget_set_visible (self->button_details_website, FALSE);
-	}
-	tmp = gs_app_get_url (self->app, AS_URL_KIND_DONATION);
-	if (tmp != NULL && tmp[0] != '\0') {
-		gtk_widget_set_visible (self->button_donate, TRUE);
-		show_support_box = TRUE;
-	} else {
-		gtk_widget_set_visible (self->button_donate, FALSE);
-	}
-	gtk_widget_set_visible (self->box_details_support, show_support_box);
-
 	/* set the developer name, falling back to the project group */
 	tmp = gs_app_get_developer_name (self->app);
 	if (tmp == NULL)
 		tmp = gs_app_get_project_group (self->app);
 	if (tmp == NULL) {
-		gtk_widget_set_visible (self->label_details_developer_title, FALSE);
+		gtk_widget_set_visible (self->label_details_developer_title, TRUE);
 		gtk_widget_set_visible (self->label_details_developer_value, FALSE);
 	} else {
 		gtk_widget_set_visible (self->label_details_developer_title, TRUE);
 		gtk_label_set_label (GTK_LABEL (self->label_details_developer_value), tmp);
 		gtk_widget_set_visible (self->label_details_developer_value, TRUE);
 	}
-
-	/* set the license buttons */
+	
+    /* set the license buttons */
 	tmp = gs_app_get_license (self->app);
 	if (tmp == NULL) {
 		gtk_widget_set_visible (self->button_details_license_free, FALSE);
@@ -967,23 +728,14 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->button_details_license_nonfree, TRUE);
 		gtk_widget_set_visible (self->button_details_license_unknown, FALSE);
 	}
-
-	/* set version */
-	tmp = gs_app_get_version (self->app);
-	if (tmp != NULL){
-		gtk_label_set_label (GTK_LABEL (self->label_details_version_value), tmp);
-	} else {
-		/* TRANSLATORS: this is where the version is not known */
-		gtk_label_set_label (GTK_LABEL (self->label_details_version_value), C_("version", "Unknown"));
-	}
-
+	
 	/* refresh size information */
 	gs_details_page_refresh_size (self);
 
 	/* set the updated date */
 	updated = gs_app_get_install_date (self->app);
 	if (updated == GS_APP_INSTALL_DATE_UNSET) {
-		gtk_widget_set_visible (self->label_details_updated_title, FALSE);
+		gtk_widget_set_visible (self->label_details_updated_title, TRUE);
 		gtk_widget_set_visible (self->label_details_updated_value, FALSE);
 	} else if (updated == GS_APP_INSTALL_DATE_UNKNOWN) {
 		/* TRANSLATORS: this is where the updated date is not known */
@@ -1011,12 +763,11 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->label_details_updated_title, TRUE);
 		gtk_widget_set_visible (self->label_details_updated_value, TRUE);
 	}
-
-	/* set the category */
+	
+    /* set the category */
 	menu_path = gs_app_get_menu_path (self->app);
 	if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
-		gtk_widget_set_visible (self->label_details_category_title, FALSE);
-		gtk_widget_set_visible (self->label_details_category_value, FALSE);
+		gtk_label_set_label (GTK_LABEL (self->label_details_category_value), category_name);
 	} else {
 		g_autofree gchar *path = NULL;
 		if (gtk_widget_get_direction (self->label_details_category_value) == GTK_TEXT_DIR_RTL)
@@ -1024,60 +775,18 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		else
 			path = g_strjoinv (" → ", menu_path);
 		gtk_label_set_label (GTK_LABEL (self->label_details_category_value), path);
-		gtk_widget_set_visible (self->label_details_category_title, TRUE);
-		gtk_widget_set_visible (self->label_details_category_value, TRUE);
 	}
-
-	/* set the origin */
-	tmp = gs_app_get_origin_hostname (self->app);
-	if (tmp == NULL)
-		tmp = gs_app_get_origin (self->app);
-	if (tmp == NULL || tmp[0] == '\0') {
-		/* TRANSLATORS: this is where we don't know the origin of the
-		 * application */
-		gtk_label_set_label (GTK_LABEL (self->label_details_origin_value), C_("origin", "Unknown"));
+	gtk_widget_set_visible (self->label_details_category_title, TRUE);
+	gtk_widget_set_visible (self->label_details_category_value, TRUE);
+    
+    /* set the app size */
+	if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
+	    gs_app_get_size_installed (self->app) != 0) {
+		gtk_widget_show (self->label_details_size_installed_title);
+		gtk_widget_hide (self->label_details_size_download_title);
 	} else {
-		gtk_label_set_label (GTK_LABEL (self->label_details_origin_value), tmp);
-	}
-
-	/* set MyLanguage kudo */
-	kudos = gs_app_get_kudos (self->app);
-	ret = (kudos & GS_APP_KUDO_MY_LANGUAGE) > 0;
-	gtk_widget_set_sensitive (self->image_details_kudo_translated, ret);
-	gs_details_page_set_sensitive (self->label_details_kudo_translated, ret);
-
-	/* set RecentRelease kudo */
-	ret = (kudos & GS_APP_KUDO_RECENT_RELEASE) > 0;
-	gtk_widget_set_sensitive (self->image_details_kudo_updated, ret);
-	gs_details_page_set_sensitive (self->label_details_kudo_updated, ret);
-
-	/* set UserDocs kudo */
-	ret = (kudos & GS_APP_KUDO_INSTALLS_USER_DOCS) > 0;
-	gtk_widget_set_sensitive (self->image_details_kudo_docs, ret);
-	gs_details_page_set_sensitive (self->label_details_kudo_docs, ret);
-
-	/* set sandboxed kudo */
-	ret = (kudos & GS_APP_KUDO_SANDBOXED) > 0;
-	gtk_widget_set_sensitive (self->image_details_kudo_sandboxed, ret);
-	gs_details_page_set_sensitive (self->label_details_kudo_sandboxed, ret);
-
-	/* any of the various integration kudos */
-	user_integration_bf = GS_APP_KUDO_SEARCH_PROVIDER |
-			      GS_APP_KUDO_USES_NOTIFICATIONS |
-			      GS_APP_KUDO_USES_APP_MENU |
-			      GS_APP_KUDO_HIGH_CONTRAST;
-	ret = (kudos & user_integration_bf) > 0;
-	gtk_widget_set_sensitive (self->image_details_kudo_integration, ret);
-	gs_details_page_set_sensitive (self->label_details_kudo_integration, ret);
-
-	/* hide the kudo details for non-desktop software */
-	switch (gs_app_get_kind (self->app)) {
-	case AS_APP_KIND_DESKTOP:
-		gtk_widget_set_visible (self->grid_details_kudo, TRUE);
-		break;
-	default:
-		gtk_widget_set_visible (self->grid_details_kudo, FALSE);
-		break;
+		gtk_widget_hide (self->label_details_size_installed_title);
+		gtk_widget_show (self->label_details_size_download_title);
 	}
 
 	/* are we trying to replace something in the baseos */
@@ -1136,8 +845,6 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->label_addons_uninstalled_app, TRUE);
 		break;
 	}
-
-	gs_details_page_update_shortcut_button (self);
 
 	/* update progress */
 	gs_details_page_refresh_progress (self);
@@ -1200,237 +907,80 @@ gs_details_page_refresh_addons (GsDetailsPage *self)
 	}
 }
 
-static void gs_details_page_refresh_reviews (GsDetailsPage *self);
-
-typedef struct {
-	GsDetailsPage		*self;
-	AsReview		*review;
-	GsApp			*app;
-	GsPluginAction		 action;
-} GsDetailsPageReviewHelper;
-
 static void
-gs_details_page_review_helper_free (GsDetailsPageReviewHelper *helper)
+app_tile_clicked (GsAppTile *tile, gpointer user_data)
 {
-	g_object_unref (helper->self);
-	g_object_unref (helper->review);
-	g_object_unref (helper->app);
-	g_free (helper);
-}
+    GsDetailsPage *self = GS_DETAILS_PAGE (user_data);
+    GsApp *app;
+    app = gs_app_tile_get_app (tile);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(GsDetailsPageReviewHelper, gs_details_page_review_helper_free);
-
-static void
-gs_details_page_app_set_review_cb (GObject *source,
-                                   GAsyncResult *res,
-                                   gpointer user_data);
-
-static void
-gs_details_page_authenticate_cb (GsPage *page,
-				 gboolean authenticated,
-				 gpointer user_data)
-{
-	g_autoptr(GsDetailsPageReviewHelper) helper = (GsDetailsPageReviewHelper *) user_data;
-	g_autoptr(GsPluginJob) plugin_job = NULL;
-
-	if (!authenticated)
-		return;
-
-	plugin_job = gs_plugin_job_newv (helper->action,
-					 "app", helper->app,
-					 "review", helper->review,
-					 NULL);
-	gs_plugin_loader_job_process_async (helper->self->plugin_loader, plugin_job,
-					    helper->self->cancellable,
-					    gs_details_page_app_set_review_cb,
-					    helper);
-	g_steal_pointer (&helper);
+    gs_shell_show_app (self->shell, app);
 }
 
 static void
-gs_details_page_app_set_review_cb (GObject *source,
-                                   GAsyncResult *res,
-                                   gpointer user_data)
+gs_details_page_refresh_similar_cb (GObject *source_object,
+                               GAsyncResult *res,
+                               gpointer user_data)
 {
-	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source);
-	g_autoptr(GsDetailsPageReviewHelper) helper = (GsDetailsPageReviewHelper *) user_data;
-	g_autoptr(GError) error = NULL;
+    guint cnt;
+    GsApp *app;
+    GtkWidget *tile;
+    GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
+    GsDetailsPage *self = GS_DETAILS_PAGE (user_data);
+    g_autoptr(GError) error = NULL;
+    g_autoptr(GsAppList) list = NULL;
+    gs_container_remove_all (GTK_CONTAINER (self->box_similar));
 
-	if (!gs_plugin_loader_job_action_finish (plugin_loader, res, &error)) {
-		/* try to authenticate then retry */
-		if (g_error_matches (error,
-				     GS_PLUGIN_ERROR,
-				     GS_PLUGIN_ERROR_AUTH_REQUIRED)) {
-			gs_page_authenticate (GS_PAGE (helper->self),
-					      helper->app,
-					      gs_utils_get_error_value (error),
-					      helper->self->cancellable,
-					      gs_details_page_authenticate_cb,
-					      helper);
-			g_steal_pointer (&helper);
-			return;
-		}
-		g_warning ("failed to set review on %s: %s",
-			   gs_app_get_id (helper->app), error->message);
-		return;
-	}
-	gs_details_page_refresh_reviews (helper->self);
+    list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
+    if (list == NULL)
+        goto out;
+
+    if (gs_app_list_length (list) == 0)
+        goto out;
+
+    gs_app_list_randomize (list);
+
+    cnt = gs_app_list_length (list);
+    if (N_TILES < cnt)
+        cnt = N_TILES; 
+
+    for (guint i = 0; i < cnt; i++) {
+        app = gs_app_list_index (list, i);
+        if (app == self->app) {
+           cnt++;
+           continue;
+        }
+        tile = gs_popular_tile_new (app);
+        if (!gs_app_has_quirk (app, AS_APP_QUIRK_PROVENANCE) ||
+             gs_utils_list_has_app_fuzzy (list, app))
+             gs_popular_tile_show_source (GS_POPULAR_TILE (tile), TRUE);
+        g_signal_connect (tile, "clicked",
+              G_CALLBACK (app_tile_clicked), self);
+        gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
+        gtk_widget_set_can_focus (gtk_widget_get_parent (tile), FALSE);
+    }
+    
+    gtk_widget_set_visible (self->box_similar, TRUE);
+    gtk_widget_set_visible (self->similar_heading, TRUE);
+
+    if (N_TILES  < gs_app_list_length (list)) {
+        gtk_widget_set_visible (self->similar_more, TRUE);
+    }
+    return;
+
+out:
+    gtk_widget_set_visible (self->box_similar, FALSE);
+    gtk_widget_set_visible (self->similar_more, FALSE);
+    gtk_widget_set_visible (self->similar_heading, FALSE);
+ 
 }
 
 static void
-gs_details_page_review_button_clicked_cb (GsReviewRow *row,
-                                          GsPluginAction action,
-                                          GsDetailsPage *self)
+gs_details_page_similar_more_cb (GtkWidget *button, GsDetailsPage *self)
 {
-	GsDetailsPageReviewHelper *helper = g_new0 (GsDetailsPageReviewHelper, 1);
-	g_autoptr(GsPluginJob) plugin_job = NULL;
-
-	helper->self = g_object_ref (self);
-	helper->app = g_object_ref (self->app);
-	helper->review = g_object_ref (gs_review_row_get_review (row));
-	helper->action = action;
-	plugin_job = gs_plugin_job_newv (helper->action,
-					 "interactive", TRUE,
-					 "app", helper->app,
-					 "review", helper->review,
-					 NULL);
-	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
-					    self->cancellable,
-					    gs_details_page_app_set_review_cb,
-					    helper);
-}
-
-static void
-gs_details_page_refresh_reviews (GsDetailsPage *self)
-{
-	GArray *review_ratings = NULL;
-	GPtrArray *reviews;
-	gboolean show_review_button = TRUE;
-	gboolean show_reviews = FALSE;
-	guint n_reviews = 0;
-	guint64 possible_actions = 0;
-	guint i;
-	struct {
-		GsPluginAction action;
-		const gchar *plugin_func;
-	} plugin_vfuncs[] = {
-		{ GS_PLUGIN_ACTION_REVIEW_UPVOTE,	"gs_plugin_review_upvote" },
-		{ GS_PLUGIN_ACTION_REVIEW_DOWNVOTE,	"gs_plugin_review_downvote" },
-		{ GS_PLUGIN_ACTION_REVIEW_REPORT,	"gs_plugin_review_report" },
-		{ GS_PLUGIN_ACTION_REVIEW_SUBMIT,	"gs_plugin_review_submit" },
-		{ GS_PLUGIN_ACTION_REVIEW_REMOVE,	"gs_plugin_review_remove" },
-		{ GS_PLUGIN_ACTION_LAST,	NULL }
-	};
-
-	/* nothing to show */
-	if (self->app == NULL)
-		return;
-
-	/* show or hide the entire reviews section */
-	switch (gs_app_get_kind (self->app)) {
-	case AS_APP_KIND_DESKTOP:
-	case AS_APP_KIND_FONT:
-	case AS_APP_KIND_INPUT_METHOD:
-	case AS_APP_KIND_WEB_APP:
-	case AS_APP_KIND_SHELL_EXTENSION:
-		/* don't show a missing rating on a local file */
-		if (gs_app_get_state (self->app) != AS_APP_STATE_AVAILABLE_LOCAL &&
-		    self->enable_reviews)
-			show_reviews = TRUE;
-		break;
-	default:
-		break;
-	}
-
-	/* some apps are unreviewable */
-	if (gs_app_has_quirk (self->app, AS_APP_QUIRK_NOT_REVIEWABLE))
-		show_reviews = FALSE;
-
-	/* set the star rating */
-	if (show_reviews) {
-		if (gs_app_get_rating (self->app) >= 0) {
-			gs_star_widget_set_rating (GS_STAR_WIDGET (self->star),
-						   gs_app_get_rating (self->app));
-		}
-		review_ratings = gs_app_get_review_ratings (self->app);
-		if (review_ratings != NULL) {
-			gs_review_histogram_set_ratings (GS_REVIEW_HISTOGRAM (self->histogram),
-						         review_ratings);
-		}
-		if (review_ratings != NULL) {
-			for (i = 0; i < review_ratings->len; i++)
-				n_reviews += (guint) g_array_index (review_ratings, gint, i);
-		} else if (gs_app_get_reviews (self->app) != NULL) {
-			n_reviews = gs_app_get_reviews (self->app)->len;
-		}
-	}
-
-	/* enable appropriate widgets */
-	gtk_widget_set_visible (self->star, show_reviews);
-	gtk_widget_set_visible (self->box_reviews, show_reviews);
-	gtk_widget_set_visible (self->histogram, review_ratings != NULL);
-	gtk_widget_set_visible (self->label_review_count, n_reviews > 0);
-
-	/* update the review label next to the star widget */
-	if (n_reviews > 0) {
-		g_autofree gchar *text = NULL;
-		gtk_widget_set_visible (self->label_review_count, TRUE);
-		text = g_strdup_printf ("(%u)", n_reviews);
-		gtk_label_set_text (GTK_LABEL (self->label_review_count), text);
-	}
-
-	/* no point continuing */
-	if (!show_reviews)
-		return;
-
-	/* find what the plugins support */
-	for (i = 0; plugin_vfuncs[i].action != GS_PLUGIN_ACTION_LAST; i++) {
-		if (gs_plugin_loader_get_plugin_supported (self->plugin_loader,
-							   plugin_vfuncs[i].plugin_func)) {
-			possible_actions |= 1u << plugin_vfuncs[i].action;
-		}
-	}
-
-	/* add all the reviews */
-	gs_container_remove_all (GTK_CONTAINER (self->list_box_reviews));
-	reviews = gs_app_get_reviews (self->app);
-	for (i = 0; i < reviews->len; i++) {
-		AsReview *review = g_ptr_array_index (reviews, i);
-		GtkWidget *row = gs_review_row_new (review);
-		guint64 actions;
-
-		g_signal_connect (row, "button-clicked",
-				  G_CALLBACK (gs_details_page_review_button_clicked_cb), self);
-		if (as_review_get_flags (review) & AS_REVIEW_FLAG_SELF) {
-			actions = possible_actions & 1 << GS_PLUGIN_ACTION_REVIEW_REMOVE;
-			show_review_button = FALSE;
-		} else {
-			actions = possible_actions & ~(1u << GS_PLUGIN_ACTION_REVIEW_REMOVE);
-		}
-		gs_review_row_set_actions (GS_REVIEW_ROW (row), actions);
-		gtk_container_add (GTK_CONTAINER (self->list_box_reviews), row);
-		gtk_widget_set_visible (row, self->show_all_reviews ||
-					     i < SHOW_NR_REVIEWS_INITIAL);
-		gs_review_row_set_network_available (GS_REVIEW_ROW (row),
-						     gs_plugin_loader_get_network_available (self->plugin_loader));
-	}
-
-	/* only show the button if there are more to show */
-	gtk_widget_set_visible (self->button_more_reviews,
-				!self->show_all_reviews &&
-				reviews->len > SHOW_NR_REVIEWS_INITIAL);
-
-	/* show the button only if the user never reviewed */
-	gtk_widget_set_visible (self->button_review, show_review_button);
-	if (gs_plugin_loader_get_network_available (self->plugin_loader)) {
-		gtk_widget_set_sensitive (self->button_review, TRUE);
-		gtk_widget_set_tooltip_text (self->button_review, NULL);
-	} else {
-		gtk_widget_set_sensitive (self->button_review, FALSE);
-		gtk_widget_set_tooltip_text (self->button_review,
-					     /* TRANSLATORS: we need a remote server to process */
-					     _("You need internet access to write a review"));
-	}
+    GsCategory *category;
+    category = GS_CATEGORY (g_object_get_data (G_OBJECT (button),"details-category"));
+    gs_shell_change_mode (self->shell, GS_SHELL_MODE_CATEGORY, gs_category_get_parent(category), FALSE);
 }
 
 static void
@@ -1448,7 +998,6 @@ gs_details_page_app_refine2_cb (GObject *source,
 		return;
 	}
 	gs_details_page_refresh_size (self);
-	gs_details_page_refresh_reviews (self);
 }
 
 static void
@@ -1471,66 +1020,50 @@ gs_details_page_app_refine2 (GsDetailsPage *self)
 					    self);
 }
 
-static void
-gs_details_page_content_rating_set_css (GtkWidget *widget, guint age)
+static gboolean
+_max_results_sort_cb (GsApp *app1, GsApp *app2, gpointer user_data)
 {
-	g_autoptr(GString) css = g_string_new (NULL);
-	const gchar *color_bg = NULL;
-	const gchar *color_fg = "#ffffff";
-	if (age >= 18) {
-		color_bg = "#ee2222";
-	} else if (age >= 15) {
-		color_bg = "#f1c000";
-	} else if (age >= 12) {
-		color_bg = "#2a97c9";
-	} else if (age >= 5) {
-		color_bg = "#3f756c";
-	} else {
-		color_bg = "#009d66";
-	}
-	g_string_append_printf (css, "color: %s;\n", color_fg);
-	g_string_append_printf (css, "background-color: %s;\n", color_bg);
-	gs_utils_widget_set_css (widget, css->str);
+    return gs_app_get_rating (app1) < gs_app_get_rating (app2);
 }
 
 static void
-gs_details_page_refresh_content_rating (GsDetailsPage *self)
+gs_details_page_refresh_similar (GsDetailsPage *self)
 {
-	AsContentRating *content_rating;
-	GsContentRatingSystem system;
-	guint age = 0;
-	gchar *str;
-	const gchar *display = NULL;
-	g_autofree gchar *locale = NULL;
+    GtkWidget *tile;
+    GPtrArray *categories;
+    GsCategory *category = NULL;
+    g_autoptr(GsPluginJob) plugin_job = NULL;
+    categories = gs_app_get_categories (self->app); 
+    category = gs_shell_get_category (self->shell, categories);
 
-	/* get the content rating system from the locale */
-	locale = g_strdup (setlocale (LC_MESSAGES, NULL));
-	str = g_strstr_len (locale, -1, ".UTF-8");
-	if (str != NULL)
-		*str = '\0';
-	str = g_strstr_len (locale, -1, ".utf8");
-	if (str != NULL)
-		*str = '\0';
-	system = gs_utils_content_rating_system_from_locale (locale);
-	g_debug ("content rating system is guessed as %s from %s",
-		 gs_content_rating_system_to_str (system),
-		 locale);
+   if (category == NULL)
+       return;
 
-	/* only show the button if a game and has a content rating */
-	content_rating = gs_app_get_content_rating (self->app);
-	if (content_rating != NULL) {
-		age = as_content_rating_get_minimum_age (content_rating);
-		display = gs_utils_content_rating_age_to_str (system, age);
-	}
-	if (display != NULL) {
-		gtk_button_set_label (GTK_BUTTON (self->button_details_rating_value), display);
-		gtk_widget_set_visible (self->button_details_rating_value, TRUE);
-		gtk_widget_set_visible (self->label_details_rating_title, TRUE);
-		gs_details_page_content_rating_set_css (self->button_details_rating_value, age);
-	} else {
-		gtk_widget_set_visible (self->button_details_rating_value, FALSE);
-		gtk_widget_set_visible (self->label_details_rating_title, FALSE);
-	}
+    gs_container_remove_all (GTK_CONTAINER (self->box_similar));
+    
+    for (guint i = 0; i < N_TILES; i++) {
+        tile = gs_popular_tile_new (NULL);
+        gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
+    }
+
+    g_object_set_data (G_OBJECT (self->similar_more), "details-category", category);
+    g_signal_connect (G_OBJECT (self->similar_more),"clicked", 
+            G_CALLBACK (gs_details_page_similar_more_cb), self);
+
+    plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_CATEGORY_APPS,
+                     "category", category,
+                     "filter-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING,
+                     "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON |
+                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
+                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_ORIGIN_HOSTNAME |
+                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE,
+                     NULL);
+    gs_plugin_job_set_sort_func (plugin_job, _max_results_sort_cb);
+    gs_plugin_loader_job_process_async (self->plugin_loader,
+                        plugin_job,
+                        self->cancellable,
+                        gs_details_page_refresh_similar_cb,
+                        self);
 }
 
 static void
@@ -1571,9 +1104,8 @@ gs_details_page_app_refine_cb (GObject *source,
 
 	gs_details_page_refresh_screenshots (self);
 	gs_details_page_refresh_addons (self);
-	gs_details_page_refresh_reviews (self);
 	gs_details_page_refresh_all (self);
-	gs_details_page_refresh_content_rating (self);
+    gs_details_page_refresh_similar (self);
 	gs_details_page_set_state (self, GS_DETAILS_PAGE_STATE_READY);
 
 	/* do 2nd stage refine */
@@ -1631,9 +1163,7 @@ set_app (GsDetailsPage *self, GsApp *app)
 	gs_page_switch_to (GS_PAGE (self), TRUE);
 	gs_details_page_refresh_screenshots (self);
 	gs_details_page_refresh_addons (self);
-	gs_details_page_refresh_reviews (self);
 	gs_details_page_refresh_all (self);
-	gs_details_page_refresh_content_rating (self);
 	gs_details_page_set_state (self, GS_DETAILS_PAGE_STATE_READY);
 
 	g_set_object (&self->app_cancellable, gs_app_get_cancellable (app));
@@ -1708,7 +1238,7 @@ gs_details_page_set_local_file (GsDetailsPage *self, GFile *file)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RELATED |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PERMISSIONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS,
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS, 
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
@@ -1736,7 +1266,7 @@ gs_details_page_set_url (GsDetailsPage *self, const gchar *url)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RELATED |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PERMISSIONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS |
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS,
 							 GS_PLUGIN_REFINE_FLAGS_ALLOW_PACKAGES,
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
@@ -1764,7 +1294,7 @@ gs_details_page_load (GsDetailsPage *self)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ADDONS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS,
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS, 
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
@@ -1860,12 +1390,6 @@ gs_details_page_remove_app (GsDetailsPage *self)
 }
 
 static void
-gs_details_page_app_remove_button_cb (GtkWidget *widget, GsDetailsPage *self)
-{
-	gs_details_page_remove_app (self);
-}
-
-static void
 gs_details_page_app_cancel_button_cb (GtkWidget *widget, GsDetailsPage *self)
 {
 	g_cancellable_cancel (self->app_cancellable);
@@ -1905,6 +1429,7 @@ gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 
 	gs_page_install_app (GS_PAGE (self), self->app, GS_SHELL_INTERACTION_FULL,
 			     self->app_cancellable);
+
 }
 
 static void
@@ -1955,82 +1480,6 @@ gs_details_page_app_launch_button_cb (GtkWidget *widget, GsDetailsPage *self)
 }
 
 static void
-gs_details_page_app_add_shortcut_button_cb (GtkWidget *widget,
-                                            GsDetailsPage *self)
-{
-	g_autoptr(GCancellable) cancellable = g_cancellable_new ();
-	g_set_object (&self->cancellable, cancellable);
-	gs_page_shortcut_add (GS_PAGE (self), self->app, self->cancellable);
-}
-
-static void
-gs_details_page_app_remove_shortcut_button_cb (GtkWidget *widget,
-                                               GsDetailsPage *self)
-{
-	g_autoptr(GCancellable) cancellable = g_cancellable_new ();
-	g_set_object (&self->cancellable, cancellable);
-	gs_page_shortcut_remove (GS_PAGE (self), self->app, self->cancellable);
-}
-
-static void
-gs_details_page_review_response_cb (GtkDialog *dialog,
-                                    gint response,
-                                    GsDetailsPage *self)
-{
-	g_autofree gchar *text = NULL;
-	g_autoptr(GDateTime) now = NULL;
-	g_autoptr(AsReview) review = NULL;
-	g_autoptr(GsPluginJob) plugin_job = NULL;
-	GsDetailsPageReviewHelper *helper;
-	GsReviewDialog *rdialog = GS_REVIEW_DIALOG (dialog);
-
-	/* not agreed */
-	if (response != GTK_RESPONSE_OK) {
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-		return;
-	}
-
-	review = as_review_new ();
-	as_review_set_summary (review, gs_review_dialog_get_summary (rdialog));
-	text = gs_review_dialog_get_text (rdialog);
-	as_review_set_description (review, text);
-	as_review_set_rating (review, gs_review_dialog_get_rating (rdialog));
-	as_review_set_version (review, gs_app_get_version (self->app));
-	now = g_date_time_new_now_local ();
-	as_review_set_date (review, now);
-
-	/* call into the plugins to set the new value */
-	helper = g_new0 (GsDetailsPageReviewHelper, 1);
-	helper->self = g_object_ref (self);
-	helper->app = g_object_ref (self->app);
-	helper->review = g_object_ref (review);
-	helper->action = GS_PLUGIN_ACTION_REVIEW_SUBMIT;
-	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_REVIEW_SUBMIT,
-					 "interactive", TRUE,
-					 "app", helper->app,
-					 "review", helper->review,
-					 NULL);
-	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
-					    self->cancellable,
-					    gs_details_page_app_set_review_cb,
-					    helper);
-
-	/* unmap the dialog */
-	gtk_widget_destroy (GTK_WIDGET (dialog));
-}
-
-static void
-gs_details_page_write_review_cb (GtkButton *button,
-                                 GsDetailsPage *self)
-{
-	GtkWidget *dialog;
-	dialog = gs_review_dialog_new ();
-	g_signal_connect (dialog, "response",
-			  G_CALLBACK (gs_details_page_review_response_cb), self);
-	gs_shell_modal_dialog_present (self->shell, GTK_DIALOG (dialog));
-}
-
-static void
 gs_details_page_app_installed (GsPage *page, GsApp *app)
 {
 	gs_details_page_reload (page);
@@ -2055,79 +1504,6 @@ gs_details_page_more_reviews_button_cb (GtkWidget *widget, GsDetailsPage *self)
 	gtk_container_foreach (GTK_CONTAINER (self->list_box_reviews),
 	                       show_all_cb, NULL);
 	gtk_widget_set_visible (self->button_more_reviews, FALSE);
-}
-
-static void
-gs_details_page_content_rating_button_cb (GtkWidget *widget, GsDetailsPage *self)
-{
-	AsContentRating *cr;
-	AsContentRatingValue value_bad = AS_CONTENT_RATING_VALUE_NONE;
-	const gchar *tmp;
-	guint i, j;
-	g_autoptr(GString) str = g_string_new (NULL);
-	struct {
-		const gchar *ids[5];	/* ordered inside from worst to best */
-	} id_map[] = {
-		{{"violence-bloodshed",
-		  "violence-realistic",
-		  "violence-fantasy",
-		  "violence-cartoon", NULL }},
-		{{"violence-sexual", NULL }},
-		{{"drugs-alcohol", NULL }},
-		{{"drugs-narcotics", NULL }},
-		{{"sex-nudity", NULL }},
-		{{"sex-themes", NULL }},
-		{{"language-profanity", NULL }},
-		{{"language-humor", NULL }},
-		{{"language-discrimination", NULL }},
-		{{"money-advertising", NULL }},
-		{{"money-gambling", NULL }},
-		{{"money-purchasing", NULL }},
-		{{"social-audio",
-		  "social-chat",
-		  "social-contacts",
-		  "social-info", NULL }},
-		{{"social-location", NULL }},
-		{{ NULL }}
-	};
-
-	/* get the worst thing */
-	cr = gs_app_get_content_rating (self->app);
-	if (cr == NULL)
-		return;
-	for (j = 0; id_map[j].ids[0] != NULL; j++) {
-		for (i = 0; id_map[j].ids[i] != NULL; i++) {
-			AsContentRatingValue value;
-			value = as_content_rating_get_value (cr, id_map[j].ids[i]);
-			if (value > value_bad)
-				value_bad = value;
-		}
-	}
-
-	/* get the content rating description for the worst things about the app */
-	for (j = 0; id_map[j].ids[0] != NULL; j++) {
-		for (i = 0; id_map[j].ids[i] != NULL; i++) {
-			AsContentRatingValue value;
-			value = as_content_rating_get_value (cr, id_map[j].ids[i]);
-			if (value < value_bad)
-				continue;
-			tmp = gs_content_rating_key_value_to_str (id_map[j].ids[i], value);
-			g_string_append_printf (str, "• %s\n", tmp);
-			break;
-		}
-	}
-	if (str->len > 0)
-		g_string_truncate (str, str->len - 1);
-
-	/* enable the details if there are any */
-	gtk_label_set_label (GTK_LABEL (self->label_content_rating_message), str->str);
-	gtk_widget_set_visible (self->label_content_rating_title, str->len > 0);
-	gtk_widget_set_visible (self->label_content_rating_message, str->len > 0);
-	gtk_widget_set_visible (self->label_content_rating_none, str->len == 0);
-
-	/* show popover */
-	gtk_popover_set_relative_to (GTK_POPOVER (self->popover_content_rating), widget);
-	gtk_widget_show (self->popover_content_rating);
 }
 
 static gboolean
@@ -2279,14 +1655,6 @@ gs_details_page_license_unknown_cb (GtkWidget *widget, GsDetailsPage *self)
 	gtk_widget_show (self->popover_license_unknown);
 }
 
-static void
-gs_details_page_network_available_notify_cb (GsPluginLoader *plugin_loader,
-                                             GParamSpec *pspec,
-                                             GsDetailsPage *self)
-{
-	gs_details_page_refresh_reviews (self);
-}
-
 static gboolean
 gs_details_page_setup (GsPage *page,
                        GsShell *shell,
@@ -2306,25 +1674,11 @@ gs_details_page_setup (GsPage *page,
 	self->builder = g_object_ref (builder);
 	self->cancellable = g_object_ref (cancellable);
 
-	/* show review widgets if we have plugins that provide them */
-	self->enable_reviews =
-		gs_plugin_loader_get_plugin_supported (plugin_loader,
-						       "gs_plugin_review_submit");
-	g_signal_connect (self->button_review, "clicked",
-			  G_CALLBACK (gs_details_page_write_review_cb),
-			  self);
-
-	/* hide some UI when offline */
-	g_signal_connect_object (self->plugin_loader, "notify::network-available",
-				 G_CALLBACK (gs_details_page_network_available_notify_cb),
-				 self, 0);
+	self->enable_reviews = FALSE;
 
 	/* setup details */
 	g_signal_connect (self->button_install, "clicked",
 			  G_CALLBACK (gs_details_page_app_install_button_cb),
-			  self);
-	g_signal_connect (self->button_remove, "clicked",
-			  G_CALLBACK (gs_details_page_app_remove_button_cb),
 			  self);
 	g_signal_connect (self->button_cancel, "clicked",
 			  G_CALLBACK (gs_details_page_app_cancel_button_cb),
@@ -2332,26 +1686,11 @@ gs_details_page_setup (GsPage *page,
 	g_signal_connect (self->button_more_reviews, "clicked",
 			  G_CALLBACK (gs_details_page_more_reviews_button_cb),
 			  self);
-	g_signal_connect (self->button_details_rating_value, "clicked",
-			  G_CALLBACK (gs_details_page_content_rating_button_cb),
-			  self);
 	g_signal_connect (self->label_details_updated_value, "activate-link",
 			  G_CALLBACK (gs_details_page_history_cb),
 			  self);
 	g_signal_connect (self->button_details_launch, "clicked",
 			  G_CALLBACK (gs_details_page_app_launch_button_cb),
-			  self);
-	g_signal_connect (self->button_details_add_shortcut, "clicked",
-			  G_CALLBACK (gs_details_page_app_add_shortcut_button_cb),
-			  self);
-	g_signal_connect (self->button_details_remove_shortcut, "clicked",
-			  G_CALLBACK (gs_details_page_app_remove_shortcut_button_cb),
-			  self);
-	g_signal_connect (self->button_details_website, "clicked",
-			  G_CALLBACK (gs_details_page_website_cb),
-			  self);
-	g_signal_connect (self->button_donate, "clicked",
-			  G_CALLBACK (gs_details_page_donate_cb),
 			  self);
 	g_signal_connect (self->button_details_license_free, "clicked",
 			  G_CALLBACK (gs_details_page_license_free_cb),
@@ -2368,6 +1707,7 @@ gs_details_page_setup (GsPage *page,
 
 	adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scrolledwindow_details));
 	gtk_container_set_focus_vadjustment (GTK_CONTAINER (self->box_details), adj);
+
 	return TRUE;
 }
 
@@ -2406,28 +1746,20 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 
 	gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/Software/gs-details-page.ui");
 
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_icon);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_summary);
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_icon);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_title);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_developer);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, application_details_category);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_addons);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_description);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_support);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_progress);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_progress2);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, star);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_review_count);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_screenshot);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_screenshot_main);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_screenshot_thumbnails);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_details_license_list);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_launch);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_add_shortcut);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_remove_shortcut);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_website);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_donate);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_install);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_remove);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_cancel);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_more_reviews);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, infobar_details_app_norepo);
@@ -2444,15 +1776,16 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_license_free);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_license_nonfree);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_license_unknown);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_origin_title);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_origin_value);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_size_download_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_size_download_value);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_size_installed_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_size_installed_value);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_updated_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_updated_value);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_version_value);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_channel_title);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_channel);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, popover_channel);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, grid_popover_channel);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_failed);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, list_box_addons);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_reviews);
@@ -2462,19 +1795,7 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, list_box_reviews);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, scrolledwindow_details);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, spinner_details);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, spinner_remove);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, stack_details);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, grid_details_kudo);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, image_details_kudo_docs);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, image_details_kudo_sandboxed);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, image_details_kudo_integration);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, image_details_kudo_translated);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, image_details_kudo_updated);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_kudo_docs);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_kudo_sandboxed);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_kudo_integration);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_kudo_translated);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_kudo_updated);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, progressbar_top);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, popover_license_free);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, popover_license_nonfree);
@@ -2485,8 +1806,10 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_message);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_none);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_rating_value);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_rating_title);
+	
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_similar);
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_heading);
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_more);
 }
 
 static void
@@ -2497,7 +1820,7 @@ gs_details_page_init (GsDetailsPage *self)
 	/* setup networking */
 	self->session = soup_session_new_with_options (SOUP_SESSION_USER_AGENT, gs_user_agent (),
 	                                               NULL);
-	self->settings = g_settings_new ("org.gnome.software");
+	self->settings = g_settings_new ("kr.gooroom.software");
 
 	gtk_list_box_set_header_func (GTK_LIST_BOX (self->list_box_addons),
 				      list_header_func,
