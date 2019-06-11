@@ -2,10 +2,11 @@
 # Copyright (C) 2013 gnome-software's COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-software package.
 # Seong-ho Cho <shcho@gnome.org>, 2013-2018.
+# Gooroom <gooroom@gooroom.kr>, 2018-2019.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-software master\n"
+"Project-Id-Version: gooroom-software master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-software/issues\n"
 "POT-Creation-Date: 2018-08-06 10:38+0000\n"
 "PO-Revision-Date: 2018-08-21 21:29+0900\n"
@@ -19,12 +20,12 @@ msgstr ""
 "X-Generator: Poedit 2.0.7\n"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:7
-msgid "GNOME Software"
-msgstr "그놈 소프트웨어"
+msgid "Gooroom Software"
+msgstr "구름 소프트웨어"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:8
-msgid "Application manager for GNOME"
-msgstr "그놈용 프로그램 관리자"
+msgid "Application manager for Gooroom"
+msgstr "구름 프로그램 관리자"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:10
 msgid ""
@@ -36,12 +37,12 @@ msgstr ""
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:14
 msgid ""
-"GNOME Software showcases featured and popular applications with useful "
+"Gooroom Software showcases featured and popular applications with useful "
 "descriptions and multiple screenshots per application. Applications can be "
 "found either through browsing the list of categories or by searching. It "
 "also allows you to update your system using an offline update."
 msgstr ""
-"그놈 소프트웨어 프로그램은 각각의 추천 항목과 인기 있는 프로그램을 유용한 설"
+"구름 소프트웨어 프로그램은 각각의 추천 항목과 인기 있는 프로그램을 유용한 설"
 "명과 여러가지 미리보기 화면을 곁들여 선보입니다. 분류 목록을 탐색하거나 검색"
 "을 통해 프로그램을 찾을 수 있습니다. 오프라인 업데이트를 사용하여 시스템을 업"
 "데이트할 수도 있습니다."
@@ -277,6 +278,14 @@ msgstr "모든 사용자용 시스템 관리 위치에 appstream 파일 설치"
 #: data/org.gnome.software.gschema.xml:140
 msgid "Enable GNOME Shell extensions repository"
 msgstr "그놈 쉘 확장 저장소 활성화"
+
+#: data/org.gnome.software.gschema.xml:144
+msgid "The server to use for software center"
+msgstr "소프트웨어 센터에서 사용할 서버 URL"
+
+#: data/org.gnome.software.gschema.xml:148
+msgid "The repository to use for software center"
+msgstr "소프트웨어 센터에서 사용할 저장소 URL"
 
 #: src/gnome-software-local-file.desktop.in:3
 msgid "Software Install"

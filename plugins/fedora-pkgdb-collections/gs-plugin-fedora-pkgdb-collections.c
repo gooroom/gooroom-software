@@ -74,7 +74,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 		return;
 	}
 	priv->distros = g_ptr_array_new_with_free_func ((GDestroyNotify) _pkgdb_item_free);
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 
 	/* require the GnomeSoftware::CpeName metadata */
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_AFTER, "os-release");

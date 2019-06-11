@@ -29,7 +29,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 	/* let appstream add applications first */
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_AFTER, "appstream");
 }
-
+#if 0
 gboolean
 gs_plugin_add_popular (GsPlugin *plugin,
 		       GsAppList *list,
@@ -77,3 +77,4 @@ gs_plugin_add_popular (GsPlugin *plugin,
 	}
 	return TRUE;
 }
+#endif

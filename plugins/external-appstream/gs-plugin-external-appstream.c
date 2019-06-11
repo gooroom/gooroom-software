@@ -37,7 +37,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 	GsPluginData *priv = gs_plugin_alloc_data (plugin, sizeof(GsPluginData));
 	const gchar *system_dir = gs_external_appstream_utils_get_system_dir ();
 
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 
 	/* run it before the appstream plugin */
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_BEFORE, "appstream");

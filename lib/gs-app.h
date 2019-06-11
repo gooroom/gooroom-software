@@ -63,6 +63,7 @@ struct _GsAppClass
  * @GS_APP_KUDO_HI_DPI_ICON:		Installs a HiDPI icon
  * @GS_APP_KUDO_SANDBOXED:		Application is sandboxed
  * @GS_APP_KUDO_SANDBOXED_SECURE:	Application is sandboxed securely
+ * @GS_APP_KUDO_FEATURED:           Is featured in gooroom
  *
  * Any awards given to the application.
  **/
@@ -83,6 +84,7 @@ typedef enum {
 	GS_APP_KUDO_HI_DPI_ICON			= 1 << 14,
 	GS_APP_KUDO_SANDBOXED			= 1 << 15,
 	GS_APP_KUDO_SANDBOXED_SECURE		= 1 << 16,
+	GS_APP_KUDO_FEATURED		    = 1 << 17,
 	/*< private >*/
 	GS_APP_KUDO_LAST
 } GsAppKudo;

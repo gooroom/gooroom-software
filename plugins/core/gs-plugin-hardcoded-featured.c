@@ -49,7 +49,7 @@ struct {
 		" center / cover no-repeat;" },
 	{ NULL, NULL }
 };
-
+#if 0
 gboolean
 gs_plugin_add_featured (GsPlugin *plugin,
 			GsAppList *list,
@@ -108,3 +108,4 @@ gs_plugin_refine_app (GsPlugin *plugin,
 	}
 	return TRUE;
 }
+#endif

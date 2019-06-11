@@ -54,7 +54,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 	g_autoptr(GsOsRelease) os_release = NULL;
 
 	g_mutex_init (&priv->ratings_mutex);
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 	priv->review_server = g_settings_get_string (priv->settings,
 						     "review-server");
 	priv->ratings = g_hash_table_new_full (g_str_hash, g_str_equal,

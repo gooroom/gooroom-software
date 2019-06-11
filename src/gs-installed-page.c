@@ -104,9 +104,9 @@ row_unrevealed (GObject *row, GParamSpec *pspec, gpointer data)
 static void
 gs_installed_page_unreveal_row (GsAppRow *app_row)
 {
-	gs_app_row_unreveal (app_row);
 	g_signal_connect (app_row, "unrevealed",
 			  G_CALLBACK (row_unrevealed), NULL);
+	gs_app_row_unreveal (app_row);
 }
 
 static void
@@ -142,7 +142,6 @@ gs_installed_page_invalidate_sort_idle (gpointer user_data)
 	AsAppState state = gs_app_get_state (app);
 
 	gtk_list_box_row_changed (GTK_LIST_BOX_ROW (app_row));
-
 	/* if the app has been uninstalled (which can happen from another view)
 	 * we should removed it from the installed view */
 	if (state == AS_APP_STATE_AVAILABLE || state == AS_APP_STATE_UNKNOWN)
@@ -552,7 +551,6 @@ gs_installed_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
                                            GsInstalledPage *self)
 {
 	GsApp *app;
-	GtkWidget *widget;
 	guint i;
 	guint cnt = 0;
 	g_autoptr(GsAppList) pending = NULL;
@@ -561,7 +559,6 @@ gs_installed_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
 	pending = gs_plugin_loader_get_pending (plugin_loader);
 	for (i = 0; i < gs_app_list_length (pending); i++) {
 		app = gs_app_list_index (pending, i);
-
 		/* never show OS upgrades, we handle the scheduling and
 		 * cancellation in GsUpgradeBanner */
 		if (gs_app_get_kind (app) == AS_APP_KIND_OS_UPGRADE)
@@ -575,7 +572,9 @@ gs_installed_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
 		cnt++;
 	}
 
+#if 0
 	/* show a label with the number of on-going operations */
+	GtkWidget *widget;
 	widget = GTK_WIDGET (gtk_builder_get_object (self->builder,
 						     "button_installed_counter"));
 	if (cnt == 0) {
@@ -586,6 +585,7 @@ gs_installed_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
 		gtk_label_set_label (GTK_LABEL (widget), label);
 		gtk_widget_show (widget);
 	}
+#endif
 }
 
 static void
@@ -595,7 +595,7 @@ set_selection_mode (GsInstalledPage *self, gboolean selection_mode)
 	GtkWidget *widget;
 	GtkStyleContext *context;
 	g_autoptr(GList) children = NULL;
-	
+
 	if (self->selection_mode == selection_mode)
 		return;
 

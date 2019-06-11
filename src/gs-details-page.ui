@@ -330,23 +330,48 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkScrolledWindow" id="box_details_screenshot">
-                            <property name="visible">True</property>
-                            <property name="shadow_type">none</property>
-                            <property name="can_focus">True</property>
-                            <property name="height-request">202</property>
-                            <property name="margin_bottom">20</property>
+                          <object class="GtkStack" id="stack">
+                            <property name="visible">Ture</property>
                             <child>
-                              <object class="GtkBox" id="box_details_screenshot_thumbnails">
+                              <object class="GtkScrolledWindow" id="box_details_screenshot">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">center</property>
-                                <property name="spacing">10</property>
-                                <property name="margin_bottom">9.5</property>
+                                <property name="shadow_type">none</property>
+                                <property name="can_focus">True</property>
+                                <property name="height-request">202</property>
+                                <property name="margin_bottom">20</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkBox" id="box_details_screenshot_thumbnails">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">center</property>
+                                    <property name="spacing">10</property>
+                                    <property name="margin_bottom">9.5</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
+                              <packing>
+                                <property name="name">screenshot</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkImage" id="screenshot_empty">
+                                <property name="visible">True</property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <property name="width_request">300</property>
+                                <property name="height_request">187.5</property>
+                                <property name="pixel-size">48</property>
+                                <property name="icon-name">software-app-empty</property>
+                                <style>
+                                  <class name="overview-featured"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="name">screenshot_empty</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>

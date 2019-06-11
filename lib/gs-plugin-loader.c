@@ -2889,7 +2889,7 @@ gs_plugin_loader_init (GsPluginLoader *plugin_loader)
 	priv->auth_array = g_ptr_array_new_with_free_func ((GFreeFunc) g_object_unref);
 	priv->file_monitors = g_ptr_array_new_with_free_func ((GFreeFunc) g_object_unref);
 	priv->locations = g_ptr_array_new_with_free_func (g_free);
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 	g_signal_connect (priv->settings, "changed",
 			  G_CALLBACK (gs_plugin_loader_settings_changed_cb), plugin_loader);
 	priv->events_by_id = g_hash_table_new_full ((GHashFunc) as_utils_unique_id_hash,

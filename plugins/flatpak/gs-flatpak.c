@@ -299,6 +299,9 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 		return TRUE;
 	}
 
+    if (g_strcmp0 (flatpak_remote_get_name (xremote), "flathub") == 0)
+       return TRUE;
+
 	/* load the file into a temp store */
 	appstream_dir_fn = g_file_get_path (appstream_dir);
 	appstream_fn = g_build_filename (appstream_dir_fn,
@@ -351,7 +354,7 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 	}
 
 	/* do we want to filter to the default branch */
-	settings = g_settings_new ("org.gnome.software");
+	settings = g_settings_new ("kr.gooroom.software");
 	if (g_settings_get_boolean (settings, "filter-default-branch"))
 		default_branch = flatpak_remote_get_default_branch (xremote);
 
@@ -898,7 +901,7 @@ gs_flatpak_add_sources (GsFlatpak *self, GsAppList *list,
 		if (flatpak_remote_get_noenumerate (xremote))
 			continue;
 
-		/* create app */
+        /* create app */
 		app = gs_flatpak_create_source (self, xremote);
 		gs_app_list_add (list, app);
 

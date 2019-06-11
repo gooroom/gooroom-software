@@ -462,21 +462,6 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <child>
-                              <object class="GtkLabel" id="button_installed_counter">
-                                <property name="can_focus">False</property>
-                                <property name="width_chars">2</property>
-                                <style>
-                                  <class name="counter-label"/>
-                                </style>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="pack_type">end</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
                           </object>
                         </child>
                         <style>

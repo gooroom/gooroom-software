@@ -6,10 +6,11 @@
 # Richard Hughes <richard@hughsie.com>, 2012.
 # Philip Withnall <philip@tecnocode.co.uk>, 2013.
 # Bruce Cowan <bruce@bcowan.eu>, 2017, 2018.
+# Gooroom <gooroom@gooroom.kr>, 2018, 2019.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-software\n"
+"Project-Id-Version: gooroom-software\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-software/issues\n"
 "POT-Creation-Date: 2018-03-01 15:54+0000\n"
 "PO-Revision-Date: 2018-03-02 13:15+0000\n"
@@ -23,12 +24,12 @@ msgstr ""
 "X-Generator: Poedit 2.0.6\n"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:7
-msgid "GNOME Software"
-msgstr "GNOME Software"
+msgid "Gooroom Software"
+msgstr "Gooroom Software"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:8
-msgid "Application manager for GNOME"
-msgstr "Application manager for GNOME"
+msgid "Application manager for Gooroom"
+msgstr "Application manager for Gooroom"
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:10
 msgid ""
@@ -40,12 +41,12 @@ msgstr ""
 
 #: data/appdata/org.gnome.Software.appdata.xml.in:14
 msgid ""
-"GNOME Software showcases featured and popular applications with useful "
+"Gooroom Software showcases featured and popular applications with useful "
 "descriptions and multiple screenshots per application. Applications can be "
 "found either through browsing the list of categories or by searching. It "
 "also allows you to update your system using an offline update."
 msgstr ""
-"GNOME Software showcases featured and popular applications with useful "
+"Gooroom Software showcases featured and popular applications with useful "
 "descriptions and multiple screenshots per application. Applications can be "
 "found either through browsing the list of categories or by searching. It "
 "also allows you to update your system using an offline update."
@@ -251,7 +252,7 @@ msgid "Show some UI elements informing the user that an app is non-free"
 msgstr "Show some UI elements informing the user that an app is non-free"
 
 #: data/org.gnome.software.gschema.xml:114
-#| msgid "Show the prompt to install nonfree software sources"
+#. msgid "Show the prompt to install nonfree software sources"
 msgid "Show the prompt to install nonfree software repositories"
 msgstr "Show the prompt to install nonfree software repositories"
 
@@ -283,6 +284,14 @@ msgstr "Install the AppStream files to a system-wide location for all users"
 #: data/org.gnome.software.gschema.xml:135
 msgid "Enable GNOME Shell extensions repository"
 msgstr "Enable GNOME Shell extensions repository"
+
+#: data/org.gnome.software.gschema.xml:144
+msgid "The server to use for software center"
+msgstr "The server to use for software center"
+
+#: data/org.gnome.software.gschema.xml:148
+msgid "The repository to use for software center"
+msgstr "The repository to use for software center"
 
 #: src/gnome-software-local-file.desktop.in:3
 msgid "Software Install"

@@ -186,7 +186,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_AFTER, "dpkg");
 
 	/* require settings */
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 }
 
 void

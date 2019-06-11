@@ -76,7 +76,7 @@ gs_plugin_initialize (GsPlugin *plugin)
 	gs_app_set_kind (priv->cached_origin, AS_APP_KIND_SOURCE);
 	gs_app_set_origin_hostname (priv->cached_origin, SHELL_EXTENSIONS_API_URI);
 
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 
 	/* add the source to the plugin cache which allows us to match the
 	 * unique ID to a GsApp when creating an event */

@@ -156,7 +156,7 @@ gs_overview_page_decrement_action_cnt (GsOverviewPage *self)
 }
 
 static void
-gs_overview_page_get_editor_cb (GObject *source_object,
+gs_overview_page_get_popular_cb (GObject *source_object,
                                  GAsyncResult *res,
                                  gpointer user_data)
 {
@@ -165,63 +165,10 @@ gs_overview_page_get_editor_cb (GObject *source_object,
 	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
 	guint i,cnt;
     const gchar *origin;
-	GsApp *app;
 	GtkWidget *tile;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
-	
-    /* get popular apps */
-	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
-	if (list == NULL) {
-		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED))
-			g_warning ("failed to get popular apps: %s", error->message);
-		goto out;
-	}
-	
-    /* Don't show apps from the category that's currently featured as the category of the day */
-	gs_app_list_filter (list, filter_category, priv->category_of_day);
-	gs_app_list_randomize (list);
-
-	gs_container_remove_all (GTK_CONTAINER (priv->box_editor));
-    cnt = 0;
-	for (i = 0; i < gs_app_list_length (list); i++) {
-		app = gs_app_list_index (list, i);
-        origin = gs_app_get_origin (app);
-        if (g_strcmp0 (origin, "flathub") == 0)
-            continue;
-
-        if (N_TILES <= cnt)
-            break;
-
-		tile = gs_popular_tile_new (app);
-		g_signal_connect (tile, "clicked",
-			  G_CALLBACK (app_tile_clicked), self);
-		gtk_container_add (GTK_CONTAINER (priv->box_editor), tile);
-        cnt++;
-	}
-    gtk_widget_set_visible (priv->box_editor, TRUE);
-	gtk_widget_set_visible (priv->editor_heading, TRUE);
-
-	priv->empty = FALSE;
-
-out:
-	gs_overview_page_decrement_action_cnt (self);
-}
-
-static void
-gs_overview_page_get_popular_cb (GObject *source_object,
-                                 GAsyncResult *res,
-                                 gpointer user_data)
-{
-	GsOverviewPage *self = GS_OVERVIEW_PAGE (user_data);
-	GsOverviewPagePrivate *priv = gs_overview_page_get_instance_private (self);
-	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
-	guint i, cnt;
-    const gchar *origin;
-	GsApp *app;
-	GtkWidget *tile;
-	g_autoptr(GError) error = NULL;
-	g_autoptr(GsAppList) list = NULL;
+	g_autoptr(GsAppList) list_tmp = gs_app_list_new ();
 
 	/* get popular apps */
 	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
@@ -230,32 +177,72 @@ gs_overview_page_get_popular_cb (GObject *source_object,
 			g_warning ("failed to get popular apps: %s", error->message);
 		goto out;
 	}
-	
+
+    g_warning ("get popular apps size : %u", gs_app_list_length (list));
+
     /* Don't show apps from the category that's currently featured as the category of the day */
 	gs_app_list_filter (list, filter_category, priv->category_of_day);
 	gs_app_list_randomize (list);
 
-	gs_container_remove_all (GTK_CONTAINER (priv->box_popular));
+    gs_container_remove_all (GTK_CONTAINER (priv->box_popular));
+    gtk_widget_set_visible (priv->box_popular, FALSE);
+    gtk_widget_set_visible (priv->popular_heading, FALSE);
+
     cnt = 0;
 	for (i = 0; i < gs_app_list_length (list); i++) {
-		app = gs_app_list_index (list, i);
+		GsApp *app = gs_app_list_index (list, i);
         origin = gs_app_get_origin (app);
-        if (g_strcmp0 (origin, "flathub") == 0)
+
+        if (g_strcmp0 (origin, "gooroom") != 0)
             continue;
+
+        if (gs_app_has_kudo (app, GS_APP_KUDO_FEATURED)) {
+            gs_app_list_add (list_tmp, app);
+            continue;
+        }
 
         if (N_TILES <= cnt)
             break;
 
-		tile = gs_popular_tile_new (app);
+        g_warning ("add popular item: %s", gs_app_get_id (app));
+        tile = gs_popular_tile_new (app);
 		g_signal_connect (tile, "clicked",
 			  G_CALLBACK (app_tile_clicked), self);
 		gtk_container_add (GTK_CONTAINER (priv->box_popular), tile);
         cnt++;
 	}
-	gtk_widget_set_visible (priv->box_popular, TRUE);
-	gtk_widget_set_visible (priv->popular_heading, TRUE);
 
-	priv->empty = FALSE;
+    if (0 < cnt) {
+	    gtk_widget_set_visible (priv->box_popular, TRUE);
+   	    gtk_widget_set_visible (priv->popular_heading, TRUE);
+   }
+
+	gs_container_remove_all (GTK_CONTAINER (priv->box_editor));
+    gtk_widget_set_visible (priv->box_editor, FALSE);
+	gtk_widget_set_visible (priv->editor_heading, FALSE);
+
+    cnt = 0;
+    for (i = 0; i < gs_app_list_length (list_tmp); i++) {
+		GsApp *app = gs_app_list_index (list_tmp, i);
+
+        if (N_TILES <= cnt)
+            break;
+
+	    g_warning ("add featured item: %s", gs_app_get_id (app));
+        tile = gs_popular_tile_new (app);
+		g_signal_connect (tile, "clicked",
+			  G_CALLBACK (app_tile_clicked), self);
+
+		gtk_container_add (GTK_CONTAINER (priv->box_editor), tile);
+        cnt++;
+	}
+
+    if (0 < cnt) {
+        gtk_widget_set_visible (priv->box_editor, TRUE);
+	    gtk_widget_set_visible (priv->editor_heading, TRUE);
+    }
+
+    priv->empty = FALSE;
 
 out:
 	gs_overview_page_decrement_action_cnt (self);
@@ -267,7 +254,7 @@ gs_overview_page_get_recent_cb (GObject *source_object, GAsyncResult *res, gpoin
 	GsOverviewPage *self = GS_OVERVIEW_PAGE (user_data);
 	GsOverviewPagePrivate *priv = gs_overview_page_get_instance_private (self);
 	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
-	guint i;
+	guint i,cnt;
 	GsApp *app;
 	GtkWidget *tile;
 	g_autoptr(GError) error = NULL;
@@ -280,26 +267,32 @@ gs_overview_page_get_recent_cb (GObject *source_object, GAsyncResult *res, gpoin
 			g_warning ("failed to get recent apps: %s", error->message);
 		goto out;
 	}
-	
+
     /* Don't show apps from the category that's currently featured as the category of the day */
 	gs_app_list_filter (list, filter_category, priv->category_of_day);
 	gs_app_list_randomize (list);
 
 	gs_container_remove_all (GTK_CONTAINER (priv->box_recent));
+    gtk_widget_set_visible (priv->box_recent, FALSE);
+	gtk_widget_set_visible (priv->recent_heading, FALSE);
 
+    cnt = 0;
 	for (i = 0; i < gs_app_list_length (list); i++) {
         if (N_TILES <= i)
             break;
-		
+
         app = gs_app_list_index (list, i);
 		tile = gs_popular_tile_new (app);
 		g_signal_connect (tile, "clicked",
 			  G_CALLBACK (app_tile_clicked), self);
 		gtk_container_add (GTK_CONTAINER (priv->box_recent), tile);
+        cnt++;
 	}
-    
-	gtk_widget_set_visible (priv->box_recent, TRUE);
-	gtk_widget_set_visible (priv->recent_heading, TRUE);
+
+    if (0 < cnt) {
+	    gtk_widget_set_visible (priv->box_recent, TRUE);
+	    gtk_widget_set_visible (priv->recent_heading, TRUE);
+    }
 
 	priv->empty = FALSE;
 out:
@@ -328,7 +321,12 @@ gs_overview_page_get_featured_cb (GObject *source_object,
 
 	gs_container_remove_all (GTK_CONTAINER (priv->stack_featured));
 	gs_container_remove_all (GTK_CONTAINER (priv->box_featured_app));
-    
+
+    if (gs_app_list_length (list) == 0) {
+        gtk_widget_set_visible (priv->stack_featured, FALSE);
+        gtk_widget_set_visible (priv->box_featured_app, FALSE);
+    }
+
     if (list == NULL) {
 		g_warning ("failed to get featured apps: %s",
 			   error->message);
@@ -524,28 +522,13 @@ gs_overview_page_load (GsOverviewPage *self)
 						    self);
 		priv->action_cnt++;
 	}
-    if (!priv->loading_editor) {
-		g_autoptr(GsPluginJob) plugin_job = NULL;
 
-		priv->loading_editor = TRUE;
-		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_POPULAR,
-						 "max-results", N_MAX_TILES,
-							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
-								 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
-						 NULL);
-		gs_plugin_loader_job_process_async (priv->plugin_loader,
-						    plugin_job,
-						    priv->cancellable,
-						    gs_overview_page_get_editor_cb,
-						    self);
-		priv->action_cnt++;
-	}
     if (!priv->loading_popular) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 
 		priv->loading_popular = TRUE;
 		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_POPULAR,
-						 "max-results", N_MAX_TILES,
+						 "max-results", 50,
 							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
 								 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
 						 NULL);
@@ -556,6 +539,7 @@ gs_overview_page_load (GsOverviewPage *self)
 						    self);
 		priv->action_cnt++;
 	}
+
     if (!priv->loading_recent) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 
@@ -708,19 +692,19 @@ gs_overview_page_setup (GsPage *page,
 	tile = gs_feature_tile_new (NULL);
     gtk_widget_set_size_request (tile, FEATURED_DEFAULT_SIZE_WIDTH, FEATURED_DEFAULT_SIZE_HEIGHT);
 	gtk_container_add (GTK_CONTAINER (priv->stack_featured), tile);
-    
+
     tile = gs_feature_tile_small_new (NULL);
 	gtk_container_add (GTK_CONTAINER (priv->box_featured_app), tile);
     tile = gs_feature_tile_small_new (NULL);
 	gtk_container_add (GTK_CONTAINER (priv->box_featured_app), tile);
     tile = gs_feature_tile_small_new (NULL);
 	gtk_container_add (GTK_CONTAINER (priv->box_featured_app), tile);
-    
+
     for (i = 0; i < N_TILES; i++) {
 		tile = gs_popular_tile_new (NULL);
 		gtk_container_add (GTK_CONTAINER (priv->box_editor), tile);
 	}
-	
+
     for (i = 0; i < N_TILES; i++) {
 		tile = gs_popular_tile_new (NULL);
 		gtk_container_add (GTK_CONTAINER (priv->box_popular), tile);

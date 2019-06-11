@@ -30,9 +30,9 @@ ifeq ($(DEB_HOST_ARCH_OS), linux)
 
 	# Enable GUdev support on Linux
 	GS_CONFIGURE_FLAGS += -Dgudev=true
-	
+
 	# Enable fwupd support on Linux
-	GS_CONFIGURE_FLAGS += -Dfwupd=true
+	GS_CONFIGURE_FLAGS += -Dfwupd=false
 
 	# Enable snap support on supported architectures
 	ifneq (,$(findstring $(DEB_HOST_ARCH), amd64 arm64 armel armhf i386 ppc64el s390x))

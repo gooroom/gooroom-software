@@ -571,7 +571,7 @@ gs_plugin_app_install (GsPlugin *plugin,
 
 	/* set the app scope */
 	if (gs_app_get_scope (app) == AS_APP_SCOPE_UNKNOWN) {
-		g_autoptr(GSettings) settings = g_settings_new ("org.gnome.software");
+		g_autoptr(GSettings) settings = g_settings_new ("kr.gooroom.software");
 
 		/* get the new GsFlatpak for handling of local files */
 		gs_app_set_scope (app, g_settings_get_boolean (settings, "install-bundles-system-wide") ?

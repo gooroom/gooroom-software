@@ -329,6 +329,7 @@ about_activated (GSimpleAction *action,
 		"Allan Day",
 		"Ryan Lerch",
 		"William Jon McCann",
+        "Gooroom",
 		NULL
 	};
 	const gchar *copyright = "Copyright \xc2\xa9 2016 Richard Hughes, Matthias Clasen, Kalev Lember";
@@ -336,9 +337,8 @@ about_activated (GSimpleAction *action,
 	g_autofree gchar *title = NULL;
 
 	dialog = GTK_ABOUT_DIALOG (gtk_about_dialog_new ());
-	gtk_about_dialog_set_authors (dialog, authors);
+    gtk_about_dialog_set_authors (dialog, authors);
 	gtk_about_dialog_set_copyright (dialog, copyright);
-	gtk_about_dialog_set_license_type (dialog, GTK_LICENSE_GPL_2_0);
 	gtk_about_dialog_set_logo_icon_name (dialog, "kr.gooroom.Software");
 	gtk_about_dialog_set_translator_credits (dialog, _("translator-credits"));
 	gtk_about_dialog_set_version (dialog, VERSION);
@@ -349,11 +349,6 @@ about_activated (GSimpleAction *action,
 	 * the application name chosen by the distro */
 	title = g_strdup_printf (_("About %s"), g_get_application_name ());
 	gtk_window_set_title (GTK_WINDOW (dialog), title);
-
-	/* TRANSLATORS: well, we seem to think so, anyway */
-	gtk_about_dialog_set_comments (dialog, _("A nice way to manage the "
-						 "software on your system."));
-
 	gs_shell_modal_dialog_present (app->shell, GTK_DIALOG (dialog));
 
 	/* just destroy */
@@ -488,13 +483,14 @@ quit_activated (GSimpleAction *action,
 		GVariant      *parameter,
 		gpointer       app)
 {
+#if 0
 	GApplicationFlags flags;
 	GList *windows;
 	GtkWidget *window;
 
 	flags = g_application_get_flags (app);
-
-	if (flags & G_APPLICATION_IS_SERVICE) {
+	
+    if (flags & G_APPLICATION_IS_SERVICE) {
 		windows = gtk_application_get_windows (GTK_APPLICATION (app));
 		if (windows) {
 			window = windows->data;
@@ -503,7 +499,7 @@ quit_activated (GSimpleAction *action,
 
 		return;
 	}
-
+#endif
 	g_application_quit (G_APPLICATION (app));
 }
 

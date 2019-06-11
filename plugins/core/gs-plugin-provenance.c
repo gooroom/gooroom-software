@@ -64,7 +64,7 @@ void
 gs_plugin_initialize (GsPlugin *plugin)
 {
 	GsPluginData *priv = gs_plugin_alloc_data (plugin, sizeof(GsPluginData));
-	priv->settings = g_settings_new ("org.gnome.software");
+	priv->settings = g_settings_new ("kr.gooroom.software");
 	g_signal_connect (priv->settings, "changed",
 			  G_CALLBACK (gs_plugin_provenance_settings_changed_cb), plugin);
 	priv->sources = gs_plugin_provenance_get_sources (plugin);

@@ -134,10 +134,11 @@ struct _GsDetailsPage
 	GtkWidget		*label_content_rating_title;
 	GtkWidget		*label_content_rating_message;
 	GtkWidget		*label_content_rating_none;
-    GtkWidget       *box_similar; 
-    GtkWidget       *similar_heading;	
-    GtkWidget       *similar_more;	
- 
+    GtkWidget       *box_similar;
+    GtkWidget       *similar_heading;
+    GtkWidget       *similar_more;
+
+    GtkWidget       *stack;
 };
 
 G_DEFINE_TYPE (GsDetailsPage, gs_details_page, GS_TYPE_PAGE)
@@ -515,16 +516,16 @@ gs_details_page_refresh_screenshots (GsDetailsPage *self)
 					FALSE);
 		break;
 	}
-	/* set screenshots */
-	gtk_widget_set_visible (self->box_details_screenshot,
-				screenshots->len > 0);
-	if (screenshots->len == 0) {
-		gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
+
+    /* set screenshots */
+    gtk_widget_set_visible (self->stack, TRUE);
+    if (screenshots->len == 0) {
+        gtk_stack_set_visible_child_name (GTK_STACK (self->stack), "screenshot_empty");
 		return;
 	}
+    gtk_stack_set_visible_child_name (GTK_STACK (self->stack), "screenshot");
+    gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
 	/* set all the thumbnails */
-	gs_container_remove_all (GTK_CONTAINER (self->box_details_screenshot_thumbnails));
-
 	for (i = 0; i < screenshots->len; i++) {
 		ss = g_ptr_array_index (screenshots, i);
 		ssimg = gs_screenshot_image_new (self->session);
@@ -945,24 +946,28 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
     gs_container_remove_all (GTK_CONTAINER (self->box_similar));
 
     list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
+
+    gtk_widget_set_visible (self->box_similar, FALSE);
+    gtk_widget_set_visible (self->similar_more, FALSE);
+    gtk_widget_set_visible (self->similar_heading, FALSE);
+
     if (list == NULL)
-        goto out;
+        return;
 
     if (gs_app_list_length (list) == 0)
-        goto out;
+        return;
 
     gs_app_list_randomize (list);
-
-    cnt = gs_app_list_length (list);
-    if (N_TILES < cnt)
-        cnt = N_TILES; 
-
-    for (guint i = 0; i < cnt; i++) {
+    cnt = 0;
+    for (guint i = 0; i < gs_app_list_length (list); i++) {
         app = gs_app_list_index (list, i);
-        if (app == self->app) {
-           cnt++;
+        if (app == self->app)
            continue;
-        }
+        if (gs_app_get_id (app) == NULL)
+            continue;
+        if (N_TILES <= cnt)
+            break;
+        cnt++;
         tile = gs_popular_tile_new (app);
         if (!gs_app_has_quirk (app, AS_APP_QUIRK_PROVENANCE) ||
              gs_utils_list_has_app_fuzzy (list, app))
@@ -972,20 +977,15 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
         gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
         gtk_widget_set_can_focus (gtk_widget_get_parent (tile), FALSE);
     }
-    
-    gtk_widget_set_visible (self->box_similar, TRUE);
-    gtk_widget_set_visible (self->similar_heading, TRUE);
+
+    if (0 < cnt) {
+        gtk_widget_set_visible (self->box_similar, TRUE);
+        gtk_widget_set_visible (self->similar_heading, TRUE);
+    }
 
     if (N_TILES  < gs_app_list_length (list)) {
         gtk_widget_set_visible (self->similar_more, TRUE);
     }
-    return;
-
-out:
-    gtk_widget_set_visible (self->box_similar, FALSE);
-    gtk_widget_set_visible (self->similar_more, FALSE);
-    gtk_widget_set_visible (self->similar_heading, FALSE);
- 
 }
 
 static void
@@ -1983,10 +1983,12 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_message);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_content_rating_none);
-	
+
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_similar);
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_heading);
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_more);
+
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, stack);
 }
 
 static void
