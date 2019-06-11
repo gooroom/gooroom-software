@@ -79,21 +79,23 @@ shared_module(
   dependencies : plugin_libs
 )
 
-shared_module(
-  'gs_plugin_appstream',
-  sources : [
-    'gs-appstream.c',
-    'gs-plugin-appstream.c'
-  ],
-  include_directories : [
-    include_directories('../..'),
-    include_directories('../../lib'),
-  ],
-  install : true,
-  install_dir: plugin_dir,
-  c_args : cargs,
-  dependencies : plugin_libs
-)
+if get_option('appstream')
+  shared_module(
+    'gs_plugin_appstream',
+    sources : [
+      'gs-appstream.c',
+      'gs-plugin-appstream.c'
+    ],
+    include_directories : [
+      include_directories('../..'),
+      include_directories('../../lib'),
+    ],
+    install : true,
+    install_dir: plugin_dir,
+    c_args : cargs,
+    dependencies : plugin_libs
+  )
+endif
 
 shared_module(
   'gs_plugin_desktop-categories',
