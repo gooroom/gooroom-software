@@ -179,23 +179,23 @@ cdata = configuration_data()
 cdata.set('bindir', join_paths(get_option('prefix'),
                                get_option('bindir')))
 
-# replace @bindir@
-configure_file(
-  input : 'kr.gooroom.Software.service.in',
-  output : 'kr.gooroom.Software.service',
-  install: true,
-  install_dir: join_paths(get_option('datadir'), 'dbus-1/services'),
-  configuration : cdata
-)
+## replace @bindir@
+#configure_file(
+#  input : 'kr.gooroom.Software.service.in',
+#  output : 'kr.gooroom.Software.service',
+#  install: true,
+#  install_dir: join_paths(get_option('datadir'), 'dbus-1/services'),
+#  configuration : cdata
+#)
 
 # replace @bindir@
-configure_file(
-  input : 'gooroom-software-service.desktop.in',
-  output : 'gooroom-software-service.desktop',
-  install: true,
-  install_dir: join_paths(get_option('sysconfdir'), 'xdg/autostart'),
-  configuration : cdata
-)
+#configure_file(
+#  input : 'gooroom-software-service.desktop.in',
+#  output : 'gooroom-software-service.desktop',
+#  install: true,
+#  install_dir: join_paths(get_option('sysconfdir'), 'xdg/autostart'),
+#  configuration : cdata
+#)
 
 # replace @bindir@
 i18n.merge_file(
@@ -268,16 +268,16 @@ if get_option('man')
   )
 endif
 
-if get_option('packagekit')
-  # replace @bindir@
-  configure_file(
-    input : 'org.freedesktop.GooroomSoftware.service.in',
-    output : 'org.freedesktop.GooroomSoftware.service',
-    install: true,
-    install_dir: join_paths(get_option('datadir'), 'dbus-1', 'services'),
-    configuration : cdata
-  )
-endif
+#if get_option('packagekit')
+#  # replace @bindir@
+#  configure_file(
+#    input : 'org.freedesktop.GooroomSoftware.service.in',
+#    output : 'org.freedesktop.GooroomSoftware.service',
+#    install: true,
+#    install_dir: join_paths(get_option('datadir'), 'dbus-1', 'services'),
+#    configuration : cdata
+#  )
+#endif
 
 if get_option('tests')
   cargs += ['-DTESTDATADIR="' + join_paths(meson.current_source_dir(), '..', 'data') + '"']

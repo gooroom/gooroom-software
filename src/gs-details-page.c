@@ -111,7 +111,7 @@ struct _GsDetailsPage
 	GtkWidget		*label_details_updated_title;
 	GtkWidget		*label_details_updated_value;
 	GtkWidget		*label_details_channel_title;
-	GtkWidget		*button_details_channel;
+	GtkWidget		*label_details_channel_value;
 	GtkWidget		*label_failed;
 	GtkWidget		*label_license_nonfree_details;
 	GtkWidget		*label_licenses_intro;
@@ -124,9 +124,7 @@ struct _GsDetailsPage
 	GtkWidget		*scrolledwindow_details;
     GtkWidget		*spinner_details;
 	GtkWidget		*stack_details;
-	GtkWidget		*grid_popover_channel;
 	GtkWidget		*progressbar_top;
-	GtkWidget		*popover_channel;
 	GtkWidget		*popover_license_free;
 	GtkWidget		*popover_license_nonfree;
 	GtkWidget		*popover_license_unknown;
@@ -615,6 +613,7 @@ gs_details_page_history_cb (GtkLabel *label,
 static void
 gs_details_page_refresh_size (GsDetailsPage *self)
 {
+#if 0
 	/* set the installed size */
 	if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
 	    gs_app_get_size_installed (self->app) != 0) {
@@ -640,6 +639,30 @@ gs_details_page_refresh_size (GsDetailsPage *self)
 		gtk_widget_hide (self->label_details_size_download_title);
 		gtk_widget_hide (self->label_details_size_download_value);
 	}
+#endif
+    if (!gs_app_is_installed (self->app) &&
+	        gs_app_get_size_download (self->app) != GS_APP_SIZE_UNKNOWABLE) {
+	    	g_autofree gchar *size = NULL;
+	    	size = g_format_size (gs_app_get_size_download (self->app));
+	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
+	        gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Download Size"));
+	    }
+    else {
+	    if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
+	        gs_app_get_size_installed (self->app) != 0) {
+	    	g_autofree gchar *size = NULL;
+	    	size = g_format_size (gs_app_get_size_installed (self->app));
+	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
+	        gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Installed Size"));
+	    }
+        else {
+	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), "0MB");
+        }
+    }
+	gtk_widget_hide (self->label_details_size_installed_title);
+	gtk_widget_hide (self->label_details_size_installed_value);
+	gtk_widget_show (self->label_details_size_download_title);
+	gtk_widget_show (self->label_details_size_download_value);
 }
 
 static void
@@ -654,6 +677,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	GsChannel *channel;
 	g_autoptr(GError) error = NULL;
     GPtrArray *categories;
+    GPtrArray *provides;
     const gchar *category_name;
 
 	/* change widgets */
@@ -664,7 +688,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	} else {
 		gtk_widget_set_visible (self->application_details_title, FALSE);
 	}
-    
+
     menu_path = gs_app_get_menu_path (self->app);
 	if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
         categories = gs_app_get_categories (self->app);
@@ -684,16 +708,23 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_label_set_label (GTK_LABEL (self->application_details_category),menu_path[0]);
 		gtk_widget_set_visible (self->application_details_category, TRUE);
 	}
-	
-    tmp = gs_app_get_developer_name (self->app);
-	if (tmp == NULL)
-		tmp = gs_app_get_project_group (self->app);
-	if (tmp != NULL) {
-		gtk_label_set_label (GTK_LABEL (self->application_details_developer), tmp);
-		gtk_widget_set_visible (self->application_details_developer, TRUE);
+
+    provides = gs_app_get_provides (self->app);
+    if (provides && 0 < provides->len) {
+        AsProvide *provide = g_ptr_array_index (provides, 0);
+        tmp = g_strdup (as_provide_get_value (provide));
+    }
+    else {
+        tmp = gs_app_get_developer_name (self->app);
+    }
+
+    if (tmp != NULL) {
+	    gtk_label_set_label (GTK_LABEL (self->application_details_developer), tmp);
+	    gtk_widget_set_visible (self->application_details_developer, TRUE);
 	} else {
-		gtk_widget_set_visible (self->application_details_developer, FALSE);
+	    gtk_widget_set_visible (self->application_details_developer, FALSE);
 	}
+
 	/* set the description */
 	tmp = gs_app_get_description (self->app);
 	gs_details_page_set_description (self, tmp);
@@ -735,22 +766,25 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->button_details_license_nonfree, TRUE);
 		gtk_widget_set_visible (self->button_details_license_unknown, FALSE);
 	}
-	
+
     /* set channel */
 	channel = gs_app_get_active_channel (self->app);
 	gtk_widget_set_visible (self->label_details_channel_title, TRUE);
-	gtk_widget_set_visible (self->button_details_channel, channel != NULL);
 	if (channel != NULL) {
-		gtk_button_set_label (GTK_BUTTON (self->button_details_channel), gs_channel_get_name (channel));
+        gtk_label_set_label (GTK_LABEL (self->label_details_channel_value), gs_channel_get_name (channel));
 	}
+    else {
+        gtk_label_set_label (GTK_LABEL (self->label_details_channel_value), "stable");
+    }
 	/* refresh size information */
 	gs_details_page_refresh_size (self);
 
 	/* set the updated date */
 	updated = gs_app_get_install_date (self->app);
 	if (updated == GS_APP_INSTALL_DATE_UNSET) {
+		gtk_label_set_label (GTK_LABEL (self->label_details_updated_value), C_("updated", "Never"));
 		gtk_widget_set_visible (self->label_details_updated_title, TRUE);
-		gtk_widget_set_visible (self->label_details_updated_value, FALSE);
+		gtk_widget_set_visible (self->label_details_updated_value, TRUE);
 	} else if (updated == GS_APP_INSTALL_DATE_UNKNOWN) {
 		/* TRANSLATORS: this is where the updated date is not known */
 		gtk_label_set_label (GTK_LABEL (self->label_details_updated_value), C_("updated", "Never"));
@@ -792,8 +826,9 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	}
 	gtk_widget_set_visible (self->label_details_category_title, TRUE);
 	gtk_widget_set_visible (self->label_details_category_value, TRUE);
-    
+ 
     /* set the app size */
+    #if 0
 	if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
 	    gs_app_get_size_installed (self->app) != 0) {
 		gtk_widget_show (self->label_details_size_installed_title);
@@ -802,6 +837,9 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_hide (self->label_details_size_installed_title);
 		gtk_widget_show (self->label_details_size_download_title);
 	}
+    #endif
+    gtk_widget_hide (self->label_details_size_installed_title);
+    gtk_widget_show (self->label_details_size_download_title);
 
 	/* are we trying to replace something in the baseos */
 	gtk_widget_set_visible (self->infobar_details_package_baseos,
@@ -1504,81 +1542,6 @@ gs_page_channel_switched_cb (GObject *source,
 }
 
 static void
-gs_details_page_switch_channel_cb (GtkWidget *widget, gpointer user_data)
-{
-	g_autoptr(GsDetailsPageChannelHelper) helper = (GsDetailsPageChannelHelper *) user_data;
-	GsDetailsPage *self = helper->self;
-	g_autoptr(GsPluginJob) plugin_job = NULL;
-
-	gtk_widget_hide (self->popover_channel);
-
-	gs_app_set_active_channel (self->app, helper->channel);
-
-	switch (gs_app_get_state (self->app)) {
-	case AS_APP_STATE_INSTALLED:
-	case AS_APP_STATE_UPDATABLE:
-	case AS_APP_STATE_UPDATABLE_LIVE:
-		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_SWITCH_CHANNEL,
-						 "app", self->app,
-						 "channel", helper->channel,
-						 NULL);
-		gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
-						    self->app_cancellable,
-						    gs_page_channel_switched_cb,
-						    g_steal_pointer (&helper));
-		break;
-	default:
-		break;
-	}
-	gs_details_page_refresh_all (self);
-}
-
-static void
-gs_details_page_channel_cb (GtkWidget *widget, GsDetailsPage *self)
-{
-	GPtrArray *channels;
-	guint i;
-
-	gs_container_remove_all (GTK_CONTAINER (self->grid_popover_channel));
-	channels = gs_app_get_channels (self->app);
-	for (i = 0; i < channels->len; i++) {
-		GsChannel *channel = g_ptr_array_index (channels, i);
-		const gchar *version;
-		GtkWidget *label;
-		GtkWidget *button;
-
-		version = gs_channel_get_version (channel);
-
-		label = gtk_label_new (gs_channel_get_name (channel));
-		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
-		gs_details_page_set_sensitive (label, version != NULL);
-		gtk_widget_show (label);
-		gtk_grid_attach (GTK_GRID (self->grid_popover_channel), label, 0, i, 1, 1);
-
-		label = gtk_label_new (version == NULL ? "—" : version);
-		gtk_label_set_xalign (GTK_LABEL (label), 0.0);
-		gs_details_page_set_sensitive (label, version != NULL);
-		gtk_widget_show (label);
-		gtk_grid_attach (GTK_GRID (self->grid_popover_channel), label, 1, i, 1, 1);
-
-		if (version != NULL && channel != gs_app_get_active_channel (self->app)) {
-			GsDetailsPageChannelHelper *helper = g_new0 (GsDetailsPageChannelHelper, 1);
-
-			button = gtk_button_new_with_label (_("Switch"));
-			gtk_widget_show (button);
-			gtk_grid_attach (GTK_GRID (self->grid_popover_channel), button, 2, i, 1, 1);
-			helper->self = g_object_ref (self);
-			helper->channel = g_object_ref (channel);
-			g_signal_connect (button, "clicked",
-					  G_CALLBACK (gs_details_page_switch_channel_cb),
-					  helper);
-		}
-	}
-
-	gtk_widget_show (self->popover_channel);
-}
-
-static void
 gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 {
 	g_autoptr(GList) addons = NULL;
@@ -1866,9 +1829,6 @@ gs_details_page_setup (GsPage *page,
 	g_signal_connect (self->button_details_launch, "clicked",
 			  G_CALLBACK (gs_details_page_app_launch_button_cb),
 			  self);
-	g_signal_connect (self->button_details_channel, "clicked",
-			  G_CALLBACK (gs_details_page_channel_cb),
-			  self);
 	g_signal_connect (self->button_details_license_free, "clicked",
 			  G_CALLBACK (gs_details_page_license_free_cb),
 			  self);
@@ -1960,9 +1920,7 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_updated_title);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_updated_value);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_channel_title);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, button_details_channel);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, popover_channel);
-	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, grid_popover_channel);
+	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_details_channel_value);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, label_failed);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, list_box_addons);
 	gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_reviews);

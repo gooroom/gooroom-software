@@ -206,7 +206,7 @@ gs_plugin_repository_initialize (GsPlugin *plugin)
     else {
         g_debug ("gs_plugin_repository_initialize : update flatpak");
         cmd = g_strdup ("flatpak --user update --appstream gooroom");
-        if (!g_spawn_command_line_sync (cmd, NULL, NULL, NULL, &error))
+        if (!g_spawn_command_line_async (cmd, &error))
             g_warning ("failed to flatpak update : %s", error->message);
     }
 }
@@ -247,6 +247,7 @@ gs_plugin_session_initialize (GsPlugin *plugin)
 
     soup_message_headers_append (msg->request_headers, "client-Id", client_id);
     soup_message_headers_append (msg->request_headers, "authorization", access_token);
+    soup_message_headers_append (msg->request_headers, "Accept", "application/vnd.v1.anonymous+json");
 
     status_code = soup_session_send_message (gs_plugin_get_soup_session (plugin), msg);
     if (status_code != SOUP_STATUS_OK) {
