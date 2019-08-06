@@ -1031,7 +1031,7 @@ gs_details_page_similar_more_cb (GtkWidget *button, GsDetailsPage *self)
 {
     GsCategory *category;
     category = GS_CATEGORY (g_object_get_data (G_OBJECT (button),"details-category"));
-    gs_shell_change_mode (self->shell, GS_SHELL_MODE_CATEGORY, gs_category_get_parent(category), FALSE);
+    gs_shell_change_mode (self->shell, GS_SHELL_MODE_CATEGORY, gs_category_get_parent(category), TRUE);
 }
 
 static void

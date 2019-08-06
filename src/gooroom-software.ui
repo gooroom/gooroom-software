@@ -280,7 +280,6 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="direction">right</property>
-                        <property name="use_popover">False</property>
                         <child>
                           <object class="GtkBox" id="button_category_box">
                             <property name="visible">True</property>

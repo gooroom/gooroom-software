@@ -106,7 +106,6 @@ gs_popup_menu_cb (GtkMenuItem *menuItem, gpointer user_data)
 static void
 add_category (gpointer key, gpointer value, gpointer user_data)
 {
-#if 1
     const gchar *name; 
     GtkStyleContext *style_context;
     GtkWidget *menu_item = NULL;
@@ -127,7 +126,6 @@ add_category (gpointer key, gpointer value, gpointer user_data)
     g_signal_connect (menu_item, "activate", G_CALLBACK (gs_popup_menu_cb), user_data);
     gtk_menu_shell_append (GTK_MENU_SHELL (priv->category_menu), menu_item);
     gtk_widget_show (menu_item);
-#endif
 }
 
 static void
@@ -165,12 +163,15 @@ gs_category_button_activate_cb (GtkWidget *widget, GdkEvent *event, gpointer use
     if (event->type == GDK_ENTER_NOTIFY)
     {
         gtk_widget_show (img_widget);
+        gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup (".main_menu_button { background-color: rgba(201,201,201,0.6);}"));
     }
     else
     {
         is_active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(widget)); 
-        if (!is_active) 
+        if (!is_active) {
             gtk_widget_hide (img_widget);
+            gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup (".main_menu_button { background-color: rgba(255,255,255,1.0);}"));
+        }
     }
 }
 
@@ -377,8 +378,10 @@ gs_shell_change_mode (GsShell *shell,
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_updates"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_UPDATES);
 
-    widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_category"));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_CATEGORY);
+    if (!scroll_up) { /* menu popup active */
+        widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_category"));
+	    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_CATEGORY);
+    }
 
     gtk_widget_set_visible (widget, gs_plugin_loader_get_allow_updates (priv->plugin_loader) ||
 					mode == GS_SHELL_MODE_UPDATES);
@@ -585,7 +588,7 @@ gs_shell_go_back (GsShell *shell)
 		g_debug ("popping back entry for %s with %s",
 			 page_name[entry->mode],
 			 gs_category_get_id (entry->category));
-		gs_shell_change_mode (shell, entry->mode, entry->category, FALSE);
+		gs_shell_change_mode (shell, entry->mode, entry->category, TRUE);
 		break;
 	case GS_SHELL_MODE_DETAILS:
 		g_debug ("popping back entry for %s with %p",
@@ -678,8 +681,8 @@ search_changed_handler (GObject *entry, GsShell *shell)
 	const gchar *text;
 
 	text = gtk_entry_get_text (GTK_ENTRY (entry));
-    if (gs_shell_get_mode (shell) != GS_SHELL_MODE_SEARCH) {
-        save_back_entry (shell);
+	if (gs_shell_get_mode (shell) != GS_SHELL_MODE_SEARCH) {
+		save_back_entry (shell);
 		gs_shell_change_mode (shell, GS_SHELL_MODE_SEARCH,
 					      (gpointer) text, TRUE);
 	} else {
