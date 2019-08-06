@@ -1459,7 +1459,6 @@ gs_plugin_loader_app_sort_version_cb (GsApp *app1, GsApp *app2, gpointer user_da
 }
 
 /******************************************************************************/
-
 static gboolean
 gs_plugin_loader_convert_unavailable_app (GsApp *app, const gchar *search)
 {
@@ -1467,7 +1466,6 @@ gs_plugin_loader_convert_unavailable_app (GsApp *app, const gchar *search)
 	const gchar *keyword;
 	guint i;
 	g_autoptr(GString) tmp = NULL;
-
 	/* is the search string one of the codec keywords */
 	keywords = gs_app_get_keywords (app);
 	for (i = 0; i < keywords->len; i++) {
@@ -1477,7 +1475,6 @@ gs_plugin_loader_convert_unavailable_app (GsApp *app, const gchar *search)
 			break;
 		}
 	}
-
 	tmp = g_string_new ("");
 	/* TRANSLATORS: this is when we know about an application or
 	 * addon, but it can't be listed for some reason */
@@ -1503,6 +1500,7 @@ gs_plugin_loader_convert_unavailable (GsAppList *list, const gchar *search)
 
 	for (i = 0; i < gs_app_list_length (list); i++) {
 		app = gs_app_list_index (list, i);
+
 		if (gs_app_get_kind (app) != AS_APP_KIND_GENERIC)
 			continue;
 		if (gs_app_get_state (app) != AS_APP_STATE_UNAVAILABLE)
@@ -1511,7 +1509,6 @@ gs_plugin_loader_convert_unavailable (GsAppList *list, const gchar *search)
 			continue;
 		if (gs_app_get_url (app, AS_URL_KIND_MISSING) == NULL)
 			continue;
-
 		/* only convert the first unavailable codec */
 		if (gs_plugin_loader_convert_unavailable_app (app, search))
 			break;
@@ -3327,7 +3324,6 @@ gs_plugin_loader_process_thread_cb (GTask *task,
 	} else {
 		g_debug ("no refine flags set for transaction");
 	}
-
 	/* convert any unavailable codecs */
 	switch (action) {
 	case GS_PLUGIN_ACTION_SEARCH:
@@ -3338,7 +3334,6 @@ gs_plugin_loader_process_thread_cb (GTask *task,
 	default:
 		break;
 	}
-
 	/* check the local files have an icon set */
 	switch (action) {
 	case GS_PLUGIN_ACTION_URL_TO_APP:
@@ -3694,7 +3689,14 @@ gs_plugin_loader_job_process_async (GsPluginLoader *plugin_loader,
 	/* pre-tokenize search */
 	if (action == GS_PLUGIN_ACTION_SEARCH) {
 		const gchar *search = gs_plugin_job_get_search (plugin_job);
-		helper->tokens = as_utils_search_tokenize (search);
+        if (strlen (search) < 3) {
+            helper->tokens = g_new (gchar *, 2);
+            helper->tokens[1] = NULL;
+            helper->tokens[0] = g_strdup(search);
+        }
+        else {
+		    helper->tokens = as_utils_search_tokenize (search);
+        }
 		if (helper->tokens == NULL) {
 			g_task_return_new_error (task,
 						 GS_PLUGIN_ERROR,
