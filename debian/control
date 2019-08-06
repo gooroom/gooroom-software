@@ -44,6 +44,7 @@ Architecture: any
 Depends: appstream,
          apt-config-icons,
          gooroom-software-common (= ${source:Version}),
+         gooroom-software-plugin-flatpak (= ${source:Version}),
          gsettings-desktop-schemas (>= 3.18),
          libgtk3-perl,
          packagekit (>= 1.1.11),
@@ -55,9 +56,8 @@ Conflicts: sessioninstaller
 Recommends: ${plugin:Recommends},
             fwupd [linux-any]
 Suggests: apt-config-icons-hidpi,
-          gooroom-software-plugin-flatpak [amd64 arm64 armel armhf i386 mips mipsel mips64el ppc64el s390x hppa powerpc powerpcspe ppc64],
           ${plugin:Suggests}
-Description: Software Center for GNOME
+Description: Software Center for Gooroom
  Software lets you install and update applications and system extensions.
  .
  Software uses a plugin architecture to separate the frontend from the
@@ -69,8 +69,9 @@ Description: Software Center for GNOME
 Package: gooroom-software-common
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}
-Description: Software Center for GNOME (common files)
+Depends: gooroom-software (= ${binary:Version}),
+         ${misc:Depends}
+Description: Software Center for Gooroom (common files)
  Software lets you install and update applications and system extensions.
  .
  Software uses a plugin architecture to separate the frontend from the
@@ -85,9 +86,10 @@ Package: gooroom-software-plugin-flatpak
 Architecture: amd64 arm64 armel armhf i386 mips mips64el ppc64el s390x hppa powerpc powerpcspe ppc64
 Depends: flatpak,
          gooroom-software (= ${binary:Version}),
+         gooroom-software-common (= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
-Description: Flatpak support for GNOME Software
+Description: Flatpak support for Gooroom Software
  Software lets you install and update applications and system extensions.
  .
  Software uses a plugin architecture to separate the frontend from the
@@ -107,7 +109,7 @@ Depends: gooroom-software (= ${binary:Version}),
 Recommends: snapd [s390x]
 Breaks: gooroom-software (<< 3.22.3)
 Replaces: gooroom-software (<< 3.22.3)
-Description: Snap support for GNOME Software
+Description: Snap support for Gooroom Software
  Software lets you install and update applications and system extensions.
  .
  Software uses a plugin architecture to separate the frontend from the
@@ -128,7 +130,7 @@ Description: Transitional package (gnome-packagekit-session -> gooroom-software)
  gooroom-software.
  .
  The PackageKit session interface is no separate component anymore, but built
- into GNOME-Software.
+ into Gooroom-Software.
 
 Package: gooroom-software-dev
 Section: libdevel
@@ -140,7 +142,7 @@ Depends: libappstream-glib-dev (>= 0.7.14),
          libsoup2.4-dev (>= 2.52.0),
          ${misc:Depends}
 Suggests: gooroom-software-doc
-Description: Software Center for GNOME - development files
+Description: Software Center for Gooroom - development files
  Software lets you install and update applications and system extensions.
  .
  This package contains headers and other files required when compiling external
@@ -151,7 +153,7 @@ Section: doc
 Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
-Description: Software Center for GNOME - documentation
+Description: Software Center for Gooroom - documentation
  Software lets you install and update applications and system extensions.
  .
  This package contains documentation for use when developing plugins for

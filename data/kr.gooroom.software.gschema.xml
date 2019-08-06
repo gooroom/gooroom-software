@@ -140,11 +140,11 @@
       <summary>Enable GNOME Shell extensions repository</summary>
     </key>
     <key name="software-server" type="s">
-      <default>'http://172.16.195.155/api/v1/swcenter/information'</default>
+      <default>'http://test-gpsc.gooroom.kr/api/v1/swcenter/information'</default>
       <summary>The server to use for software center</summary>
     </key>
     <key name="software-remote" type="s">
-      <default>'http://172.16.195.155/repo/gpsc.flatpakrepo'</default>
+      <default>'http://test-gpsc.gooroom.kr/repo/gpsc.flatpakrepo'</default>
       <summary>The repository to use for software center</summary>
     </key>
     <key name="software-runtime-remote" type="s">
