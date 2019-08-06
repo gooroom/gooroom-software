@@ -43,6 +43,8 @@
 #include "gs-popular-tile.h"
 #include "gs-hiding-box.h"
 
+#include "gs-utils.h"
+
 /* the number of reviews to show before clicking the 'More Reviews' button */
 #define N_TILES             		4
 #define SHOW_NR_REVIEWS_INITIAL		4
@@ -586,12 +588,12 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 				    label, FALSE, FALSE, 0);
 	}
 }
-
+#if 0
 static void
 gs_details_page_set_sensitive (GtkWidget *widget, gboolean is_active)
 {
 }
-
+#endif
 static gboolean
 gs_details_page_history_cb (GtkLabel *label,
                             gchar *uri,
@@ -979,6 +981,7 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
     GtkWidget *tile;
     GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
     GsDetailsPage *self = GS_DETAILS_PAGE (user_data);
+    //GPtrArray *similar_categories = NULL;
     g_autoptr(GError) error = NULL;
     g_autoptr(GsAppList) list = NULL;
     gs_container_remove_all (GTK_CONTAINER (self->box_similar));
@@ -996,6 +999,7 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
         return;
 
     gs_app_list_randomize (list);
+
     cnt = 0;
     for (guint i = 0; i < gs_app_list_length (list); i++) {
         app = gs_app_list_index (list, i);
@@ -1005,6 +1009,7 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
             continue;
         if (N_TILES <= cnt)
             break;
+
         cnt++;
         tile = gs_popular_tile_new (app);
         if (!gs_app_has_quirk (app, AS_APP_QUIRK_PROVENANCE) ||
@@ -1473,6 +1478,7 @@ gs_details_page_channel_helper_free (GsDetailsPageChannelHelper *helper)
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(GsDetailsPageChannelHelper, gs_details_page_channel_helper_free);
 
+#if 0
 static void
 gs_page_channel_switch_refine_cb (GObject *source,
                                   GAsyncResult *res,
@@ -1540,7 +1546,7 @@ gs_page_channel_switched_cb (GObject *source,
 					    gs_page_channel_switch_refine_cb,
 					    g_steal_pointer (&helper));
 }
-
+#endif
 static void
 gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 {

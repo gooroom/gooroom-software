@@ -1276,4 +1276,53 @@ gs_utils_get_desktop_category_label (const gchar *name)
     
     return desktop_name;
 }
+
+/**
+ * gs_utils_appstream_category_label:
+ * @name: gnome category name
+ *
+ * Returns: Appstream category name
+ **/
+const gchar *
+gs_utils_desktop_category_to_appstream_category (const gchar *name)
+{
+    const gchar *appstream_name= NULL;
+
+    if (g_strcmp0 (name, "AudioVideo") == 0) {
+        appstream_name = g_strdup ("audio-video");
+    }
+    else if (g_strcmp0 (name, "Development") == 0) {
+        appstream_name = g_strdup ("developer-tools");
+    }
+    else if (g_strcmp0 (name, "Education") == 0) {
+        appstream_name = g_strdup ("education-science");
+    }
+    else if (g_strcmp0 (name, "Science") == 0) {
+        appstream_name = g_strdup ("education-science");
+    }
+    else if (g_strcmp0 (name, "Game") == 0) {
+        appstream_name = g_strdup ("games");
+    }
+    else if (g_strcmp0 (name, "Graphics") == 0) {
+        appstream_name = g_strdup ("graphics");
+    }
+    else if (g_strcmp0 (name, "Office") == 0) {
+        appstream_name = g_strdup ("productivity");
+    }
+    else if (g_strcmp0 (name, "Network") == 0) {
+        appstream_name = g_strdup ("communication");
+    }
+    else if (g_strcmp0 (name, "Reference") == 0) {
+        appstream_name = g_strdup ("reference");
+    }
+    else if (g_strcmp0 (name, "Utility") == 0) {
+        appstream_name = g_strdup ("utilities");
+    }
+    else {
+        return NULL;
+    }
+
+    return appstream_name;
+}
+
 /* vim: set noexpandtab: */

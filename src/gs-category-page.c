@@ -27,6 +27,7 @@
 #include <string.h>
 #include <glib/gi18n.h>
 
+#include "gs-utils.h"
 #include "gs-app-list-private.h"
 #include "gs-common.h"
 #include "gs-summary-tile.h"
@@ -134,8 +135,13 @@ gs_category_page_get_apps_cb (GObject *source_object,
 	GtkWidget *tile;
 	GsCategoryPage *self = GS_CATEGORY_PAGE (user_data);
 	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
+	GPtrArray *categories = NULL;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
+
+    const gchar *tmp = NULL;
+    const gchar *appstream_id = NULL;
+    const gchar *menu_category_id = NULL;
 
 	/* show an empty space for no results */
 	gs_container_remove_all (GTK_CONTAINER (self->category_detail_box));
@@ -149,8 +155,20 @@ gs_category_page_get_apps_cb (GObject *source_object,
 		return;
 	}
 
+    menu_category_id = gs_category_get_id (self->category);
 	for (i = 0; i < gs_app_list_length (list); i++) {
 		app = gs_app_list_index (list, i);
+
+        categories = gs_app_get_categories (app);
+        tmp = g_ptr_array_index (categories, 0);
+        appstream_id = gs_utils_desktop_category_to_appstream_category (tmp);
+
+        if (appstream_id == NULL)
+            continue;
+
+        if (g_ascii_strcasecmp (menu_category_id, appstream_id) != 0)
+            continue;
+
 		if (g_strcmp0 (gs_category_get_id (self->category), "addons") == 0) {
 			tile = make_addon_tile_for_category (app, self->subcategory);
 		} else {
