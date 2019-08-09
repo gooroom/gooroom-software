@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 /**
  * SECTION:gs-utils
  * @title: GsUtils
@@ -30,36 +29,28 @@
  * These functions provide useful functionality that makes it easy to
  * add new plugin functions.
  */
-
 #include "config.h"
-
 #include <errno.h>
 #include <fnmatch.h>
 #include <math.h>
 #include <string.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
-
 #if defined(__linux__)
 #include <sys/sysinfo.h>
 #elif defined(__FreeBSD__)
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
-
 #ifdef HAVE_POLKIT
 #include <polkit/polkit.h>
 #endif
-
 #include "gs-app.h"
 #include "gs-utils.h"
 #include "gs-plugin.h"
-
 #define LOW_RESOLUTION_WIDTH  800
 #define LOW_RESOLUTION_HEIGHT 600
-
 #define MB_IN_BYTES (1024 * 1024)
-
 /**
  * gs_mkdir_parent:
  * @path: A full pathname
@@ -73,7 +64,6 @@ gboolean
 gs_mkdir_parent (const gchar *path, GError **error)
 {
 	g_autofree gchar *parent = NULL;
-
 	parent = g_path_get_dirname (path);
 	if (g_mkdir_with_parents (parent, 0755) == -1) {
 		g_set_error (error,
@@ -85,7 +75,6 @@ gs_mkdir_parent (const gchar *path, GError **error)
 	}
 	return TRUE;
 }
-
 /**
  * gs_utils_get_file_age:
  * @file: A #GFile
@@ -100,7 +89,6 @@ gs_utils_get_file_age (GFile *file)
 	guint64 now;
 	guint64 mtime;
 	g_autoptr(GFileInfo) info = NULL;
-
 	info = g_file_query_info (file,
 				  G_FILE_ATTRIBUTE_TIME_MODIFIED,
 				  G_FILE_QUERY_INFO_NONE,
@@ -116,7 +104,6 @@ gs_utils_get_file_age (GFile *file)
 		return G_MAXUINT;
 	return (guint) (now - mtime);
 }
-
 static gchar *
 gs_utils_filename_array_return_newest (GPtrArray *array)
 {
@@ -134,7 +121,6 @@ gs_utils_filename_array_return_newest (GPtrArray *array)
 	}
 	return g_strdup (filename_best);
 }
-
 /**
  * gs_utils_get_cache_filename:
  * @kind: A cache kind, e.g. "fwupd" or "screenshots/123x456"
@@ -169,7 +155,6 @@ gs_utils_get_cache_filename (const gchar *kind,
 	g_autofree gchar *cachedir = NULL;
 	g_autoptr(GFile) cachedir_file = NULL;
 	g_autoptr(GPtrArray) candidates = g_ptr_array_new_with_free_func (g_free);
-
 	/* get basename */
 	if (flags & GS_UTILS_CACHE_FLAG_USE_HASH) {
 		g_autofree gchar *basename_tmp = g_path_get_basename (resource);
@@ -179,7 +164,6 @@ gs_utils_get_cache_filename (const gchar *kind,
 	} else {
 		basename = g_path_get_basename (resource);
 	}
-
 	/* not writable, so try the system cache first */
 	if ((flags & GS_UTILS_CACHE_FLAG_WRITEABLE) == 0) {
 		g_autofree gchar *cachefn = NULL;
@@ -194,7 +178,6 @@ gs_utils_get_cache_filename (const gchar *kind,
 					 g_steal_pointer (&cachefn));
 		}
 	}
-
 	/* not writable, so try the system cache first */
 	if ((flags & GS_UTILS_CACHE_FLAG_WRITEABLE) == 0) {
 		g_autofree gchar *cachefn = NULL;
@@ -209,7 +192,6 @@ gs_utils_get_cache_filename (const gchar *kind,
 					 g_steal_pointer (&cachefn));
 		}
 	}
-
 	/* create the cachedir in a per-release location, creating
 	 * if it does not already exist */
 	cachedir = g_build_filename (g_get_user_cache_dir (),
@@ -226,15 +208,12 @@ gs_utils_get_cache_filename (const gchar *kind,
 	    !g_file_make_directory_with_parents (cachedir_file, NULL, error))
 		return NULL;
 	g_ptr_array_add (candidates, g_build_filename (cachedir, basename, NULL));
-
 	/* common case: we only have one option */
 	if (candidates->len == 1)
 		return g_strdup (g_ptr_array_index (candidates, 0));
-
 	/* return the newest (i.e. one with least age) */
 	return gs_utils_filename_array_return_newest (candidates);
 }
-
 /**
  * gs_utils_get_user_hash:
  * @error: A #GError, or %NULL
@@ -256,15 +235,12 @@ gs_utils_get_user_hash (GError **error)
 {
 	g_autofree gchar *data = NULL;
 	g_autofree gchar *salted = NULL;
-
 	if (!g_file_get_contents ("/etc/machine-id", &data, NULL, error))
 		return NULL;
-
 	salted = g_strdup_printf ("gooroom-software[%s:%s]",
 				  g_get_user_name (), data);
 	return g_compute_checksum_for_string (G_CHECKSUM_SHA1, salted, -1);
 }
-
 /**
  * gs_utils_get_permission:
  * @id: A PolicyKit ID, e.g. "org.gnome.Desktop"
@@ -295,7 +271,6 @@ gs_utils_get_permission (const gchar *id, GCancellable *cancellable, GError **er
 	return NULL;
 #endif
 }
-
 /**
  * gs_utils_get_content_type:
  * @file: A GFile
@@ -313,7 +288,6 @@ gs_utils_get_content_type (GFile *file,
 {
 	const gchar *tmp;
 	g_autoptr(GFileInfo) info = NULL;
-
 	/* get content type */
 	info = g_file_query_info (file,
 				  G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -327,7 +301,6 @@ gs_utils_get_content_type (GFile *file,
 		return NULL;
 	return g_strdup (tmp);
 }
-
 /**
  * gs_utils_strv_fnmatch:
  * @strv: A NUL-terminated list of strings
@@ -341,11 +314,9 @@ gboolean
 gs_utils_strv_fnmatch (gchar **strv, const gchar *str)
 {
 	guint i;
-
 	/* empty */
 	if (strv == NULL)
 		return FALSE;
-
 	/* look at each one */
 	for (i = 0; strv[i] != NULL; i++) {
 		if (fnmatch (strv[i], str, 0) == 0)
@@ -353,7 +324,6 @@ gs_utils_strv_fnmatch (gchar **strv, const gchar *str)
 	}
 	return FALSE;
 }
-
 /**
  * gs_utils_get_desktop_app_info:
  * @id: A desktop ID, e.g. "gimp.desktop"
@@ -369,17 +339,14 @@ gs_utils_get_desktop_app_info (const gchar *id)
 {
 	GDesktopAppInfo *app_info;
 	g_autofree gchar *desktop_id = NULL;
-
 	/* for convenience, if the given id doesn't have the required .desktop
 	 * suffix, we add it here */
 	if (!g_str_has_suffix (id, ".desktop")) {
 		desktop_id = g_strconcat (id, ".desktop", NULL);
 		id = desktop_id;
 	}
-
 	/* try to get the standard app-id */
 	app_info = g_desktop_app_info_new (id);
-
 	/* KDE is a special project because it believes /usr/share/applications
 	 * isn't KDE enough. For this reason we support falling back to the
 	 * "kde4-" prefixed ID to avoid educating various self-righteous
@@ -389,10 +356,8 @@ gs_utils_get_desktop_app_info (const gchar *id)
 		kde_id = g_strdup_printf ("%s-%s", "kde4", id);
 		app_info = g_desktop_app_info_new (kde_id);
 	}
-
 	return app_info;
 }
-
 /**
  * gs_utils_symlink:
  * @target: the full path of the symlink to create
@@ -419,7 +384,6 @@ gs_utils_symlink (const gchar *target, const gchar *linkpath, GError **error)
 	}
 	return TRUE;
 }
-
 /**
  * gs_utils_unlink:
  * @filename: A full pathname to delete
@@ -442,18 +406,15 @@ gs_utils_unlink (const gchar *filename, GError **error)
 	}
 	return TRUE;
 }
-
 static gboolean
 gs_utils_rmtree_real (const gchar *directory, GError **error)
 {
 	const gchar *filename;
 	g_autoptr(GDir) dir = NULL;
-
 	/* try to open */
 	dir = g_dir_open (directory, 0, error);
 	if (dir == NULL)
 		return FALSE;
-
 	/* find each */
 	while ((filename = g_dir_read_name (dir))) {
 		g_autofree gchar *src = NULL;
@@ -472,7 +433,6 @@ gs_utils_rmtree_real (const gchar *directory, GError **error)
 			}
 		}
 	}
-
 	if (g_rmdir (directory) != 0) {
 		g_set_error (error,
 			     GS_PLUGIN_ERROR,
@@ -482,7 +442,6 @@ gs_utils_rmtree_real (const gchar *directory, GError **error)
 	}
 	return TRUE;
 }
-
 /**
  * gs_utils_rmtree:
  * @directory: A full directory pathname to delete
@@ -498,7 +457,6 @@ gs_utils_rmtree (const gchar *directory, GError **error)
 	g_debug ("recursively removing directory '%s'", directory);
 	return gs_utils_rmtree_real (directory, error);
 }
-
 static gdouble
 pnormaldist (gdouble qn)
 {
@@ -508,12 +466,10 @@ pnormaldist (gdouble qn)
 				 0.3657763036e-10, 0.6936233982e-12 };
 	gdouble w1, w3;
 	guint i;
-
 	if (qn < 0 || qn > 1)
 		return 0; // This is an error case
 	if (qn == 0.5)
 		return 0;
-
 	w1 = qn;
 	if (qn > 0.5)
 		w1 = 1.0 - w1;
@@ -521,13 +477,11 @@ pnormaldist (gdouble qn)
 	w1 = b[0];
 	for (i = 1; i < 11; i++)
 		w1 = w1 + (b[i] * pow (w3, i));
-
 	if (qn > 0.5)
 		return sqrt (w1 * w3);
 	else
 		return -sqrt (w1 * w3);
 }
-
 static gdouble
 wilson_score (gdouble value, gdouble n, gdouble power)
 {
@@ -540,7 +494,6 @@ wilson_score (gdouble value, gdouble n, gdouble power)
 		z * sqrt ((phat * (1 - phat) + z * z / (4 * n)) / n)) /
 		(1 + z * z / n);
 }
-
 /**
  * gs_utils_get_wilson_rating:
  * @star1: The number of 1 star reviews
@@ -568,23 +521,18 @@ gs_utils_get_wilson_rating (guint64 star1,
 	guint64 star_sum = star1 + star2 + star3 + star4 + star5;
 	if (star_sum == 0)
 		return -1;
-
 	/* get score */
 	val =  (wilson_score ((gdouble) star1, (gdouble) star_sum, 0.2) * -2);
 	val += (wilson_score ((gdouble) star2, (gdouble) star_sum, 0.2) * -1);
 	val += (wilson_score ((gdouble) star4, (gdouble) star_sum, 0.2) * 1);
 	val += (wilson_score ((gdouble) star5, (gdouble) star_sum, 0.2) * 2);
-
 	/* normalize from -2..+2 to 0..5 */
 	val += 3;
-
 	/* multiply to a percentage */
 	val *= 20;
-
 	/* return rounded up integer */
 	return (gint) ceil (val);
 }
-
 /**
  * gs_utils_error_add_app_id:
  * @error: a #GError
@@ -602,7 +550,6 @@ gs_utils_error_add_app_id (GError **error, GsApp *app)
 		return;
 	g_prefix_error (error, "{%s} ", gs_app_get_unique_id (app));
 }
-
 /**
  * gs_utils_error_add_origin_id:
  * @error: a #GError
@@ -620,7 +567,6 @@ gs_utils_error_add_origin_id (GError **error, GsApp *origin)
 		return;
 	g_prefix_error (error, "[%s] ", gs_app_get_unique_id (origin));
 }
-
 /**
  * gs_utils_error_strip_app_id:
  * @error: a #GError
@@ -637,10 +583,8 @@ gs_utils_error_strip_app_id (GError *error)
 {
 	g_autofree gchar *app_id = NULL;
 	g_autofree gchar *msg = NULL;
-
 	if (error == NULL || error->message == NULL)
 		return FALSE;
-
 	if (g_str_has_prefix (error->message, "{")) {
 		const gchar *endp = strstr (error->message + 1, "} ");
 		if (endp != NULL) {
@@ -649,15 +593,12 @@ gs_utils_error_strip_app_id (GError *error)
 			msg = g_strdup (endp + 2);
 		}
 	}
-
 	if (msg != NULL) {
 		g_free (error->message);
 		error->message = g_steal_pointer (&msg);
 	}
-
 	return g_steal_pointer (&app_id);
 }
-
 /**
  * gs_utils_error_strip_origin_id:
  * @error: a #GError
@@ -674,10 +615,8 @@ gs_utils_error_strip_origin_id (GError *error)
 {
 	g_autofree gchar *origin_id = NULL;
 	g_autofree gchar *msg = NULL;
-
 	if (error == NULL || error->message == NULL)
 		return FALSE;
-
 	if (g_str_has_prefix (error->message, "[")) {
 		const gchar *endp = strstr (error->message + 1, "] ");
 		if (endp != NULL) {
@@ -686,15 +625,12 @@ gs_utils_error_strip_origin_id (GError *error)
 			msg = g_strdup (endp + 2);
 		}
 	}
-
 	if (msg != NULL) {
 		g_free (error->message);
 		error->message = g_steal_pointer (&msg);
 	}
-
 	return g_steal_pointer (&origin_id);
 }
-
 /**
  * gs_utils_error_convert_gdbus:
  * @perror: a pointer to a #GError, or %NULL
@@ -707,7 +643,6 @@ gboolean
 gs_utils_error_convert_gdbus (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
@@ -753,7 +688,6 @@ gs_utils_error_convert_gdbus (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_error_convert_gio:
  * @perror: a pointer to a #GError, or %NULL
@@ -766,7 +700,6 @@ gboolean
 gs_utils_error_convert_gio (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
@@ -815,7 +748,6 @@ gs_utils_error_convert_gio (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_error_convert_gresolver:
  * @perror: a pointer to a #GError, or %NULL
@@ -828,7 +760,6 @@ gboolean
 gs_utils_error_convert_gresolver (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
@@ -853,7 +784,6 @@ gs_utils_error_convert_gresolver (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_error_convert_gdk_pixbuf:
  * @perror: a pointer to a #GError, or %NULL
@@ -866,7 +796,6 @@ gboolean
 gs_utils_error_convert_gdk_pixbuf (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
@@ -894,7 +823,6 @@ gs_utils_error_convert_gdk_pixbuf (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_error_convert_json_glib:
  * @perror: a pointer to a #GError, or %NULL
@@ -907,7 +835,6 @@ gboolean
 gs_utils_error_convert_json_glib (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
@@ -926,7 +853,6 @@ gs_utils_error_convert_json_glib (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_error_convert_appstream:
  * @perror: a pointer to a #GError, or %NULL
@@ -940,13 +866,11 @@ gboolean
 gs_utils_error_convert_appstream (GError **perror)
 {
 	GError *error = perror != NULL ? *perror : NULL;
-
 	/* not set */
 	if (error == NULL)
 		return FALSE;
 	if (error->domain == GS_PLUGIN_ERROR)
 		return TRUE;
-
 	/* custom to this plugin */
 	if (error->domain == AS_UTILS_ERROR) {
 		switch (error->code) {
@@ -987,7 +911,6 @@ gs_utils_error_convert_appstream (GError **perror)
 	error->domain = GS_PLUGIN_ERROR;
 	return TRUE;
 }
-
 /**
  * gs_utils_get_url_scheme:
  * @url: A URL, e.g. "appstream://gimp.desktop"
@@ -1000,20 +923,16 @@ gchar *
 gs_utils_get_url_scheme	(const gchar *url)
 {
 	g_autoptr(SoupURI) uri = NULL;
-
 	/* no data */
 	if (url == NULL)
 		return NULL;
-
 	/* create URI from URL */
 	uri = soup_uri_new (url);
 	if (!SOUP_URI_IS_VALID (uri))
 		return NULL;
-
 	/* success */
 	return g_strdup (soup_uri_get_scheme (uri));
 }
-
 /**
  * gs_utils_get_url_path:
  * @url: A URL, e.g. "appstream://gimp.desktop"
@@ -1028,26 +947,21 @@ gs_utils_get_url_path (const gchar *url)
 	g_autoptr(SoupURI) uri = NULL;
 	const gchar *host;
 	const gchar *path;
-
 	uri = soup_uri_new (url);
 	if (!SOUP_URI_IS_VALID (uri))
 		return NULL;
-
 	/* foo://bar -> scheme: foo, host: bar, path: / */
 	/* foo:bar -> scheme: foo, host: (empty string), path: /bar */
 	host = soup_uri_get_host (uri);
 	path = soup_uri_get_path (uri);
 	if (host != NULL && (strlen (host) > 0))
 		path = host;
-
 	/* trim any leading slashes */
 	while (*path == '/')
 		path++;
-
 	/* success */
 	return g_strdup (path);
 }
-
 /**
  * gs_utils_get_url_query:
  * @url: A URL, e.g. "snap://moon-buggy?channel=beta"
@@ -1065,11 +979,9 @@ gs_utils_get_url_query_param (const gchar *url, const gchar *name)
 	g_autofree gchar *prefix = NULL;
 	g_auto(GStrv) params = NULL;
 	int i;
-
 	uri = soup_uri_new (url);
 	if (!SOUP_URI_IS_VALID (uri))
 		return NULL;
-
 	query = soup_uri_get_query (uri);
 	if (query == NULL)
 		return NULL;
@@ -1079,10 +991,8 @@ gs_utils_get_url_query_param (const gchar *url, const gchar *name)
 		if (g_str_has_prefix (params[i], prefix))
 			return g_strdup (params[i] + strlen (prefix));
 	}
-
 	return NULL;
 }
-
 /**
  * gs_user_agent:
  *
@@ -1095,7 +1005,6 @@ gs_user_agent (void)
 {
 	return PACKAGE_NAME "/" PACKAGE_VERSION;
 }
-
 /**
  * gs_utils_append_key_value:
  * @str: A #GString
@@ -1112,10 +1021,8 @@ gs_utils_append_key_value (GString *str, gsize align_len,
 			   const gchar *key, const gchar *value)
 {
 	gsize len = 0;
-
 	g_return_if_fail (str != NULL);
 	g_return_if_fail (value != NULL);
-
 	if (key != NULL) {
 		len = strlen (key) + 2;
 		g_string_append (str, key);
@@ -1126,7 +1033,6 @@ gs_utils_append_key_value (GString *str, gsize align_len,
 	g_string_append (str, value);
 	g_string_append (str, "\n");
 }
-
 /**
  * gs_utils_is_low_resolution:
  * @toplevel: widget on monitor to check
@@ -1141,15 +1047,11 @@ gs_utils_is_low_resolution (GtkWidget *toplevel)
 	GdkRectangle geometry;
 	GdkDisplay *display;
 	GdkMonitor *monitor;
-
 	display = gtk_widget_get_display (toplevel);
 	monitor = gdk_display_get_monitor_at_window (display, gtk_widget_get_window (toplevel));
-
 	gdk_monitor_get_geometry (monitor, &geometry);
-
 	return geometry.width < LOW_RESOLUTION_WIDTH || geometry.height < LOW_RESOLUTION_HEIGHT;
 }
-
 guint
 gs_utils_get_memory_total (void)
 {
@@ -1165,7 +1067,6 @@ gs_utils_get_memory_total (void)
 #error "Please implement gs_utils_get_memory_total for your system."
 #endif
 }
-
 /**
  * gs_utils_parse_evr:
  * @evr: an EVR version string
@@ -1186,7 +1087,6 @@ gs_utils_parse_evr (const gchar *evr,
 	const gchar *version_release;
 	g_auto(GStrv) split_colon = NULL;
 	g_auto(GStrv) split_dash = NULL;
-
 	/* split on : to get epoch */
 	split_colon = g_strsplit (evr, ":", -1);
 	switch (g_strv_length (split_colon)) {
@@ -1204,7 +1104,6 @@ gs_utils_parse_evr (const gchar *evr,
 		/* error */
 		return FALSE;
 	}
-
 	/* split on - to get version and release */
 	split_dash = g_strsplit (version_release, "-", -1);
 	switch (g_strv_length (split_dash)) {
@@ -1222,13 +1121,11 @@ gs_utils_parse_evr (const gchar *evr,
 		/* error */
 		return FALSE;
 	}
-
 	g_assert (*out_epoch != NULL);
 	g_assert (*out_version != NULL);
 	g_assert (*out_release != NULL);
 	return TRUE;
 }
-
 /**
  * gs_utils_desktop_category_label:
  * @name: gnome category name
@@ -1239,90 +1136,99 @@ const gchar *
 gs_utils_get_desktop_category_label (const gchar *name)
 {
     const gchar *desktop_name = NULL;
-
-    if (g_strcmp0 (name, "AudioVideo") == 0) {
+    if (g_ascii_strcasecmp (name, "AudioVideo") == 0 ||
+	    g_ascii_strcasecmp (name, "AudioVideoEditing") == 0 ||
+	    g_ascii_strcasecmp (name, "Midi") == 0 ||
+	    g_ascii_strcasecmp (name, "DiscBurning") == 0 ||
+	    g_ascii_strcasecmp (name, "Sequencer") == 0 ||
+	    g_ascii_strcasecmp (name, "Music") == 0 ||
+	    g_ascii_strcasecmp (name, "Player") == 0 ) {
         desktop_name = g_strdup ("Audio & Video");
     }
-    else if (g_strcmp0 (name, "Development") == 0){
+    else if (g_ascii_strcasecmp (name, "Development") == 0 ||
+	         g_ascii_strcasecmp (name, "Debugger") == 0 ||
+	         g_ascii_strcasecmp (name, "IDE") == 0 ||
+	         g_ascii_strcasecmp (name, "GUIDesigner") == 0 ) {
         desktop_name = g_strdup ("Developer Tools");
     }
-    else if (g_strcmp0 (name, "Education") == 0){
+    else if (g_ascii_strcasecmp (name, "Education") == 0 ||
+	         g_ascii_strcasecmp (name, "Science") == 0 ||
+	         g_ascii_strcasecmp (name, "Astronomy") == 0 ||
+	         g_ascii_strcasecmp (name, "Chemistry") == 0 ||
+	         g_ascii_strcasecmp (name, "Languages") == 0 ||
+	         g_ascii_strcasecmp (name, "Literature") == 0 ||
+	         g_ascii_strcasecmp (name, "Math") == 0 ||
+	         g_ascii_strcasecmp (name, "NumericalAnalysis") == 0 ||
+	         g_ascii_strcasecmp (name, "Physics") == 0 ||
+	         g_ascii_strcasecmp (name, "Robotics") == 0 ) {
         desktop_name = g_strdup ("Education & Science");
     }
-    else if (g_strcmp0 (name, "Science") == 0){
-        desktop_name = g_strdup ("Education & Science");
-    }
-    else if (g_strcmp0 (name, "Game") == 0){
+    else if (g_ascii_strcasecmp (name, "Game") == 0 ||
+	         g_ascii_strcasecmp (name, "ActionGame") == 0 ||
+	         g_ascii_strcasecmp (name, "AdventureGame") == 0 ||
+	         g_ascii_strcasecmp (name, "ArcadeGame") == 0 ||
+	         g_ascii_strcasecmp (name, "BlocksGame") == 0 ||
+	         g_ascii_strcasecmp (name, "BoardGame") == 0 ||
+	         g_ascii_strcasecmp (name, "CardGame") == 0 ||
+	         g_ascii_strcasecmp (name, "Emulator") == 0 ||
+	         g_ascii_strcasecmp (name, "kidsGame") == 0 ||
+	         g_ascii_strcasecmp (name, "LogicGame") == 0 ||
+	         g_ascii_strcasecmp (name, "RolePlaying") == 0 ||
+	         g_ascii_strcasecmp (name, "SportsGame") == 0 ||
+	         g_ascii_strcasecmp (name, "StrategyGame") == 0 ||
+	         g_ascii_strcasecmp (name, "Simulation") == 0 ) {
         desktop_name = g_strdup ("Games");
     }
-    else if (g_strcmp0 (name, "Graphics") == 0){
+    else if (g_ascii_strcasecmp (name, "Graphics") == 0 ||
+	         g_ascii_strcasecmp (name, "3DGraphics") == 0 ||
+	         g_ascii_strcasecmp (name, "PhotoGraphics") == 0 ||
+	         g_ascii_strcasecmp (name, "Scanning") == 0 ||
+	         g_ascii_strcasecmp (name, "VectorGraphics") == 0 ||
+	         g_ascii_strcasecmp (name, "Viewer") == 0 ) {
         desktop_name = g_strdup ("Graphics & Photography");
     }
-    else if (g_strcmp0 (name, "Office") == 0){
+    else if (g_ascii_strcasecmp (name, "Office") == 0 ||
+	         g_ascii_strcasecmp (name, "Calendar") == 0 ||
+	         g_ascii_strcasecmp (name, "ProjectManagement") == 0 ||
+	         g_ascii_strcasecmp (name, "Database") == 0 ||
+	         g_ascii_strcasecmp (name, "Finance") == 0 ||
+	         g_ascii_strcasecmp (name, "Spreadsheet") == 0 ||
+	         g_ascii_strcasecmp (name, "WordProcessor") == 0 ||
+	         g_ascii_strcasecmp (name, "Dictionary") == 0 ) {
         desktop_name = g_strdup ("Productivity");
     }
-    else if (g_strcmp0 (name, "Network") == 0){
+    else if (g_ascii_strcasecmp (name, "Network") == 0 ||
+	         g_ascii_strcasecmp (name, "Chat") == 0 ||
+	         g_ascii_strcasecmp (name, "InstantMessaging") == 0 ||
+	         g_ascii_strcasecmp (name, "IRCClient") == 0 ||
+	         g_ascii_strcasecmp (name, "Telephony") == 0 ||
+	         g_ascii_strcasecmp (name, "VideoConference") == 0 ||
+	         g_ascii_strcasecmp (name, "Email") == 0 ||
+	         g_ascii_strcasecmp (name, "Feed") == 0 ||
+	         g_ascii_strcasecmp (name, "News") == 0 ||
+	         g_ascii_strcasecmp (name, "WebBrowser") == 0 ) {
         desktop_name = g_strdup ("Communication & News");
     }
-    else if (g_strcmp0 (name, "Reference") == 0){
+    else if (g_ascii_strcasecmp (name, "Reference") == 0 ||
+	         g_ascii_strcasecmp (name, "Art") == 0 ||
+	         g_ascii_strcasecmp (name, "Biography") == 0 ||
+	         g_ascii_strcasecmp (name, "Comics") == 0 ||
+	         g_ascii_strcasecmp (name, "Fiction") == 0 ||
+	         g_ascii_strcasecmp (name, "Health") == 0 ||
+	         g_ascii_strcasecmp (name, "History") == 0 ||
+	         g_ascii_strcasecmp (name, "Lifestyle") == 0 ||
+	         g_ascii_strcasecmp (name, "Politics") == 0 ||
+	         g_ascii_strcasecmp (name, "Sports") == 0 ) {
         desktop_name = g_strdup ("Reference");
     }
-    else if (g_strcmp0 (name, "Utility") == 0){
+    else if (g_ascii_strcasecmp (name, "Utility") == 0 ||
+	         g_ascii_strcasecmp (name, "TextEditor") == 0 ) {
         desktop_name = g_strdup ("Utilities");
     }
     else {
         return NULL;
     }
-    
+
     return desktop_name;
 }
-
-/**
- * gs_utils_appstream_category_label:
- * @name: gnome category name
- *
- * Returns: Appstream category name
- **/
-const gchar *
-gs_utils_desktop_category_to_appstream_category (const gchar *name)
-{
-    const gchar *appstream_name= NULL;
-
-    if (g_strcmp0 (name, "AudioVideo") == 0) {
-        appstream_name = g_strdup ("audio-video");
-    }
-    else if (g_strcmp0 (name, "Development") == 0) {
-        appstream_name = g_strdup ("developer-tools");
-    }
-    else if (g_strcmp0 (name, "Education") == 0) {
-        appstream_name = g_strdup ("education-science");
-    }
-    else if (g_strcmp0 (name, "Science") == 0) {
-        appstream_name = g_strdup ("education-science");
-    }
-    else if (g_strcmp0 (name, "Game") == 0) {
-        appstream_name = g_strdup ("games");
-    }
-    else if (g_strcmp0 (name, "Graphics") == 0) {
-        appstream_name = g_strdup ("graphics");
-    }
-    else if (g_strcmp0 (name, "Office") == 0) {
-        appstream_name = g_strdup ("productivity");
-    }
-    else if (g_strcmp0 (name, "Network") == 0) {
-        appstream_name = g_strdup ("communication");
-    }
-    else if (g_strcmp0 (name, "Reference") == 0) {
-        appstream_name = g_strdup ("reference");
-    }
-    else if (g_strcmp0 (name, "Utility") == 0) {
-        appstream_name = g_strdup ("utilities");
-    }
-    else {
-        return NULL;
-    }
-
-    return appstream_name;
-}
-
 /* vim: set noexpandtab: */

@@ -591,6 +591,7 @@ gs_plugin_add_category_apps (GsPlugin *plugin,
 				return FALSE;
 			for (j = 0; j < snaps->len; j++) {
 				g_autoptr(GsApp) app = snap_to_app (plugin, g_ptr_array_index (snaps, j));
+				gs_app_set_desktop_group (app, tokens[0]);
 				gs_app_list_add (list, app);
 			}
 		}

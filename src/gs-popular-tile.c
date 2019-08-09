@@ -97,6 +97,9 @@ gs_popular_tile_set_app (GsAppTile *app_tile, GsApp *app)
 {
 	GsPopularTile *tile = GS_POPULAR_TILE (app_tile);
 	const gchar *css;
+	const gchar *group;
+	const gchar *desktop_name;
+	g_autofree gchar *str = NULL;
     GPtrArray *categories;
 
 	g_return_if_fail (GS_IS_APP (app) || app == NULL);
@@ -131,20 +134,19 @@ gs_popular_tile_set_app (GsAppTile *app_tile, GsApp *app)
 	}
 
 	gtk_label_set_label (GTK_LABEL (tile->label), gs_app_get_name (app));
-    
-    categories = gs_app_get_categories (app);
-    if (categories)
-    {
-        g_autofree gchar *str = NULL;
-        const gchar *tmp = g_ptr_array_index (categories, 0);
-        const gchar *desktop_name = gs_utils_get_desktop_category_label (tmp);
-        if (desktop_name == NULL) {
-            tmp = g_ptr_array_index (categories, 1);
-            desktop_name = gs_utils_get_desktop_category_label (tmp);
-        }
-        str = g_strdup (_(desktop_name));
-	    gtk_label_set_label (GTK_LABEL (tile->category), str);
-    }
+
+	group = gs_app_get_desktop_group (app);
+	if (group == NULL) {
+        categories = gs_app_get_categories (app);
+        if (categories)
+            group = g_ptr_array_index (categories, 0);
+	}
+
+    desktop_name = gs_utils_get_desktop_category_label (group);
+	if (desktop_name ==  NULL)
+	    desktop_name = group;
+    str = g_strdup (_(desktop_name));
+	gtk_label_set_label (GTK_LABEL (tile->category), str);
 }
 
 static void

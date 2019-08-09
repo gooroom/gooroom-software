@@ -71,6 +71,7 @@ typedef struct
 	GPtrArray		*sources;
 	GPtrArray		*source_ids;
 	gchar			*project_group;
+	gchar			*desktop_group;
 	gchar			*developer_name;
 	gchar			*agreement;
 	gchar			*version;
@@ -1583,6 +1584,24 @@ gs_app_get_project_group (GsApp *app)
 }
 
 /**
+ * gs_app_get_desktop_group:
+ * @app: a #GsApp
+ *
+ * Gets a desktop group for the application.
+ *
+ * Returns: a string, or %NULL for unset
+ *
+ * Since: 3.22
+ **/
+const gchar *
+gs_app_get_desktop_group (GsApp *app)
+{
+	GsAppPrivate *priv = gs_app_get_instance_private (app);
+	g_return_val_if_fail (GS_IS_APP (app), NULL);
+	return priv->desktop_group;
+}
+
+/**
  * gs_app_get_developer_name:
  * @app: a #GsApp
  *
@@ -1617,6 +1636,25 @@ gs_app_set_project_group (GsApp *app, const gchar *project_group)
 	g_return_if_fail (GS_IS_APP (app));
 	locker = g_mutex_locker_new (&priv->mutex);
 	_g_set_str (&priv->project_group, project_group);
+}
+
+/**
+ * gs_app_set_desktop_group:
+ * @app: a #GsApp
+ * @desktop_group:
+ *
+ * Sets a desktop group for the application.
+ *
+ * Since: 3.22
+ **/
+void
+gs_app_set_desktop_group (GsApp *app, const gchar *desktop_group)
+{
+	GsAppPrivate *priv = gs_app_get_instance_private (app);
+	g_autoptr(GMutexLocker) locker = NULL;
+	g_return_if_fail (GS_IS_APP (app));
+	locker = g_mutex_locker_new (&priv->mutex);
+	_g_set_str (&priv->desktop_group, desktop_group);
 }
 
 /**
@@ -4285,6 +4323,7 @@ gs_app_finalize (GObject *object)
 	g_ptr_array_unref (priv->sources);
 	g_ptr_array_unref (priv->source_ids);
 	g_free (priv->project_group);
+	g_free (priv->desktop_group);
 	g_free (priv->developer_name);
 	g_free (priv->agreement);
 	g_free (priv->version);

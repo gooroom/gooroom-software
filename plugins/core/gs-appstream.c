@@ -487,7 +487,6 @@ gs_appstream_refine_app (GsPlugin *plugin,
 	    gs_app_get_kind (app) == AS_APP_KIND_GENERIC) {
 		gs_app_set_kind (app, as_app_get_kind (item));
 	}
-
 	/* is compatible */
 	req = as_app_get_require_by_value (item,
 					   AS_REQUIRE_KIND_ID,
@@ -969,6 +968,8 @@ gs_appstream_store_add_category_apps (GsPlugin *plugin,
 			app = gs_appstream_create_app (plugin, item, error);
 			if (app == NULL)
 				return FALSE;
+
+			gs_app_set_desktop_group (app, split[0]);
 			gs_app_list_add (list, app);
 		}
 	}
@@ -983,7 +984,6 @@ gs_appstream_store_add_categories (GsPlugin *plugin,
 				   GError **error)
 {
 	g_autoptr(GPtrArray) array = NULL;
-
 	/* find out how many packages are in each category */
 #if AS_CHECK_VERSION(0,7,15)
 	array = as_store_dup_apps (store);
