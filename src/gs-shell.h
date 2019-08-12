@@ -62,6 +62,16 @@ typedef enum {
 	GS_SHELL_INTERACTION_LAST
 } GsShellInteraction;
 
+typedef enum {
+    GS_SHELL_EVENT_BUTTON_NONE      = 0,
+    GS_SHELL_EVENT_BUTTON_SOURCES       = 1 << 0,
+    GS_SHELL_EVENT_BUTTON_NO_SPACE      = 1 << 1,
+    GS_SHELL_EVENT_BUTTON_NETWORK_SETTINGS  = 1 << 2,
+    GS_SHELL_EVENT_BUTTON_MORE_INFO     = 1 << 3,
+    GS_SHELL_EVENT_BUTTON_RESTART_REQUIRED  = 1 << 4,
+    GS_SHELL_EVENT_BUTTON_LAST
+} GsShellEventButtons;
+
 GsShell		*gs_shell_new			(void);
 void		 gs_shell_activate		(GsShell	*shell);
 void		 gs_shell_refresh		(GsShell	*shell,
@@ -106,6 +116,9 @@ GtkWindow	*gs_shell_get_window		(GsShell	*shell);
 
 GsCategory  *gs_shell_get_category  (GsShell    *shell,
                         GPtrArray   *find_categories);
+void 		 gs_shell_notify (GsShell *shell,
+						const gchar		*title,
+						GsShellEventButtons buttons);
 G_END_DECLS
 
 #endif /* __GS_SHELL_H */

@@ -1729,6 +1729,8 @@ gs_plugin_action_to_function_name (GsPluginAction action)
 		return "gs_plugin_add_installed";
 	if (action == GS_PLUGIN_ACTION_GET_FEATURED)
 		return "gs_plugin_add_featured";
+	if (action == GS_PLUGIN_ACTION_GET_EDITOR_FEATURED)
+		return "gs_plugin_add_editor_featured";
 	if (action == GS_PLUGIN_ACTION_GET_UPDATES_HISTORICAL)
 		return "gs_plugin_add_updates_historical";
 	if (action == GS_PLUGIN_ACTION_GET_UPDATES)
@@ -1831,6 +1833,8 @@ gs_plugin_action_to_string (GsPluginAction action)
 		return "get-popular";
 	if (action == GS_PLUGIN_ACTION_GET_FEATURED)
 		return "get-featured";
+	if (action == GS_PLUGIN_ACTION_GET_EDITOR_FEATURED)
+		return "get-editor-featured";
 	if (action == GS_PLUGIN_ACTION_SEARCH)
 		return "search";
 	if (action == GS_PLUGIN_ACTION_SEARCH_FILES)

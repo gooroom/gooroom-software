@@ -699,6 +699,7 @@ gs_plugin_loader_call_vfunc (GsPluginLoaderHelper *helper,
 	case GS_PLUGIN_ACTION_GET_INSTALLED:
 	case GS_PLUGIN_ACTION_GET_POPULAR:
 	case GS_PLUGIN_ACTION_GET_FEATURED:
+	case GS_PLUGIN_ACTION_GET_EDITOR_FEATURED:
 		{
 			GsPluginResultsFunc plugin_func = func;
 			ret = plugin_func (plugin, list, cancellable, &error_local);
@@ -3399,6 +3400,11 @@ gs_plugin_loader_process_thread_cb (GTask *task,
 			gs_app_list_filter (list, gs_plugin_loader_get_app_is_compatible, plugin_loader);
 		}
 		break;
+	case GS_PLUGIN_ACTION_GET_EDITOR_FEATURED:
+		gs_app_list_filter (list, gs_plugin_loader_app_is_valid, helper);
+		gs_app_list_filter (list, gs_plugin_loader_filter_qt_for_gtk, NULL);
+		gs_app_list_filter (list, gs_plugin_loader_get_app_is_compatible, plugin_loader);
+		break;
 	case GS_PLUGIN_ACTION_GET_UPDATES:
 		gs_app_list_filter (list, gs_plugin_loader_app_is_valid_updatable, helper);
 		break;
@@ -3720,6 +3726,7 @@ gs_plugin_loader_job_process_async (GsPluginLoader *plugin_loader,
 	switch (action) {
 	case GS_PLUGIN_ACTION_GET_CATEGORY_APPS:
 	case GS_PLUGIN_ACTION_GET_FEATURED:
+	case GS_PLUGIN_ACTION_GET_EDITOR_FEATURED:
 	case GS_PLUGIN_ACTION_GET_INSTALLED:
 	case GS_PLUGIN_ACTION_GET_POPULAR:
 	case GS_PLUGIN_ACTION_GET_RECENT:

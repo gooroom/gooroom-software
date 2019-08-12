@@ -684,6 +684,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
     GPtrArray *categories;
     GPtrArray *provides;
     const gchar *category_name;
+	gboolean addon_visible = FALSE;
 
 	/* change widgets */
 	tmp = gs_app_get_name (self->app);
@@ -896,6 +897,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	case AS_APP_STATE_INSTALLED:
 	case AS_APP_STATE_UPDATABLE:
 	case AS_APP_STATE_UPDATABLE_LIVE:
+	    addon_visible = TRUE;
 		gtk_widget_set_visible (self->label_addons_uninstalled_app, FALSE);
 		break;
 	default:
@@ -906,9 +908,11 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	/* update progress */
 	gs_details_page_refresh_progress (self);
 
-	addons = gtk_container_get_children (GTK_CONTAINER (self->list_box_addons));
-	gtk_widget_set_visible (self->box_addons, addons != NULL);
-	g_list_free (addons);
+    if (addon_visible) {
+	    addons = gtk_container_get_children (GTK_CONTAINER (self->list_box_addons));
+	    gtk_widget_set_visible (self->box_addons, addons != NULL);
+	    g_list_free (addons);
+	}
 }
 
 static void
@@ -939,8 +943,19 @@ static void gs_details_page_addon_selected_cb (GsAppAddonRow *row, GParamSpec *p
 static void
 gs_details_page_refresh_addons (GsDetailsPage *self)
 {
-	GsAppList *addons;
 	guint i;
+	GsAppList *addons;
+
+    switch (gs_app_get_state (self->app)) {
+	case AS_APP_STATE_INSTALLED:
+	case AS_APP_STATE_UPDATABLE:
+	case AS_APP_STATE_UPDATABLE_LIVE:
+	    gtk_widget_set_visible (self->box_addons, TRUE);
+	    break;
+	default:
+	    gtk_widget_set_visible (self->box_addons, FALSE);
+		return;
+	}
 
 	gs_container_remove_all (GTK_CONTAINER (self->list_box_addons));
 
@@ -1553,6 +1568,7 @@ gs_page_channel_switched_cb (GObject *source,
 static void
 gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 {
+#if 0
 	g_autoptr(GList) addons = NULL;
 
 	/* Mark ticked addons to be installed together with the app */
@@ -1565,7 +1581,7 @@ gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 				gs_app_set_to_be_installed (addon, TRUE);
 		}
 	}
-
+#endif
 	g_set_object (&self->app_cancellable, gs_app_get_cancellable (self->app));
 
 	if (gs_app_get_state (self->app) == AS_APP_STATE_UPDATABLE_LIVE) {
@@ -1573,9 +1589,13 @@ gs_details_page_app_install_button_cb (GtkWidget *widget, GsDetailsPage *self)
 		return;
 	}
 
-	gs_page_install_app (GS_PAGE (self), self->app, GS_SHELL_INTERACTION_FULL,
-			     self->app_cancellable);
-
+	if (gs_plugin_loader_get_network_available (self->plugin_loader)) {
+		gs_page_install_app (GS_PAGE (self), self->app, GS_SHELL_INTERACTION_FULL,
+			     	self->app_cancellable);
+	}
+	else {
+		gs_shell_notify (self->shell, _("Unable to install: internet access was required but wasn’t available"), GS_SHELL_EVENT_BUTTON_NETWORK_SETTINGS);
+	}
 }
 
 static void

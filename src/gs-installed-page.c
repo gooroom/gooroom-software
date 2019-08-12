@@ -171,8 +171,15 @@ should_show_installed_size (GsInstalledPage *self)
 static gboolean
 gs_installed_page_is_actual_app (GsApp *app)
 {
+    const gchar *origin;
+
 	if (gs_app_get_description (app) != NULL)
 		return TRUE;
+
+	origin = gs_app_get_origin (app);
+	if (g_strcmp0 (origin, "gooroom") == 0)
+		return TRUE;
+
 	/* special snowflake */
 	if (g_strcmp0 (gs_app_get_id (app), "google-chrome.desktop") == 0)
 		return TRUE;

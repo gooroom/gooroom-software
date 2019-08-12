@@ -160,17 +160,18 @@ gs_category_button_activate_cb (GtkWidget *widget, GdkEvent *event, gpointer use
     gboolean is_active;
 	GsShellPrivate *priv = gs_shell_get_instance_private (user_data);
     GtkWidget *img_widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_category_right_arrow_image"));
+
     if (event->type == GDK_ENTER_NOTIFY)
     {
         gtk_widget_show (img_widget);
-        gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup (".main_menu_button { background-color: rgba(201,201,201,0.6);}"));
+        gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup ("background-color:rgba(201,201,201,0.6)"));
     }
     else
     {
         is_active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(widget)); 
         if (!is_active) {
             gtk_widget_hide (img_widget);
-            gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup (".main_menu_button { background-color: rgba(255,255,255,1.0);}"));
+            gs_utils_widget_set_css (GTK_WIDGET (widget), g_strdup ("background-color:rgba(255,255,255,1.0)"));
         }
     }
 }
@@ -803,16 +804,6 @@ gs_shell_allow_updates_notify_cb (GsPluginLoader *plugin_loader,
 	gtk_widget_set_visible (widget, gs_plugin_loader_get_allow_updates (plugin_loader) ||
 					priv->mode == GS_SHELL_MODE_UPDATES);
 }
-
-typedef enum {
-	GS_SHELL_EVENT_BUTTON_NONE		= 0,
-	GS_SHELL_EVENT_BUTTON_SOURCES		= 1 << 0,
-	GS_SHELL_EVENT_BUTTON_NO_SPACE		= 1 << 1,
-	GS_SHELL_EVENT_BUTTON_NETWORK_SETTINGS	= 1 << 2,
-	GS_SHELL_EVENT_BUTTON_MORE_INFO		= 1 << 3,
-	GS_SHELL_EVENT_BUTTON_RESTART_REQUIRED	= 1 << 4,
-	GS_SHELL_EVENT_BUTTON_LAST
-} GsShellEventButtons;
 
 static gboolean
 gs_shell_has_disk_examination_app (void)
@@ -2203,6 +2194,14 @@ gs_shell_show_uri (GsShell *shell, const gchar *url)
 		g_warning ("failed to show URI %s: %s",
 		           url, error->message);
 	}
+}
+
+void
+gs_shell_notify(GsShell *shell,
+				const gchar *title,
+				GsShellEventButtons buttons)
+{
+	gs_shell_show_event_app_notify (shell, title, buttons);
 }
 
 static void

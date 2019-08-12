@@ -377,6 +377,19 @@ gboolean	 gs_plugin_add_featured			(GsPlugin	*plugin,
 							 GError		**error);
 
 /**
+ * gs_plugin_add_editor_featured:
+ * @plugin: a #GsPlugin
+ * @list: a #GsAppList
+ * @cancellable: a #GCancellable, or %NULL
+ * @error: a #GError, or %NULL
+ *
+ * Returns: %TRUE for success or if not relevant
+ **/
+gboolean	 gs_plugin_add_editor_featured			(GsPlugin	*plugin,
+							 GsAppList	*list,
+							 GCancellable	*cancellable,
+							 GError		**error);
+/**
  * gs_plugin_add_unvoted_reviews:
  * @plugin: a #GsPlugin
  * @list: a #GsAppList

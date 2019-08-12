@@ -375,11 +375,9 @@ gs_app_row_refresh (GsAppRow *app_row)
 		sizestr = g_format_size (size);
 		gtk_label_set_label (GTK_LABEL (priv->label_app_size), sizestr);
 		gtk_widget_show (priv->label_app_size);
-	} else {
-		gtk_widget_hide (priv->label_app_size);
 	}
 
-    /* show the install date */
+	/* show the install date */
     if (!priv->show_update && priv->show_buttons) {
         g_autoptr(GDateTime) dt = NULL;
         g_autofree gchar *installed_date = NULL;
@@ -387,7 +385,7 @@ gs_app_row_refresh (GsAppRow *app_row)
         g_autofree gchar *date = NULL;
         g_autofree gchar *installed_str = g_strdup (_("Installed"));
         if (installed == 0 || installed == 1) {
-            date = g_strdup_printf ("%s", installed_str); 
+            date = g_strdup_printf ("%s", installed_str);
         }
         else {
             dt = g_date_time_new_from_unix_utc ((gint64)installed);
