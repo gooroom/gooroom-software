@@ -83,6 +83,7 @@ typedef struct
 	gchar			*events_info_uri;
 	gboolean		 in_mode_change;
 	GsPage			*page_last;
+	gboolean		 search_clean;
 
     GtkWidget       *category_menu;
 } GsShellPrivate;
@@ -471,6 +472,23 @@ gs_shell_change_mode (GsShell *shell,
 		}
 		g_ptr_array_set_size (priv->modal_dialogs, 0);
 	}
+
+	priv->in_mode_change = TRUE;
+	if (mode == GS_SHELL_MODE_UPDATES ||
+		mode == GS_SHELL_MODE_DETAILS ||
+		mode == GS_SHELL_MODE_INSTALLED ||
+		mode == GS_SHELL_MODE_CATEGORY ||
+		mode == GS_SHELL_MODE_OVERVIEW) {
+
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "entry_search"));
+		const gchar *search_msg = gtk_entry_get_text (GTK_ENTRY (widget));
+		if (g_utf8_strlen(search_msg, -1) > 0 ) {
+			priv->search_clean = TRUE;
+			widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "entry_search"));
+			gtk_entry_set_text (GTK_ENTRY (widget), "");
+		}
+	}
+	priv->in_mode_change = FALSE;
 }
 
 static void
@@ -681,6 +699,12 @@ search_changed_handler (GObject *entry, GsShell *shell)
 	GsShellPrivate *priv = gs_shell_get_instance_private (shell);
 	const gchar *text;
 
+	if (priv->search_clean) {
+		priv->search_clean = FALSE;
+		return;
+	}
+
+	priv->search_clean = FALSE;
 	text = gtk_entry_get_text (GTK_ENTRY (entry));
 	if (gs_shell_get_mode (shell) != GS_SHELL_MODE_SEARCH) {
 		save_back_entry (shell);
@@ -2252,6 +2276,7 @@ gs_shell_init (GsShell *shell)
 	priv->back_entry_stack = g_queue_new ();
 	priv->ignore_primary_buttons = FALSE;
 	priv->modal_dialogs = g_ptr_array_new_with_free_func ((GDestroyNotify) gtk_widget_destroy);
+	priv->search_clean = FALSE;
 }
 
 GsShell *
