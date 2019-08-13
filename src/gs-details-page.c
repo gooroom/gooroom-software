@@ -1054,7 +1054,7 @@ gs_details_page_similar_more_cb (GtkWidget *button, GsDetailsPage *self)
 {
     GsCategory *category;
     category = GS_CATEGORY (g_object_get_data (G_OBJECT (button),"details-category"));
-    gs_shell_change_mode (self->shell, GS_SHELL_MODE_CATEGORY, gs_category_get_parent(category), TRUE);
+	gs_shell_show_category (self->shell, gs_category_get_parent (category));
 }
 
 static void
@@ -1114,15 +1114,15 @@ gs_details_page_refresh_similar (GsDetailsPage *self)
        return;
 
     gs_container_remove_all (GTK_CONTAINER (self->box_similar));
-    
+ 
     for (guint i = 0; i < N_TILES; i++) {
         tile = gs_popular_tile_new (NULL);
         gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
     }
 
     g_object_set_data (G_OBJECT (self->similar_more), "details-category", category);
-    g_signal_connect (G_OBJECT (self->similar_more),"clicked", 
-            G_CALLBACK (gs_details_page_similar_more_cb), self);
+    g_signal_connect_object (G_OBJECT (self->similar_more),"clicked",
+            G_CALLBACK (gs_details_page_similar_more_cb), self, 0);
 
     plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_CATEGORY_APPS,
                      "category", category,
@@ -1200,6 +1200,8 @@ set_app (GsDetailsPage *self, GsApp *app)
 		g_signal_handlers_disconnect_by_func (self->app, gs_details_page_progress_changed_cb, self);
 		g_signal_handlers_disconnect_by_func (self->app, gs_details_page_allow_cancel_changed_cb,
 						      self);
+
+		g_signal_handlers_disconnect_by_func (self->similar_more, gs_details_page_similar_more_cb, self);
 	}
 
 	/* save app */
@@ -1415,6 +1417,8 @@ gs_details_page_set_app (GsDetailsPage *self, GsApp *app)
 						      self);
 		g_signal_handlers_disconnect_by_func (self->app, gs_details_page_allow_cancel_changed_cb,
 						      self);
+
+		g_signal_handlers_disconnect_by_func (self->similar_more, gs_details_page_similar_more_cb, self);
 	}
 	/* save app */
 	g_set_object (&self->app, app);
@@ -1881,7 +1885,6 @@ static void
 gs_details_page_dispose (GObject *object)
 {
 	GsDetailsPage *self = GS_DETAILS_PAGE (object);
-
 	if (self->app != NULL) {
 		g_signal_handlers_disconnect_by_func (self->app, gs_details_page_notify_state_changed_cb, self);
 		g_signal_handlers_disconnect_by_func (self->app, gs_details_page_progress_changed_cb, self);

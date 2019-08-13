@@ -95,19 +95,21 @@ enum {
 	SIGNAL_LAST
 };
 
+static void save_back_entry (GsShell *shell);
 static guint signals [SIGNAL_LAST] = { 0 };
 static void
 gs_popup_menu_cb (GtkMenuItem *menuItem, gpointer user_data)
 {
-    GsCategory *category;
-    category = GS_CATEGORY (g_object_get_data (G_OBJECT (menuItem), "gnome-software::category-value"));
-    gs_shell_change_mode (user_data, GS_SHELL_MODE_CATEGORY, category, FALSE);
+	GsCategory *category;
+	category = GS_CATEGORY (g_object_get_data (G_OBJECT (menuItem), "gnome-software::category-value"));
+	save_back_entry (user_data);
+	gs_shell_change_mode (user_data, GS_SHELL_MODE_CATEGORY, category, FALSE);
 }
 
 static void
 add_category (gpointer key, gpointer value, gpointer user_data)
 {
-    const gchar *name; 
+    const gchar *name;
     GtkStyleContext *style_context;
     GtkWidget *menu_item = NULL;
 	GsShellPrivate *priv = gs_shell_get_instance_private (user_data);
@@ -364,7 +366,7 @@ gs_shell_change_mode (GsShell *shell,
         widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "title_box"));
         gtk_widget_show (widget);
     }
-	
+
     priv->in_mode_change = TRUE;
 	/* set the window title back to default */
 	gtk_window_set_title (priv->main_window, g_get_application_name ());
@@ -397,11 +399,11 @@ gs_shell_change_mode (GsShell *shell,
 	priv->mode = mode;
 	switch (mode) {
 	case GS_SHELL_MODE_OVERVIEW:
-		gs_shell_clean_back_entry_stack (shell);
+		//gs_shell_clean_back_entry_stack (shell);
 		page = GS_PAGE (g_hash_table_lookup (priv->pages, "overview"));
 		break;
 	case GS_SHELL_MODE_INSTALLED:
-		gs_shell_clean_back_entry_stack (shell);
+		//gs_shell_clean_back_entry_stack (shell);
 		page = GS_PAGE (g_hash_table_lookup (priv->pages, "installed"));
 		break;
 	case GS_SHELL_MODE_MODERATE:
@@ -415,7 +417,7 @@ gs_shell_change_mode (GsShell *shell,
 		gs_search_page_set_text (GS_SEARCH_PAGE (page), data);
 		break;
 	case GS_SHELL_MODE_UPDATES:
-		gs_shell_clean_back_entry_stack (shell);
+		//gs_shell_clean_back_entry_stack (shell);
 		page = GS_PAGE (g_hash_table_lookup (priv->pages, "updates"));
 		break;
 	case GS_SHELL_MODE_DETAILS:
@@ -484,6 +486,7 @@ gs_shell_change_mode (GsShell *shell,
 		const gchar *search_msg = gtk_entry_get_text (GTK_ENTRY (widget));
 		if (g_utf8_strlen(search_msg, -1) > 0 ) {
 			priv->search_clean = TRUE;
+			gtk_entry_reset_im_context (GTK_ENTRY (widget));
 			widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "entry_search"));
 			gtk_entry_set_text (GTK_ENTRY (widget), "");
 		}
@@ -495,8 +498,13 @@ static void
 gs_overview_page_button_cb (GtkWidget *widget, GsShell *shell)
 {
 	GsShellMode mode;
+	GsShellPrivate *priv = gs_shell_get_instance_private (shell);
+	if (priv->ignore_primary_buttons)
+		return;
+
 	mode = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (widget),
 						   "gnome-software::overview-mode"));
+	save_back_entry (shell);
 	gs_shell_change_mode (shell, mode, NULL, TRUE);
 }
 
@@ -506,13 +514,13 @@ save_back_entry (GsShell *shell)
 	GsShellPrivate *priv = gs_shell_get_instance_private (shell);
 	BackEntry *entry;
 	GsPage *page;
-
+#if 0
 	/* never go back to a details page */
 	if (priv->mode == GS_SHELL_MODE_DETAILS) {
 		g_debug ("ignoring back entry for details");
 		return;
 	}
-
+#endif
 	entry = g_new0 (BackEntry, 1);
 	entry->mode = priv->mode;
 
@@ -536,8 +544,13 @@ save_back_entry (GsShell *shell)
 		g_debug ("pushing back entry for %s with %s",
 			 page_name[entry->mode], entry->search);
 		break;
-	default:
+	case GS_SHELL_MODE_DETAILS:
+		page = GS_PAGE (g_hash_table_lookup (priv->pages, "details"));
+		entry->app = gs_details_page_get_app (GS_DETAILS_PAGE (page));
 		g_debug ("pushing back entry for %s", page_name[entry->mode]);
+		break;
+	default:
+		g_debug ("pushing back entry for %s\n", page_name[entry->mode]);
 		break;
 	}
 
