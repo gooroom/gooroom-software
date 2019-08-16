@@ -47,6 +47,7 @@ typedef struct
 	GtkWidget	*label_app_desc;
 	GtkWidget	*button_app_detail;
 	GtkWidget	*sub_box;
+	GtkWidget	*restart_box;
 	gboolean	 colorful;
 	gboolean	 show_folders;
 	gboolean	 show_buttons;
@@ -155,7 +156,8 @@ gs_app_row_refresh_button (GsAppRow *app_row, gboolean missing_search_result)
         if (priv->show_update) {
 			/* TRANSLATORS: this is a button in the updates panel
 			 * that allows the app to be easily updated live */
-			gtk_button_set_label (GTK_BUTTON (priv->button), _("Intergrated Update"));
+			//gtk_button_set_label (GTK_BUTTON (priv->button), _("Intergrated Update"));
+			gtk_button_set_label (GTK_BUTTON (priv->button), _("Update"));
 		} else {
 			/* TRANSLATORS: this is a button next to the search results that
 			 * allows the application to be easily removed */
@@ -411,6 +413,13 @@ gs_app_row_refresh (GsAppRow *app_row)
 	    	gtk_label_set_text (GTK_LABEL (priv->label_app_desc), NULL);
 	    }
     }
+
+	/* show requires restart label */
+	if (priv->show_update && priv->show_buttons) {
+		if (gs_app_get_state (priv->app) == AS_APP_STATE_UPDATABLE) {
+		    gtk_widget_show (priv->restart_box);
+		}
+	}
 }
 
 static void
@@ -616,6 +625,7 @@ gs_app_row_class_init (GsAppRowClass *klass)
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, label_app_desc);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, button_app_detail);
 	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, sub_box);
+	gtk_widget_class_bind_template_child_private (widget_class, GsAppRow, restart_box);
 }
 
 static void

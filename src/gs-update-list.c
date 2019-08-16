@@ -54,8 +54,9 @@ gs_update_list_add_app (GsUpdateList *update_list, GsApp *app)
 	GtkWidget *app_row;
 
 	app_row = gs_app_row_new (app);
-	gs_app_row_set_show_update (GS_APP_ROW (app_row), FALSE);
-	gs_app_row_set_show_buttons (GS_APP_ROW (app_row), FALSE);
+	gs_app_row_set_show_update (GS_APP_ROW (app_row), TRUE);
+	gs_app_row_set_show_buttons (GS_APP_ROW (app_row), TRUE);
+
 	gtk_container_add (GTK_CONTAINER (update_list), app_row);
 	gs_app_row_set_size_groups (GS_APP_ROW (app_row),
 				    priv->sizegroup_image,

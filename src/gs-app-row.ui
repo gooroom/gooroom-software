@@ -200,6 +200,35 @@
             <property name="position">2</property>
           </packing>
         </child>
+
+        <child>
+          <object class="GtkBox" id="restart_box">
+            <property name="visible">False</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="valign">center</property>
+            <property name="margin_right">20</property>
+            <child>
+              <object class="GtkLabel" id="restart_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Requires Restart</property>
+                <style>
+                  <class name="app-row-app-sub-label"/>
+                  <class name="app-row-app-sub-label-disable"/>
+                </style>
+              </object>
+           </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+
         <child>
           <object class="GtkBox" id="vertical_box">
             <property name="visible">True</property>
@@ -245,7 +274,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

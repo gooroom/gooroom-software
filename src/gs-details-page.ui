@@ -331,7 +331,7 @@
                         </child>
                         <child>
                           <object class="GtkStack" id="stack">
-                            <property name="visible">Ture</property>
+                            <property name="visible">True</property>
                             <child>
                               <object class="GtkScrolledWindow" id="box_details_screenshot">
                                 <property name="visible">True</property>

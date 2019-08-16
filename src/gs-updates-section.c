@@ -46,12 +46,14 @@ struct _GsUpdatesSection
 	GtkSizeGroup		*sizegroup_desc;
 	GtkSizeGroup		*sizegroup_button;
 	GtkSizeGroup		*sizegroup_header;
-	
+
     GtkWidget		*button_cancel;
 };
 
 G_DEFINE_TYPE (GsUpdatesSection, gs_updates_section, GTK_TYPE_LIST_BOX)
 static void _update_all (GsUpdatesSection *self, gboolean checked);
+static void _update_app (GsUpdatesSection *self, GsApp *app);
+static void _button_update_clicked_cb (GsAppRow *app_row, GsUpdatesSection *self);
 
 GsAppList *
 gs_updates_section_get_list (GsUpdatesSection *self)
@@ -93,6 +95,11 @@ gs_updates_section_add_app (GsUpdatesSection *self, GsApp *app)
 	GtkWidget *app_row;
 	app_row = gs_app_row_new (app);
 	gs_app_row_set_show_update (GS_APP_ROW (app_row), TRUE);
+	gs_app_row_set_colorful (GS_APP_ROW (app_row), TRUE);
+	gs_app_row_set_show_buttons (GS_APP_ROW (app_row), TRUE);
+	g_signal_connect (app_row, "button-clicked",
+						G_CALLBACK (_button_update_clicked_cb),
+						self);
 	gtk_container_add (GTK_CONTAINER (self), app_row);
 	gs_app_list_add (self->list, app);
 
@@ -296,8 +303,30 @@ _perform_update_cb (GsPluginLoader *plugin_loader, GAsyncResult *res, gpointer u
 		g_notification_set_priority (n, G_NOTIFICATION_PRIORITY_URGENT);
 		g_application_send_notification (g_application_get_default (), "restart-required", n);
 	}
+
 out:
 	g_clear_object (&self->cancellable);
+}
+
+static void
+_download_all_finished_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+	g_autoptr(GsUpdatesSection) self = (GsUpdatesSection *) user_data;
+	g_autoptr(GError) error = NULL;
+	g_autoptr(GsAppList) list = NULL;
+	/* get result */
+	list = gs_plugin_loader_job_process_finish (GS_PLUGIN_LOADER (object), res, &error);
+	if (list == NULL) {
+		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED))
+			g_warning ("failed to download updates: %s", error->message);
+
+		g_clear_object (&self->cancellable);
+		return;
+	}
+	g_clear_object (&self->cancellable);
+
+    if (gs_plugin_loader_get_network_available (self->plugin_loader))
+        _update_all (self, FALSE);
 }
 
 static void
@@ -306,27 +335,86 @@ _download_finished_cb (GObject *object, GAsyncResult *res, gpointer user_data)
 	g_autoptr(GsUpdatesSection) self = (GsUpdatesSection *) user_data;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
+	g_autoptr(GsApp) app = NULL;
 
 	/* get result */
 	list = gs_plugin_loader_job_process_finish (GS_PLUGIN_LOADER (object), res, &error);
 	if (list == NULL) {
 		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED))
 			g_warning ("failed to download updates: %s", error->message);
+
+		g_clear_object (&self->cancellable);
+		return;
 	}
 
 	g_clear_object (&self->cancellable);
 
-    if (gs_plugin_loader_get_network_available (self->plugin_loader))
-        _update_all (self, FALSE);
+    if (self->cancellable != NULL)
+		return;
+
+	app = gs_app_list_index (list, 0);
+    if (self->kind == GS_UPDATES_SECTION_KIND_OFFLINE_FIRMWARE ||
+        self->kind == GS_UPDATES_SECTION_KIND_OFFLINE) {
+        if (_all_offline_updates_downloaded (self))
+            _update_app (self, app);
+    } else if (self->kind == GS_UPDATES_SECTION_KIND_ONLINE) {
+        _update_app (self, app);
+    }
 }
 
-static void 
+static void
+_download_app (GsUpdatesSection *self, GsApp *app)
+{
+	g_autoptr(GError) error = NULL;
+	g_autoptr(GCancellable) cancellable = g_cancellable_new ();
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+
+	g_set_object (&self->cancellable, cancellable);
+	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_DOWNLOAD,
+						"app", app,
+						"refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_SIZE,
+						"interactive", TRUE,
+						NULL);
+	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+						self->cancellable,
+						(GAsyncReadyCallback) _download_finished_cb,
+						g_object_ref (self));
+}
+
+static void
+_update_app (GsUpdatesSection *self, GsApp *app)
+{
+	g_autoptr(GError) error = NULL;
+	g_autoptr(GCancellable) cancellable = g_cancellable_new ();
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+
+	g_set_object (&self->cancellable, cancellable);
+	GsUpdatesSectionUpdateHelper *helper = g_new0 (GsUpdatesSectionUpdateHelper, 1);
+	helper->self = g_object_ref (self);
+
+	/* look at each app in turn */
+	if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE)
+		helper->do_reboot = TRUE;
+	if (gs_app_has_quirk (app, AS_APP_QUIRK_NEEDS_REBOOT))
+		helper->do_reboot_notification = FALSE;
+
+	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_UPDATE,
+						"app", app,
+						"interactive", TRUE,
+						NULL);
+	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+						self->cancellable,
+						(GAsyncReadyCallback) _perform_update_cb,
+						helper);
+}
+
+static void
 _update_all (GsUpdatesSection *self, gboolean checked)
 {
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GCancellable) cancellable = g_cancellable_new ();
 	g_autoptr(GsPluginJob) plugin_job = NULL;
-	
+
     GsUpdatesSectionUpdateHelper *helper = g_new0 (GsUpdatesSectionUpdateHelper, 1);
 	helper->self = g_object_ref (self);
 
@@ -336,24 +424,24 @@ _update_all (GsUpdatesSection *self, gboolean checked)
 		return;
 	}
 
-    if (!checked)
-        goto update;
-	
     if (self->kind == GS_UPDATES_SECTION_KIND_OFFLINE_FIRMWARE ||
 	    self->kind == GS_UPDATES_SECTION_KIND_OFFLINE) {
 		if (_all_offline_updates_downloaded (self))
-		    goto update;	
+		    goto update;
 		else
             goto download;
 
 	} else if (self->kind == GS_UPDATES_SECTION_KIND_ONLINE) {
-        goto update;	
+        goto update;
     } else {
         return;
 	}
 
 download:
-    g_set_object (&self->cancellable, cancellable);
+    if (!checked)
+        return;
+
+	g_set_object (&self->cancellable, cancellable);
 	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_DOWNLOAD,
 					 "list", self->list,
 					 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_SIZE,
@@ -361,7 +449,7 @@ download:
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
-					    (GAsyncReadyCallback) _download_finished_cb,
+					    (GAsyncReadyCallback) _download_all_finished_cb,
 					    g_object_ref (self));
     return;
 update:
@@ -384,6 +472,16 @@ update:
 					    (GAsyncReadyCallback) _perform_update_cb,
 					    helper);
     return;
+}
+
+static void
+_button_update_clicked_cb (GsAppRow *app_row, GsUpdatesSection *self)
+{
+	GsApp *app = gs_app_row_get_app (app_row);
+	if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE_LIVE)
+		gs_page_update_app (GS_PAGE (self->page), app, gs_app_get_cancellable (app));
+	else
+		_download_app (self, app);
 }
 
 static void

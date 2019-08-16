@@ -313,6 +313,61 @@ gs_shell_activate (GsShell *shell)
 	gtk_window_present (priv->main_window);
 }
 
+#if 1
+static void
+gs_shell_set_header_start_widget (GsShell *shell, GtkWidget *widget)
+{
+    GsShellPrivate *priv = gs_shell_get_instance_private (shell);
+    GtkWidget *old_widget;
+    GtkWidget *header;
+
+    old_widget = priv->header_start_widget;
+    header = GTK_WIDGET (gtk_builder_get_object (priv->builder, "header"));
+
+    if (priv->header_start_widget == widget)
+        return;
+
+    if (widget != NULL) {
+        g_object_ref (widget);
+        gtk_header_bar_pack_start (GTK_HEADER_BAR (header), widget);
+    }
+
+    priv->header_start_widget = widget;
+
+    if (old_widget != NULL) {
+        gtk_container_remove (GTK_CONTAINER (header), old_widget);
+        g_object_unref (old_widget);
+    }
+}
+
+static void
+gs_shell_set_header_end_widget (GsShell *shell, GtkWidget *widget)
+{
+    GsShellPrivate *priv = gs_shell_get_instance_private (shell);
+    GtkWidget *old_widget;
+    GtkWidget *header;
+
+    old_widget = priv->header_end_widget;
+    header = GTK_WIDGET (gtk_builder_get_object (priv->builder, "header"));
+
+    if (priv->header_end_widget == widget)
+        return;
+
+    if (widget != NULL) {
+        g_object_ref (widget);
+        gtk_header_bar_pack_end (GTK_HEADER_BAR (header), widget);
+    }
+
+    priv->header_end_widget = widget;
+
+    if (old_widget != NULL) {
+        gtk_container_remove (GTK_CONTAINER (header), old_widget);
+        g_object_unref (old_widget);
+    }
+}
+
+#endif
+
 static void
 free_back_entry (BackEntry *entry)
 {
@@ -458,6 +513,16 @@ gs_shell_change_mode (GsShell *shell,
 	g_set_object (&priv->page_last, page);
 	gs_page_switch_to (page, scroll_up);
 	priv->in_mode_change = FALSE;
+
+#if 1
+    /* update header bar widgets */
+    widget = gs_page_get_header_start_widget (page);
+    gs_shell_set_header_start_widget (shell, widget);
+
+    widget = gs_page_get_header_end_widget (page);
+    gs_shell_set_header_end_widget (shell, widget);
+#endif
+
 
 	/* destroy any existing modals */
 	if (priv->modal_dialogs != NULL) {

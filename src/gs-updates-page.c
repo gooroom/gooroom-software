@@ -520,13 +520,19 @@ gs_updates_page_get_updates_cb (GsPluginLoader *plugin_loader,
 	self->cache_valid = TRUE;
 	/* get the results */
 	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
-	
+
     /* add the results */
 	for (guint i = 0; i < gs_app_list_length (list); i++) {
 		GsApp *app = gs_app_list_index (list, i);
-        if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE)
-           gtk_widget_show (self->label_updates_restart);
 		section = _get_app_section (app);
+#if 0
+		if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE) {
+		    if (section == GS_UPDATES_SECTION_KIND_OFFLINE) {
+                gtk_widget_show (self->label_updates_restart);
+				gtk_widget_set_hexpand (self->button_updates_all, FALSE);
+		    }
+		}
+#endif
 		gs_updates_section_add_app (GS_UPDATES_SECTION (self->sections[section]), app);
 	}
 
@@ -633,7 +639,6 @@ gs_updates_page_get_system_finished_cb (GObject *source_object,
 
 	gtk_label_set_label (GTK_LABEL (self->label_end_of_life), str->str);
 	gtk_widget_set_visible (self->box_end_of_life, TRUE);
-
 }
 
 static void
@@ -645,11 +650,13 @@ gs_updates_page_load (GsUpdatesPage *self)
 
 	if (self->action_cnt > 0)
 		return;
-
+#if 0
+	gtk_widget_set_visible (self->label_updates_restart, FALSE);
+#endif
 	/* remove all existing apps */
 	for (guint i = 0; i < GS_UPDATES_SECTION_KIND_LAST; i++)
 		gs_updates_section_remove_all (GS_UPDATES_SECTION (self->sections[i]));
-
+#if 1
 	refine_flags = GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_SIZE |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_UPDATE_DETAILS |
@@ -694,6 +701,7 @@ gs_updates_page_load (GsUpdatesPage *self)
 						    self);
 		self->action_cnt++;
 	}
+#endif
 }
 
 static void
@@ -1344,7 +1352,7 @@ gs_updates_page_setup (GsPage *page,
 	gs_page_set_header_end_widget (GS_PAGE (self), self->header_end_box);
 
 	self->header_start_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-	gtk_widget_set_visible (self->header_start_box, TRUE);
+	gtk_widget_set_visible (self->header_start_box, FALSE);
 	gs_page_set_header_start_widget (GS_PAGE (self), self->header_start_box);
 
 	/* This label indicates that the update check is in progress */
@@ -1352,7 +1360,6 @@ gs_updates_page_setup (GsPage *page,
 	gtk_box_pack_end (GTK_BOX (self->header_start_box), self->header_checking_label, FALSE, FALSE, 0);
 	self->header_spinner_start = gtk_spinner_new ();
 	gtk_box_pack_end (GTK_BOX (self->header_start_box), self->header_spinner_start, FALSE, FALSE, 0);
-
 	/* setup update details window */
 	self->button_refresh = gtk_button_new_from_icon_name ("view-refresh-symbolic", GTK_ICON_SIZE_MENU);
 	accessible = gtk_widget_get_accessible (self->button_refresh);
@@ -1380,11 +1387,12 @@ gs_updates_page_setup (GsPage *page,
 	/* set initial state */
 	if (!gs_plugin_loader_get_allow_updates (self->plugin_loader))
 		self->state = GS_UPDATES_PAGE_STATE_MANAGED;
-
+#if 0
     /* setup update button */
 	g_signal_connect (self->button_updates_all, "clicked",
 			  G_CALLBACK (gs_updates_page_button_update_all_clicked),
 			  self);
+#endif
 	return TRUE;
 }
 
@@ -1450,8 +1458,10 @@ gs_updates_page_class_init (GsUpdatesPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, upgrade_banner);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, box_end_of_life);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_end_of_life);
+#if 0
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_updates_restart);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, button_updates_all);
+#endif
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, updates_heading);
 }
 
