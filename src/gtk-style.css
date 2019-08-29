@@ -647,7 +647,7 @@ flowboxchild {
 }
 
 .overview-more-button {
-    border: none; 
+    border: none;
 	background-color: transparent;
 }
 
@@ -676,9 +676,9 @@ flowboxchild {
 }
 
 .details-button {
-    border: none; 
+    border: none;
     border-radius: 6px;
-	background-color: #9b9b9b; 
+	background-color: #9b9b9b;
 }
 
 .details-progress-label {
@@ -719,6 +719,28 @@ flowboxchild {
     background-color: #ffffff;
 }
 
+.upgrade-section-button {
+    border: none;
+    border-radius: 0px;
+    color : #ffffff;
+    background-color: #9b9b9b;
+}
+
+.upgrade-section-button:checked,
+.upgrade-section-button:active {
+    background-color: #1b6ed0;
+}
+
+.upgrade-section-button-left {
+	border-top-left-radius : 6px;
+	border-bottom-left-radius : 6px;
+}
+
+.upgrade-section-button-right {
+	border-top-right-radius : 6px;
+	border-bottom-right-radius : 6px;
+}
+
 .app-row-app-label {
     font-family: NotoSansCJKkr;
     font-size: 13px;
@@ -756,6 +778,10 @@ flowboxchild {
     color : #ffffff;
 }
 
+.app-row-app-button:disabled {
+    background-color: #9b9b9b;
+}
+
 .app-row-app-button-install {
     background-color: #3986e1;
 }
@@ -770,10 +796,10 @@ flowboxchild {
 }
 
 .app-row-app-sub-button {
-    border: none; 
+    border: none;
 }
 
-.app-row-app-sub-button:checked, 
+.app-row-app-sub-button:checked,
 .app-row-app-sub-button:active {
     border: none;
     background-color: #ffffff;

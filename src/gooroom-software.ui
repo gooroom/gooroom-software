@@ -47,25 +47,6 @@
       </packing>
     </child>
   </object>
-  <object class="GtkMenu" id="header_selection_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="menu_type_hint">menu</property>
-    <child>
-      <object class="GtkMenuItem" id="select_all_menuitem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Select All</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="select_none_menuitem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Select None</property>
-      </object>
-    </child>
-  </object>
   <object class="GtkMenu" id="main_category_button_menu">
     <property name="width_request">180</property>
     <property name="visible">True</property>

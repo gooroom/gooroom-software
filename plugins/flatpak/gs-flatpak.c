@@ -299,8 +299,10 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 		return TRUE;
 	}
 
+#if 1
     if (g_strcmp0 (flatpak_remote_get_name (xremote), "flathub") == 0)
        return TRUE;
+#endif
 
 	/* load the file into a temp store */
 	appstream_dir_fn = g_file_get_path (appstream_dir);
@@ -748,7 +750,7 @@ gs_flatpak_set_metadata_installed (GsFlatpak *self, GsApp *app,
 {
 	guint64 mtime;
 	guint64 size_installed;
-	g_autofree gchar *metadata_fn = NULL;
+	const gchar *metadata_fn;
 	g_autoptr(GFile) file = NULL;
 	g_autoptr(GFileInfo) info = NULL;
 
@@ -830,7 +832,6 @@ gs_flatpak_create_installed (GsFlatpak *self,
 			     flatpak_ref_get_name (FLATPAK_REF (xref)));
 		return NULL;
 	}
-
 	/* create new object */
 	app = gs_flatpak_create_app (self, FLATPAK_REF (xref));
 	gs_flatpak_set_metadata_installed (self, app, xref);
@@ -2558,6 +2559,37 @@ FlatpakInstallation *
 gs_flatpak_get_installation (GsFlatpak *self)
 {
 	return self->installation;
+}
+
+void
+gs_flatpak_update_metadata_app (GsFlatpak *self,
+		       GsApp *app,
+		       GCancellable *cancellable,
+		       GError **error)
+{
+	FILE* file = NULL;
+	const gchar *metadata_fn;
+	g_autoptr(FlatpakInstalledRef) ref = NULL;;
+	ref = flatpak_installation_get_installed_ref (self->installation,
+						      gs_flatpak_app_get_ref_kind (app),
+						      gs_flatpak_app_get_ref_name (app),
+						      gs_flatpak_app_get_ref_arch (app),
+						      gs_flatpak_app_get_ref_branch (app),
+						      cancellable,
+						      error);
+	metadata_fn = g_build_filename (flatpak_installed_ref_get_deploy_dir (ref),
+					"..",
+					"active",
+					"metadata",
+					NULL);
+	file = fopen (metadata_fn, "a");
+	if (file == NULL)
+		return;
+
+	fputs(" ", file);
+	fclose(file);
+
+	gs_flatpak_set_metadata_installed (self, app, ref);
 }
 
 static void

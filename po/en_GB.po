@@ -4277,6 +4277,14 @@ msgstr "Integrated Update"
 msgid "Show Detail"
 msgstr "Show Detail"
 
+#: src/gs-updates-page.ui
+msgid "Update Immediately"
+msgstr "Immediately"
+
+#: src/gs-updates-page.ui
+msgid "Update Restart"
+msgstr "Restart"
+
 #~ msgid "The list of extra sources that have been previously enabled"
 #~ msgstr "The list of extra sources that have been previously enabled"
 

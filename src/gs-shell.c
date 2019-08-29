@@ -401,6 +401,7 @@ gs_shell_change_mode (GsShell *shell,
 	GsApp *app;
 	GsPage *page;
 	GtkWidget *widget;
+	const gchar *search_msg;
 
 	if (priv->ignore_primary_buttons)
 		return;
@@ -548,7 +549,7 @@ gs_shell_change_mode (GsShell *shell,
 		mode == GS_SHELL_MODE_OVERVIEW) {
 
 		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "entry_search"));
-		const gchar *search_msg = gtk_entry_get_text (GTK_ENTRY (widget));
+		search_msg = gtk_entry_get_text (GTK_ENTRY (widget));
 		if (g_utf8_strlen(search_msg, -1) > 0 ) {
 			priv->search_clean = TRUE;
 			gtk_entry_reset_im_context (GTK_ENTRY (widget));

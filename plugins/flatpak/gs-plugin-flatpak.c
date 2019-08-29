@@ -680,6 +680,7 @@ gs_plugin_app_install (GsPlugin *plugin,
 		gs_flatpak_error_convert (error);
 		return FALSE;
 	}
+	gs_flatpak_update_metadata_app (flatpak, app, cancellable, error);
 	return TRUE;
 }
 
@@ -754,6 +755,7 @@ gs_plugin_update (GsPlugin *plugin,
 			gs_flatpak_error_convert (error);
 			return FALSE;
 		}
+		gs_flatpak_update_metadata_app (flatpak, app, cancellable, error);
 	}
 	return TRUE;
 }

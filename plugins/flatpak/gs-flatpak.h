@@ -133,6 +133,10 @@ gboolean	gs_flatpak_add_recent		(GsFlatpak		*self,
 						 guint64		 age,
 						 GCancellable		*cancellable,
 						 GError			**error);
+void		gs_flatpak_update_metadata_app		(GsFlatpak		*self,
+						 GsApp			*app,
+						 GCancellable		*cancellable,
+						 GError			**error);
 
 G_END_DECLS
 

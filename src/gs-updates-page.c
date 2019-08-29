@@ -72,6 +72,8 @@ struct _GsUpdatesPage
 	GSettings		*desktop_settings;
 	gboolean		 cache_valid;
 	guint			 action_cnt;
+	guint			 label_update_restart_cnt;
+	guint			 label_update_immediately_cnt;
 	GsShell			*shell;
 	GsPluginStatus		 last_status;
 	GsUpdatesPageState	 state;
@@ -96,9 +98,12 @@ struct _GsUpdatesPage
 	GtkWidget		*upgrade_banner;
 	GtkWidget		*box_end_of_life;
 	GtkWidget		*label_end_of_life;
-    GtkWidget       *label_updates_restart;
     GtkWidget       *button_updates_all;
+    GtkWidget       *box_heading;
     GtkWidget       *updates_heading;
+
+	GtkWidget		*updates_section_immediately;
+	GtkWidget		*updates_section_restart;
 
 	GtkSizeGroup		*sizegroup_image;
 	GtkSizeGroup		*sizegroup_name;
@@ -186,13 +191,24 @@ static guint
 _get_num_updates (GsUpdatesPage *self)
 {
 	guint count = 0;
+	gboolean immediately = FALSE;
+    GsUpdatesSectionKind section;
 	g_autoptr(GsAppList) apps = _get_all_apps (self);
+	immediately = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately));
 
 	for (guint i = 0; i < gs_app_list_length (apps); ++i) {
 		GsApp *app = gs_app_list_index (apps, i);
+		section = _get_app_section (app);
 		if (gs_app_is_updatable (app) ||
-		    gs_app_get_state (app) == AS_APP_STATE_INSTALLING)
-			++count;
+		    gs_app_get_state (app) == AS_APP_STATE_INSTALLING) {
+			if (immediately) {
+				if (section == GS_UPDATES_SECTION_KIND_ONLINE)
+					++count;
+			} else {
+				if (section == GS_UPDATES_SECTION_KIND_OFFLINE)
+					++count;
+			}
+		}
 	}
 	return count;
 }
@@ -294,17 +310,37 @@ gs_updates_page_get_state_string (GsPluginStatus status)
 static void
 refresh_headerbar_updates_counter (GsUpdatesPage *self)
 {
+#if 0
 	guint num_updates;
-
 	num_updates = _get_num_updates (self);
-    
     /* update the title */
-	if (num_updates > 0 &&
-	    gs_plugin_loader_get_allow_updates (self->plugin_loader)) {
-        const gchar *title = g_strdup (_("_Updates")); 
+	if (gs_plugin_loader_get_allow_updates (self->plugin_loader)) {
+        const gchar *title = g_strdup (_("_Updates"));
 		g_autofree gchar *text = NULL;
-		text = g_strdup_printf ("%s (%u)", title, num_updates);
+		if (num_updates != 0)
+			text = g_strdup_printf ("%s (%u)", title, num_updates);
+		else
+			text = title;
 		gtk_label_set_label (GTK_LABEL (self->updates_heading), text);
+	}
+#endif
+	if (gs_plugin_loader_get_allow_updates (self->plugin_loader)) {
+		gboolean immediately = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately));
+		if (immediately)
+			self->label_update_immediately_cnt = _get_num_updates (self);
+		else
+			self->label_update_restart_cnt = _get_num_updates (self);
+
+		if (self->label_update_immediately_cnt != 0) {
+			const gchar *title = g_strdup (_("Update Immediately"));
+			g_autofree gchar *text = g_strdup_printf ("%s (%u)", title, self->label_update_immediately_cnt);
+			gtk_button_set_label (GTK_BUTTON (self->updates_section_immediately), text);
+		}
+		if (self->label_update_restart_cnt != 0) {
+			const gchar *title = g_strdup (_("Update Restart"));
+			g_autofree gchar *text = g_strdup_printf ("%s (%u)", title, self->label_update_restart_cnt);
+			gtk_button_set_label (GTK_BUTTON (self->updates_section_restart), text);
+		}
 	}
 }
 
@@ -443,14 +479,13 @@ gs_updates_page_update_ui_state (GsUpdatesPage *self)
 		}
 
 		/* no network connection */
-		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_updates), "offline");
+		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_updates), "restart");
 		break;
 	default:
 		g_assert_not_reached ();
 		break;
 	}
 
-	/* any updates? */
 	gtk_widget_set_visible (self->updates_box,
 				self->result_flags & GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
 
@@ -481,6 +516,7 @@ gs_updates_page_set_state (GsUpdatesPage *self, GsUpdatesPageState state)
 		 (self->result_flags & GS_UPDATES_PAGE_FLAG_HAS_UPDATES) > 0,
 		 (self->result_flags & GS_UPDATES_PAGE_FLAG_HAS_UPGRADES) > 0);
 	self->state = state;
+
 	gs_updates_page_update_ui_state (self);
 }
 
@@ -516,8 +552,12 @@ gs_updates_page_get_updates_cb (GsPluginLoader *plugin_loader,
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
 	g_autoptr(GsAppList) ic = NULL;
-
+	gint cnt = 0;
+	gboolean immediately = FALSE;
 	self->cache_valid = TRUE;
+
+	/* update section */
+	immediately = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately));
 	/* get the results */
 	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
 
@@ -525,14 +565,19 @@ gs_updates_page_get_updates_cb (GsPluginLoader *plugin_loader,
 	for (guint i = 0; i < gs_app_list_length (list); i++) {
 		GsApp *app = gs_app_list_index (list, i);
 		section = _get_app_section (app);
-#if 0
-		if (gs_app_get_state (app) == AS_APP_STATE_UPDATABLE) {
-		    if (section == GS_UPDATES_SECTION_KIND_OFFLINE) {
-                gtk_widget_show (self->label_updates_restart);
-				gtk_widget_set_hexpand (self->button_updates_all, FALSE);
-		    }
+
+		if (immediately) {
+			if (section == GS_UPDATES_SECTION_KIND_OFFLINE) {
+				self->label_update_restart_cnt++;
+				continue;
+			}
+		} else {
+			if (section == GS_UPDATES_SECTION_KIND_ONLINE) {
+				self->label_update_immediately_cnt++;
+				continue;
+			}
 		}
-#endif
+		++cnt;
 		gs_updates_section_add_app (GS_UPDATES_SECTION (self->sections[section]), app);
 	}
 
@@ -541,12 +586,21 @@ gs_updates_page_get_updates_cb (GsPluginLoader *plugin_loader,
 
 	/* no results */
 	if (gs_app_list_length (list) == 0) {
-		g_debug ("updates-shell: no updates to show");
+		gtk_widget_hide (self->box_heading);
 		gs_updates_page_clear_flag (self, GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
-	} else {
-		gs_updates_page_set_flag (self, GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
+		gs_updates_page_decrement_refresh_count (self);
+		return;
 	}
 
+	if (cnt == 0) {
+		g_debug ("updates-shell: no updates to show");
+		gtk_widget_set_sensitive (self->button_updates_all, FALSE);
+		gs_updates_page_clear_flag (self, GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
+	} else {
+		gtk_widget_set_sensitive (self->button_updates_all, TRUE);
+		gs_updates_page_set_flag (self, GS_UPDATES_PAGE_FLAG_HAS_UPDATES);
+	}
+	gtk_widget_show (self->box_heading);
 	/* only when both set */
 	gs_updates_page_decrement_refresh_count (self);
 }
@@ -650,20 +704,19 @@ gs_updates_page_load (GsUpdatesPage *self)
 
 	if (self->action_cnt > 0)
 		return;
-#if 0
-	gtk_widget_set_visible (self->label_updates_restart, FALSE);
-#endif
 	/* remove all existing apps */
 	for (guint i = 0; i < GS_UPDATES_SECTION_KIND_LAST; i++)
 		gs_updates_section_remove_all (GS_UPDATES_SECTION (self->sections[i]));
-#if 1
+
 	refine_flags = GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_SIZE |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_UPDATE_DETAILS |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE |
 		       GS_PLUGIN_REFINE_FLAGS_REQUIRE_VERSION;
-	gs_updates_page_set_state (self, GS_UPDATES_PAGE_STATE_ACTION_GET_UPDATES);
+	//gs_updates_page_set_state (self, GS_UPDATES_PAGE_STATE_ACTION_GET_UPDATES);
 	self->action_cnt++;
+	self->label_update_restart_cnt = 0;
+	self->label_update_immediately_cnt = 0;
 	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_UPDATES,
 					 "interactive", TRUE,
 					 "refine-flags", refine_flags,
@@ -701,7 +754,6 @@ gs_updates_page_load (GsUpdatesPage *self)
 						    self);
 		self->action_cnt++;
 	}
-#endif
 }
 
 static void
@@ -752,6 +804,8 @@ gs_updates_page_switch_to (GsPage *page,
 		gs_updates_page_update_ui_state (self);
 		return;
 	}
+
+	gs_updates_page_set_state (self, GS_UPDATES_PAGE_STATE_ACTION_GET_UPDATES);
 	gs_updates_page_load (self);
 }
 
@@ -940,8 +994,15 @@ static void
 gs_updates_page_button_update_all_clicked(GtkWidget *widget, GsUpdatesPage *self)
 {
 	/* update all existing apps */
-	for (guint i = 0; i < GS_UPDATES_SECTION_KIND_LAST; i++)
-		gs_updates_section_update_all (GS_UPDATES_SECTION (self->sections[i]));
+	gboolean immediately = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately));
+	if (immediately) {
+		gs_updates_section_update_all (GS_UPDATES_SECTION (self->sections[GS_UPDATES_SECTION_KIND_ONLINE]));
+	} else {
+		for (guint i = 0; i < GS_UPDATES_SECTION_KIND_LAST; i++) {
+			if (i != GS_UPDATES_SECTION_KIND_ONLINE)
+				gs_updates_section_update_all (GS_UPDATES_SECTION (self->sections[i]));
+		}
+	}
 }
 
 static void
@@ -949,6 +1010,27 @@ gs_updates_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
                                          GsUpdatesPage *self)
 {
 	gs_updates_page_invalidate (self);
+}
+
+static void
+gs_updates_page_section_button_cb (GtkWidget *widget, GsUpdatesPage *self)
+{
+	gboolean active = FALSE;
+	if (widget == self->updates_section_immediately) {
+		active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately));
+		if (active) {
+			gs_updates_page_load (self);
+			refresh_headerbar_updates_counter (self);
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->updates_section_restart), FALSE);
+		}
+	} else {
+		active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->updates_section_restart));
+		if (active) {
+			gs_updates_page_load (self);
+			refresh_headerbar_updates_counter (self);
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->updates_section_immediately), FALSE);
+		}
+	}
 }
 
 typedef struct {
@@ -1074,7 +1156,7 @@ upgrade_trigger_finished_cb (GObject *source,
 
 	/* get the results */
 	if (!gs_plugin_loader_job_action_finish (self->plugin_loader, res, &error)) {
-		g_warning ("Failed to trigger offline update: %s", error->message);
+		g_warning ("Failed to trigger restart update: %s", error->message);
 		return;
 	}
 
@@ -1348,7 +1430,7 @@ gs_updates_page_setup (GsPage *page,
 			  G_CALLBACK (gs_updates_page_upgrade_help_cb), self);
 
 	self->header_end_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-	gtk_widget_set_visible (self->header_end_box, TRUE);
+	gtk_widget_set_visible (self->header_end_box, FALSE);
 	gs_page_set_header_end_widget (GS_PAGE (self), self->header_end_box);
 
 	self->header_start_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -1385,14 +1467,23 @@ gs_updates_page_setup (GsPage *page,
 	self->sizegroup_header = gtk_size_group_new (GTK_SIZE_GROUP_VERTICAL);
 
 	/* set initial state */
+
 	if (!gs_plugin_loader_get_allow_updates (self->plugin_loader))
 		self->state = GS_UPDATES_PAGE_STATE_MANAGED;
-#if 0
-    /* setup update button */
+
+	/* setup update button */
+	gtk_widget_set_sensitive (self->button_updates_all, FALSE);
 	g_signal_connect (self->button_updates_all, "clicked",
 			  G_CALLBACK (gs_updates_page_button_update_all_clicked),
 			  self);
-#endif
+	/* update section radio-button */
+	g_signal_connect (self->updates_section_immediately, "toggled",
+				G_CALLBACK (gs_updates_page_section_button_cb),
+				self);
+	g_signal_connect (self->updates_section_restart, "toggled",
+				G_CALLBACK (gs_updates_page_section_button_cb),
+				self);
+
 	return TRUE;
 }
 
@@ -1458,11 +1549,12 @@ gs_updates_page_class_init (GsUpdatesPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, upgrade_banner);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, box_end_of_life);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_end_of_life);
-#if 0
-	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, label_updates_restart);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, button_updates_all);
-#endif
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, updates_section_immediately);
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, updates_section_restart);
+	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, box_heading);
 	gtk_widget_class_bind_template_child (widget_class, GsUpdatesPage, updates_heading);
+
 }
 
 static void

@@ -77,6 +77,110 @@
           </object>
         </child>
         <child>
+          <object class="GtkBox" id="box_heading">
+            <property name="visible">True</property>
+            <property name="margin_start">15</property>
+            <property name="margin_top">20</property>
+            <property name="margin_bottom">0</property>
+            <property name="margin_right">30</property>
+            <property name="height_request">35</property>
+            <child>
+              <object class="GtkLabel" id="updates_heading">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">_Updates</property>
+                <property name="width_request">150</property>
+                <style>
+                  <class name="installed-title-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_updates_all">
+                <property name="visible">True</property>
+                <property name="width_request">100</property>
+                <property name="height_request">34</property>
+                <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Update</property>
+                <style>
+                  <class name="app-row-app-button"/>
+                  <class name="app-row-app-button-install"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="pack-type">start</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box_section">
+            <property name="visible">True</property>
+            <property name="margin_top">10</property>
+            <property name="margin_right">70</property>
+            <property name="margin_bottom">20</property>
+            <property name="height_request">35</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkToggleButton" id="updates_section_immediately">
+                <property name="label" translatable="yes">Update Immediately</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">start</property>
+                <property name="active">True</property>
+                <property name="width_request">100</property>
+                <style>
+                  <class name="upgrade-section-button"/>
+                  <class name="upgrade-section-button-left"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="updates_section_restart">
+                <property name="label" translatable="yes">Update Restart</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="halign">start</property>
+                <property name="active">False</property>
+                <property name="width_request">100</property>
+                <style>
+                  <class name="upgrade-section-button"/>
+                  <class name="upgrade-section-button-right"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkStack" id="stack_updates">
             <property name="visible">True</property>
             <child>
@@ -125,77 +229,6 @@
                 <style>
                   <class name="installed-box"/>
                 </style>
-                <child>
-                  <object class="GtkBox" id="box_heading">
-                    <property name="visible">True</property>
-                    <property name="margin_start">15</property>
-                    <property name="margin_top">20</property>
-                    <property name="margin_bottom">20</property>
-                    <property name="margin_right">30</property>
-                    <child>
-                      <object class="GtkLabel" id="updates_heading">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">_Updates</property>
-                        <style>
-                          <class name="installed-title-label"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-					<!--
-                    <child>
-                      <object class="GtkLabel" id="label_updates_restart">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="halign">end</property>
-                        <property name="margin_right">20</property>
-                        <property name="label" translatable="yes">Requires Restart</property>
-                        <style>
-                          <class name="app-row-app-sub-label"/>
-                          <class name="app-row-app-sub-label-disable"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button_updates_all">
-                        <property name="visible">True</property>
-                        <property name="width_request">100</property>
-                        <property name="height_request">34</property>
-                        <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="halign">end</property>
-                        <property name="label" translatable="yes">Update</property>
-                        <style>
-                          <class name="app-row-app-button"/>
-                          <class name="app-row-app-button-install"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-					-->
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="pack-type">start</property>
-                  </packing>
-                </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow_updates">
                     <property name="visible">True</property>

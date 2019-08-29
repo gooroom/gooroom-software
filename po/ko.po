@@ -4291,6 +4291,14 @@ msgstr "통합 업데이트"
 msgid "Show Detail"
 msgstr "업데이트 내용보기"
 
+#: src/gs-updates-page.ui
+msgid "Update Immediately"
+msgstr "즉시"
+
+#: src/gs-updates-page.ui
+msgid "Update Restart"
+msgstr "재시동"
+
 #~ msgid "_Restart & Update"
 #~ msgstr "다시 시작하고 업데이트(_R)"
 

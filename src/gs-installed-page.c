@@ -643,12 +643,6 @@ set_selection_mode (GsInstalledPage *self, gboolean selection_mode)
 	gtk_revealer_set_reveal_child (GTK_REVEALER (self->bottom_install), self->selection_mode);
 }
 
-static void
-selection_mode_cb (GtkButton *button, GsInstalledPage *self)
-{
-	set_selection_mode (self, !self->selection_mode);
-}
-
 static GList *
 get_selected_apps (GsInstalledPage *self)
 {
@@ -740,30 +734,6 @@ remove_folders (GtkButton *button, GsInstalledPage *self)
 }
 
 static void
-select_all_cb (GtkMenuItem *item, GsInstalledPage *self)
-{
-	g_autoptr(GList) children = NULL;
-
-	children = gtk_container_get_children (GTK_CONTAINER (self->list_box_install));
-	for (GList *l = children; l; l = l->next) {
-		GsAppRow *app_row = GS_APP_ROW (l->data);
-		gs_app_row_set_selected (app_row, TRUE);
-	}
-}
-
-static void
-select_none_cb (GtkMenuItem *item, GsInstalledPage *self)
-{
-	g_autoptr(GList) children = NULL;
-
-	children = gtk_container_get_children (GTK_CONTAINER (self->list_box_install));
-	for (GList *l = children; l; l = l->next) {
-		GsAppRow *app_row = GS_APP_ROW (l->data);
-		gs_app_row_set_selected (app_row, FALSE);
-	}
-}
-
-static void
 gs_shell_settings_changed_cb (GsInstalledPage *self,
                               const gchar *key,
                               gpointer data)
@@ -782,8 +752,6 @@ gs_installed_page_setup (GsPage *page,
                          GError **error)
 {
 	GsInstalledPage *self = GS_INSTALLED_PAGE (page);
-	AtkObject *accessible;
-	GtkWidget *widget;
 
 	g_return_val_if_fail (GS_IS_INSTALLED_PAGE (self), TRUE);
 
@@ -814,21 +782,6 @@ gs_installed_page_setup (GsPage *page,
 	
 	g_signal_connect (self->button_folder_remove, "clicked",
 			  G_CALLBACK (remove_folders), self);
-
-	self->button_select = gtk_button_new_from_icon_name ("object-select-symbolic", GTK_ICON_SIZE_MENU);
-	accessible = gtk_widget_get_accessible (self->button_select);
-	if (accessible != NULL)
-		atk_object_set_name (accessible, _("Select"));
-	gs_page_set_header_end_widget (GS_PAGE (self), self->button_select);
-	g_signal_connect (self->button_select, "clicked",
-			  G_CALLBACK (selection_mode_cb), self);
-
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "select_all_menuitem"));
-	g_signal_connect (widget, "activate",
-			  G_CALLBACK (select_all_cb), self);
-	widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "select_none_menuitem"));
-	g_signal_connect (widget, "activate",
-			  G_CALLBACK (select_none_cb), self);
 	return TRUE;
 }
 
