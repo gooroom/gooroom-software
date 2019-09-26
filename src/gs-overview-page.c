@@ -301,7 +301,6 @@ gs_overview_page_get_recent_cb (GObject *source_object, GAsyncResult *res, gpoin
 
     /* Don't show apps from the category that's currently featured as the category of the day */
 	gs_app_list_filter (list, filter_category, priv->category_of_day);
-	gs_app_list_randomize (list);
 
 	gs_container_remove_all (GTK_CONTAINER (priv->box_recent));
     gtk_widget_set_visible (priv->box_recent, FALSE);
@@ -559,7 +558,7 @@ gs_overview_page_load (GsOverviewPage *self)
 
 		priv->loading_popular = TRUE;
 		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_POPULAR,
-						 "max-results", 10,
+						 "max-results", 20,
 							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
 								 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
 						 NULL);
@@ -576,9 +575,8 @@ gs_overview_page_load (GsOverviewPage *self)
 
 		priv->loading_editor= TRUE;
 		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_EDITOR_FEATURED,
-						 "max-results", 10,
-							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
-								 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
+						 "max-results", 20,
+							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
 						 NULL);
 		gs_plugin_loader_job_process_async (priv->plugin_loader,
 						    plugin_job,
@@ -595,8 +593,7 @@ gs_overview_page_load (GsOverviewPage *self)
 		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_RECENT,
 						 "age", (guint64) (60 * 60 * 24 * 60),
 						 "max-results", N_MAX_TILES, 
-							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
-								 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
+							 "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON,
 						 NULL);
 		gs_plugin_loader_job_process_async (priv->plugin_loader,
 						    plugin_job,

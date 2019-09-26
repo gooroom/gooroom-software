@@ -1049,6 +1049,18 @@ _as_app_is_recent (AsApp *app, guint64 age)
 	return (now - ts) < age;
 }
 
+static gint
+_as_app_compare_release_date (gconstpointer a, gconstpointer b)
+{
+	AsApp *app1 = *(AsApp **)a;
+	AsApp *app2 = *(AsApp **)b;
+
+	AsRelease *rel1 = as_app_get_release_default (app1);
+	AsRelease *rel2 = as_app_get_release_default (app2);
+
+	return as_release_get_timestamp (rel1) <= as_release_get_timestamp (rel2);
+}
+
 gboolean
 gs_appstream_add_recent (GsPlugin *plugin,
 			 AsStore *store,
@@ -1058,24 +1070,37 @@ gs_appstream_add_recent (GsPlugin *plugin,
 			 GError **error)
 {
 	g_autoptr(GPtrArray) array = NULL;
+	g_autoptr(GPtrArray) tmp = g_ptr_array_new();
 
 #if AS_CHECK_VERSION(0,7,15)
 	array = as_store_dup_apps (store);
 #else
 	array = g_ptr_array_ref (as_store_get_apps (store));
 #endif
+
 	for (guint i = 0; i < array->len; i++) {
-		g_autoptr(GsApp) app = NULL;
 		AsApp *item = g_ptr_array_index (array, i);
 		if (as_app_get_id (item) == NULL)
 			continue;
 		if (!_as_app_is_recent (item, age))
 			continue;
+		g_ptr_array_add (tmp, item);
+	}
+
+	if (tmp->len == 0)
+		return TRUE;
+
+	g_ptr_array_sort (tmp, _as_app_compare_release_date);
+
+	for (guint i = 0; i < tmp->len; i++) {
+		g_autoptr(GsApp) app = NULL;
+		AsApp *item = g_ptr_array_index (tmp, i);
 		app = gs_appstream_create_app (plugin, item, error);
 		if (app == NULL)
 			return FALSE;
 		gs_app_list_add (list, app);
 	}
+
 	return TRUE;
 }
 
