@@ -26,11 +26,6 @@
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
 
-/*
- * SECTION:
- * Blacklists some applications based on a hardcoded list.
- */
-
 struct GsPluginData {
     GSettings *settings;
     GPtrArray *popularList;
@@ -402,53 +397,6 @@ gs_plugin_add_popular (GsPlugin *plugin,
         gs_app_list_add (list, app);
         gs_plugin_cache_add (plugin, desktop, app);
     }
-#if 0
-    if (priv->featuredList == NULL)
-        return FALSE;
-
-    for (i = 0; i < priv->featuredList->len; i++)
-    {
-        g_autoptr (GsApp) app = NULL;
-        const gchar *data = g_ptr_array_index (priv->featuredList, i);
-        app = gs_plugin_cache_lookup (plugin, data);
-        if (app != NULL)
-        {
-            gs_app_list_add (list, app);
-            continue;
-        }
-
-        app = gs_app_new (data);
-        gs_app_add_kudo (app, GS_APP_KUDO_FEATURED);
-        gs_app_add_quirk (app, AS_APP_QUIRK_MATCH_ANY_PREFIX);
-        gs_app_set_metadata (app, "GnomeSoftware::Creator",
-                     gs_plugin_get_name (plugin));
-
-        gs_app_list_add (list, app);
-        gs_plugin_cache_add (plugin, data, app);
-    }
-
-    for (i = 0; i < priv->featuredList->len; i++)
-    {
-        g_autoptr (GsApp) app = NULL;
-        const gchar *data = g_ptr_array_index (priv->featuredList, i);
-        const gchar *desktop = g_strdup_printf ("%s.desktop", data);
-        app = gs_plugin_cache_lookup (plugin, desktop);
-        if (app != NULL)
-        {
-            gs_app_list_add (list, app);
-            continue;
-        }
-
-        app = gs_app_new (desktop);
-        gs_app_add_kudo (app, GS_APP_KUDO_FEATURED);
-        gs_app_add_quirk (app, AS_APP_QUIRK_MATCH_ANY_PREFIX);
-        gs_app_set_metadata (app, "GnomeSoftware::Creator",
-                     gs_plugin_get_name (plugin));
-
-        gs_app_list_add (list, app);
-        gs_plugin_cache_add (plugin, desktop, app);
-    }
-#endif
     return TRUE;
 }
 

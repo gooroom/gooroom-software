@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2017 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2015-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *

@@ -3,6 +3,7 @@
  * Copyright (C) 2016 Joaquim Rocha <jrocha@endlessm.com>
  * Copyright (C) 2016-2018 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2016-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -299,10 +300,8 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 		return TRUE;
 	}
 
-#if 1
     if (g_strcmp0 (flatpak_remote_get_name (xremote), "flathub") == 0)
        return TRUE;
-#endif
 
 	/* load the file into a temp store */
 	appstream_dir_fn = g_file_get_path (appstream_dir);

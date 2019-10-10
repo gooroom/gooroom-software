@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
  * Copyright (C) 2016-2018 Endless Mobile, Inc.
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Authors: Joaquim Rocha <jrocha@endlessm.com>
  *

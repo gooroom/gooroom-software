@@ -21,8 +21,8 @@ Build locally with:
 ```
 $ meson --prefix $PWD/install build/
 $ ninja -C build/ all install
-$ killall gnome-software
-$ XDG_DATA_DIRS=install/share:$XDG_DATA_DIRS ./install/bin/gnome-software
+$ killall gooroom-software
+$ XDG_DATA_DIRS=install/share:$XDG_DATA_DIRS ./install/bin/gooroom-software
 ```
 
 # Debugging
