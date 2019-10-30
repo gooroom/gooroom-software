@@ -5,8 +5,7 @@
 Source: gooroom-software
 Section: gnome
 Priority: optional
-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Jeremy Bicha <jbicha@debian.org>, Laurent Bigonville <bigon@debian.org>
+Maintainer: Gooroom Maintainers <gooroom@gooroom.kr>
 Build-Depends: appstream,
                appstream-util,
                debhelper-compat (= 12),
@@ -35,9 +34,7 @@ Build-Depends: appstream,
                xsltproc
 Rules-Requires-Root: no
 Standards-Version: 4.3.0
-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-software
-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-software.git
-Homepage: https://wiki.gnome.org/Apps/Software
+Vcs-Git: https://github.com/gooroom/gooroom-software.git
 
 Package: gooroom-software
 Architecture: any

@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2013-2016 Richard Hughes <richard@hughsie.com>
  * Copyright (C) 2014-2018 Kalev Lember <klember@redhat.com>
+ * Copyright (C) 2018-2019 Gooroom <gooroom@gooroom.kr>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -376,6 +377,13 @@ gs_plugin_app_install (GsPlugin *plugin,
 							 cancellable,
 							 gs_packagekit_helper_cb, helper,
 							 error);
+
+		/* state is cancel */
+		if (g_cancellable_is_cancelled (cancellable)) {
+			gs_app_set_state (app, AS_APP_STATE_AVAILABLE);
+			return FALSE;
+		}
+
 		if (!gs_plugin_packagekit_results_valid (results, error)) {
 			gs_app_set_state_recover (app);
 			return FALSE;

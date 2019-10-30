@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: gooroom-software
-Source: https://download.gnome.org/sources/gnome-software/
+Source: https://github.com/gooroom/gooroom-software
 
 Files: *
 Copyright: 2007-2016 Richard Hughes <richard@hughsie.com>
