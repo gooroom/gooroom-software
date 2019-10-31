@@ -151,5 +151,9 @@
       <default>'https://flathub.org/repo/flathub.flatpakrepo'</default>
       <summary>The runtime repository to use for software center</summary>
     </key>
+    <key name="use-appstream" type="b">
+      <default>false</default>
+      <summary>Whether Debian Packages Are Used</summary>
+    </key>
   </schema>
 </schemalist>

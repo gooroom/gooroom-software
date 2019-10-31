@@ -2190,6 +2190,12 @@ gs_plugin_loader_open_plugin (GsPluginLoader *plugin_loader,
 	GsPlugin *plugin;
 	g_autoptr(GError) error = NULL;
 
+	/* check appsstream */
+	if (!g_settings_get_boolean (priv->settings, "use-appstream")) {
+		if (g_str_has_suffix (filename, "libgs_plugin_appstream.so") != 0)
+			return;
+	}
+
 	/* create plugin from file */
 	plugin = gs_plugin_create (filename, &error);
 	if (plugin == NULL) {
