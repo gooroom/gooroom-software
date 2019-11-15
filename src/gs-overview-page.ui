@@ -95,6 +95,7 @@
                 <property name="hscrollbar_policy">automatic</property>
                 <property name="vscrollbar_policy">automatic</property>
                 <property name="shadow_type">none</property>
+                <property name="margin-top">20</property>
                 <property name="margin-bottom">20</property>
                 <style>
                     <class name="default-box"/>
@@ -112,7 +113,6 @@
                         <property name="halign">center</property>
                         <property name="hexpand">False</property>
                         <property name="border_width">0</property>
-                        <property name="margin-top">20</property>
                         <property name="margin-left">15</property>
                         <property name="margin-right">30</property>
                         <property name="orientation">vertical</property>

@@ -685,6 +685,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
     GPtrArray *provides;
     const gchar *category_name;
 	gboolean addon_visible = FALSE;
+	gboolean category_visible = FALSE;
 
 	/* change widgets */
 	tmp = gs_app_get_name (self->app);
@@ -695,25 +696,26 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_set_visible (self->application_details_title, FALSE);
 	}
 
-    menu_path = gs_app_get_menu_path (self->app);
-	if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
-        categories = gs_app_get_categories (self->app);
-        if (categories) {
-            const gchar *category = g_ptr_array_index (categories, 0);
-            const gchar *desktop_name = gs_utils_get_desktop_category_label (category);
-            if (desktop_name == NULL && categories->len > 1) {
-                category = g_ptr_array_index (categories, 1);
-                desktop_name = gs_utils_get_desktop_category_label (category);
-            }
-            category_name = g_strdup (_(desktop_name));
-		    gtk_label_set_label (GTK_LABEL (self->application_details_category), category_name);
-		    gtk_widget_set_visible (self->application_details_category, TRUE);
-        }
+	categories = gs_app_get_categories (self->app);
+	if (categories && categories->len > 0)
+	    category_visible = TRUE;
 
-	} else {
-		gtk_label_set_label (GTK_LABEL (self->application_details_category),menu_path[0]);
-		gtk_widget_set_visible (self->application_details_category, TRUE);
+	if (category_visible) {
+		menu_path = gs_app_get_menu_path (self->app);
+		if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
+			const gchar *category = g_ptr_array_index (categories, 0);
+			const gchar *desktop_name = gs_utils_get_desktop_category_label (category);
+			if (desktop_name == NULL && categories->len > 1) {
+				category = g_ptr_array_index (categories, 1);
+				desktop_name = gs_utils_get_desktop_category_label (category);
+			}
+			category_name = g_strdup (_(desktop_name));
+			gtk_label_set_label (GTK_LABEL (self->application_details_category), category_name);
+		} else {
+			gtk_label_set_label (GTK_LABEL (self->application_details_category),menu_path[0]);
+		}
 	}
+	gtk_widget_set_visible (self->application_details_category, category_visible);
 
     provides = gs_app_get_provides (self->app);
     if (provides && 0 < provides->len) {
@@ -819,22 +821,24 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	}
 	
     /* set the category */
-	menu_path = gs_app_get_menu_path (self->app);
-	if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
-		gtk_label_set_label (GTK_LABEL (self->label_details_category_value), category_name);
-	} else {
-		g_autofree gchar *path = NULL;
-		if (gtk_widget_get_direction (self->label_details_category_value) == GTK_TEXT_DIR_RTL)
-			path = g_strjoinv (" ← ", menu_path);
-		else
-			path = g_strjoinv (" → ", menu_path);
-		gtk_label_set_label (GTK_LABEL (self->label_details_category_value), path);
+	if (category_visible) {
+		menu_path = gs_app_get_menu_path (self->app);
+		if (menu_path == NULL || menu_path[0] == NULL || menu_path[0][0] == '\0') {
+			gtk_label_set_label (GTK_LABEL (self->label_details_category_value), category_name);
+		} else {
+			g_autofree gchar *path = NULL;
+			if (gtk_widget_get_direction (self->label_details_category_value) == GTK_TEXT_DIR_RTL)
+				path = g_strjoinv (" ← ", menu_path);
+			else
+				path = g_strjoinv (" → ", menu_path);
+			gtk_label_set_label (GTK_LABEL (self->label_details_category_value), path);
+		}
 	}
-	gtk_widget_set_visible (self->label_details_category_title, TRUE);
-	gtk_widget_set_visible (self->label_details_category_value, TRUE);
+	gtk_widget_set_visible (self->label_details_category_title, category_visible);
+	gtk_widget_set_visible (self->label_details_category_value, category_visible);
  
     /* set the app size */
-    #if 0
+	#if 0
 	if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
 	    gs_app_get_size_installed (self->app) != 0) {
 		gtk_widget_show (self->label_details_size_installed_title);
@@ -843,7 +847,7 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 		gtk_widget_hide (self->label_details_size_installed_title);
 		gtk_widget_show (self->label_details_size_download_title);
 	}
-    #endif
+	#endif
     gtk_widget_hide (self->label_details_size_installed_title);
     gtk_widget_show (self->label_details_size_download_title);
 
@@ -908,10 +912,10 @@ gs_details_page_refresh_all (GsDetailsPage *self)
 	/* update progress */
 	gs_details_page_refresh_progress (self);
 
-    if (addon_visible) {
-	    addons = gtk_container_get_children (GTK_CONTAINER (self->list_box_addons));
-	    gtk_widget_set_visible (self->box_addons, addons != NULL);
-	    g_list_free (addons);
+	if (addon_visible) {
+		addons = gtk_container_get_children (GTK_CONTAINER (self->list_box_addons));
+		gtk_widget_set_visible (self->box_addons, addons != NULL);
+		g_list_free (addons);
 	}
 }
 
