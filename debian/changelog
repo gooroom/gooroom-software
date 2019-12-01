@@ -1,3 +1,27 @@
+gooroom-software (3.30.6+5+grm2u1) unstable; urgency=medium
+
+  [ donghun ]
+  * [748e3221] Auto start remove and detail page update
+  * [60ac259e] Modified to search less than 2 words
+  * [f564e0f6] Fixed category popup activation bug
+  * [c05490c6] Modify software center server schema and fix installation dependencies
+  * [275f0a9a] Fixed other category exposure error
+  * [f6036f87] Fixed category name error
+  * [e2c462cb] Fixed popular apps and featured apps exposure error
+  * [96fe0235] Delete search text when moving menu
+  * [6a0c9c2f] Fixed back button error
+  * [b5d3ebde] Fixed app update error
+  * [f2bb2d35] Modified update UI
+  * [02268925] Fixed popular app list and modified recent app sort
+  * [49c6a9f5] Update source regarding copyright
+  * [4622e373] Fixed button status error when canceling during Debian app installation
+  * [afbc871b] Added setting of appstream activation
+  * [9b9ec129] Fixed search error and detail UI
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Sun, 01 Dec 2019 19:35:37 +0900
+
 gooroom-software (3.30.6+5) unstable; urgency=medium
 
   * Initial release
