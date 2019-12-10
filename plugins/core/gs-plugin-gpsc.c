@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include <pwd.h>
 #include <fnmatch.h>
 #include <gnome-software.h>
 #include <glib/gi18n.h>
@@ -209,10 +210,13 @@ gs_plugin_repository_initialize (GsPlugin *plugin)
 static void
 gs_plugin_session_initialize (GsPlugin *plugin)
 {
+    gint64 uid;
     guint status_code;
+    struct passwd *pwd;
     const gchar *res_data = NULL;
     g_autofree gchar *uri = NULL;
     g_autofree gchar *data = NULL;
+    g_autofree gchar *user_name = NULL;
     g_autofree gchar *client_id = NULL;
     g_autofree gchar *client_id_path = NULL;
     g_autofree gchar *access_token = NULL;
@@ -227,11 +231,17 @@ gs_plugin_session_initialize (GsPlugin *plugin)
        client_id = g_key_file_get_string (keyfile, "certificate", "client_name", NULL);
     else
         client_id = g_strdup ("");
-
-    access_token_path = g_strdup_printf ("/var/run/user/%u/gooroom/.grm-user", getuid());
-    if (g_file_test (access_token_path, G_FILE_TEST_EXISTS))
-        access_token = g_strdup_printf ("Bearer %s", gs_plugin_gpsc_token_parser (access_token_path, &error));
-    else
+    uid = getuid();
+    pwd = getpwuid (uid);
+    if (pwd != NULL)
+    {
+        user_name = g_strdup (pwd->pw_name);
+        access_token_path = g_strdup_printf ("/home/%s/.gooroom/.grm-user", user_name);
+        g_debug ("access token path is %s", access_token_path);
+        if (g_file_test (access_token_path, G_FILE_TEST_EXISTS))
+            access_token = g_strdup_printf ("Bearer %s", gs_plugin_gpsc_token_parser (access_token_path, &error));
+    }
+    if (access_token == NULL)
         access_token = g_strdup ("");
 
     g_debug ("client id is %s", client_id);
