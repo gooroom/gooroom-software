@@ -140,11 +140,11 @@
       <summary>Enable GNOME Shell extensions repository</summary>
     </key>
     <key name="software-server" type="s">
-      <default>'http://test-gpsc.gooroom.kr/api/v1/swcenter/information'</default>
+      <default>'http://gpsc.gooroom.kr/api/v1/swcenter/information'</default>
       <summary>The server to use for software center</summary>
     </key>
     <key name="software-remote" type="s">
-      <default>'http://test-gpsc.gooroom.kr/repo/gpsc.flatpakrepo'</default>
+      <default>'http://gpsc.gooroom.kr/repo/gpsc.flatpakrepo'</default>
       <summary>The repository to use for software center</summary>
     </key>
     <key name="software-runtime-remote" type="s">
@@ -152,8 +152,16 @@
       <summary>The runtime repository to use for software center</summary>
     </key>
     <key name="use-appstream" type="b">
+      <default>true</default>
+      <summary>Whether Debian Packages are used</summary>
+    </key>
+    <key name="use-default-remote" type="b">
+      <default>true</default>
+      <summary>Whether flathub repository are used</summary>
+    </key>
+    <key name="use-gpsc-remote" type="b">
       <default>false</default>
-      <summary>Whether Debian Packages Are Used</summary>
+      <summary>Whether GPSC repository are used</summary>
     </key>
   </schema>
 </schemalist>

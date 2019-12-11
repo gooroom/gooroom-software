@@ -2196,6 +2196,12 @@ gs_plugin_loader_open_plugin (GsPluginLoader *plugin_loader,
 			return;
 	}
 
+	/* check gpsc plugin*/
+	if (!g_settings_get_boolean (priv->settings, "use-gpsc-remote")) {
+		if (g_str_has_suffix (filename, "libgs_plugin_gpsc.so") != 0)
+			return;
+	}
+
 	/* create plugin from file */
 	plugin = gs_plugin_create (filename, &error);
 	if (plugin == NULL) {

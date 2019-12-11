@@ -300,9 +300,18 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 		return TRUE;
 	}
 
-    if (g_strcmp0 (flatpak_remote_get_name (xremote), "flathub") == 0)
-       return TRUE;
+	settings = g_settings_new ("kr.gooroom.software");
+	if (!g_settings_get_boolean (settings, "use-default-remote"))
+	{
+		if (g_strcmp0 (flatpak_remote_get_name (xremote), "flathub") == 0)
+			return TRUE;
+	}
 
+	if (!g_settings_get_boolean (settings, "use-gpsc-remote"))
+	{
+		if (g_strcmp0 (flatpak_remote_get_name (xremote), "gooroom") == 0)
+			return TRUE;
+	}
 	/* load the file into a temp store */
 	appstream_dir_fn = g_file_get_path (appstream_dir);
 	appstream_fn = g_build_filename (appstream_dir_fn,
@@ -355,7 +364,6 @@ gs_flatpak_add_apps_from_xremote (GsFlatpak *self,
 	}
 
 	/* do we want to filter to the default branch */
-	settings = g_settings_new ("kr.gooroom.software");
 	if (g_settings_get_boolean (settings, "filter-default-branch"))
 		default_branch = flatpak_remote_get_default_branch (xremote);
 

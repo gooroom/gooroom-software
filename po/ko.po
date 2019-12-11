@@ -287,6 +287,22 @@ msgstr "소프트웨어 센터에서 사용할 서버 URL"
 msgid "The repository to use for software center"
 msgstr "소프트웨어 센터에서 사용할 저장소 URL"
 
+#: data/org.gnome.software.gschema.xml:152
+msgid "The runtime repository to use for software center"
+msgstr "소프트웨어 센터에서 사용할 런타임 저장소"
+
+#: data/org.gnome.software.gschema.xml:156
+msgid "Whether Debian Packages are used"
+msgstr "데비안 패키지 활성화"
+
+#: data/org.gnome.software.gschema.xml:160
+msgid "Whether flathub repository are used"
+msgstr "Flathub 저장소 활성화"
+
+#: data/org.gnome.software.gschema.xml:164
+msgid "Whether GPSC repository are used"
+msgstr "구름 저장소 활성화"
+
 #: src/gnome-software-local-file.desktop.in:3
 msgid "Software Install"
 msgstr "프로그램 설치"
