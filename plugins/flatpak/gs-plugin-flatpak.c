@@ -49,10 +49,13 @@ struct GsPluginData {
 void
 gs_plugin_initialize (GsPlugin *plugin)
 {
+	g_autofree gchar *uri = NULL;
+	g_autofree gchar *cmd = NULL;
 	GsPluginData *priv = gs_plugin_alloc_data (plugin, sizeof(GsPluginData));
 	const gchar *action_id = "org.freedesktop.Flatpak.appstream-update";
 	g_autoptr(GError) error_local = NULL;
 	g_autoptr(GPermission) permission = NULL;
+	g_autoptr(GSettings) settings = NULL;
 
 	priv->flatpaks = g_ptr_array_new_with_free_func ((GDestroyNotify) g_object_unref);
 
@@ -80,6 +83,16 @@ gs_plugin_initialize (GsPlugin *plugin)
 
 	/* used for self tests */
 	priv->destdir_for_tests = g_getenv ("GS_SELF_TEST_FLATPAK_DATADIR");
+
+	/* add default repository */
+	settings = g_settings_new ("kr.gooroom.software");
+	if (!g_settings_get_boolean (settings, "use-default-remote"))
+		return;
+
+	uri = g_settings_get_string (settings, "software-runtime-remote");
+	cmd = g_strdup_printf ("flatpak --user remote-add --if-not-exists flathub %s", uri);
+	if (!g_spawn_command_line_sync (cmd, NULL, NULL, NULL, &error_local))
+		g_debug ("failed to setting flathub repository : %s", error_local->message);
 }
 
 static gboolean
