@@ -137,7 +137,10 @@ void		gs_flatpak_update_metadata_app		(GsFlatpak		*self,
 						 GsApp			*app,
 						 GCancellable		*cancellable,
 						 GError			**error);
-
+void		gs_flatpak_app_remove_desktop	(GsFlatpak		*self,
+						 GsApp *app,
+						 GCancellable		*cancellable,
+						 GError			**error);
 G_END_DECLS
 
 #endif /* __GS_FLATPAK_H */

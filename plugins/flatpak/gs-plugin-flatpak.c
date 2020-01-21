@@ -522,7 +522,6 @@ gs_plugin_app_remove (GsPlugin *plugin,
 		gs_flatpak_error_convert (error);
 		return FALSE;
 	}
-
 	/* run transaction */
 	gs_app_set_state (app, AS_APP_STATE_REMOVING);
 	if (!gs_flatpak_transaction_run (transaction, cancellable, error)) {
@@ -530,6 +529,10 @@ gs_plugin_app_remove (GsPlugin *plugin,
 		gs_app_set_state_recover (app);
 		return FALSE;
 	}
+
+	/* If the desktop file exists, delete it.*/
+	if (app)
+	    gs_flatpak_app_remove_desktop (flatpak, app, cancellable, error);
 
 	/* get any new state */
 	if (!gs_flatpak_refresh (flatpak, G_MAXUINT, cancellable, error)) {

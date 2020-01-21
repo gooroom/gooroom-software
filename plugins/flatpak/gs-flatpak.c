@@ -2525,6 +2525,50 @@ gs_flatpak_add_recent (GsFlatpak *self,
 	return TRUE;
 }
 
+void
+gs_flatpak_app_remove_desktop (GsFlatpak *self,
+			      GsApp *app,
+			      GCancellable *cancellable,
+			      GError **error)
+{
+	const gchar *fn;
+	const gchar *app_id;
+
+	g_autoptr(GDir) dir = NULL;
+	g_autoptr(GFile) path = NULL;
+	g_autoptr(GString) str_app = NULL;
+
+	g_autofree gchar *path_str = NULL;
+	g_autofree gchar *path_exports = NULL;
+	g_autofree gchar *path_apps = NULL;
+
+	app_id = gs_app_get_id (app);
+	str_app = g_string_new (app_id);
+	as_utils_string_replace (str_app, ".desktop", "");
+
+	path = flatpak_installation_get_path (self->installation);
+	path_str = g_file_get_path (path);
+	path_exports = g_build_filename (path_str, "exports", NULL);
+	path_apps = g_build_filename (path_exports, "share", "applications", NULL);
+
+	dir = g_dir_open (path_apps, 0, NULL);
+	if (dir == NULL)
+		return;
+
+	while ((fn = g_dir_read_name (dir)) != NULL) {
+		g_autoptr(GFile) file_desktop = NULL;
+		g_autofree gchar *fn_desktop = NULL;
+
+		if (!g_str_has_prefix (fn, str_app->str))
+			continue;
+
+		/* delete desktop files */
+		fn_desktop = g_build_filename (path_apps, fn, NULL);
+		file_desktop = g_file_new_for_path (fn_desktop);
+		g_file_delete (file_desktop, NULL, error);
+	}
+}
+
 static void
 gs_flatpak_store_app_added_cb (AsStore *store, AsApp *app, GsFlatpak *self)
 {
