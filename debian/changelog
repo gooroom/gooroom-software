@@ -1,3 +1,15 @@
+gooroom-software (3.30.6+5+grm2u2) unstable; urgency=medium
+
+  [ donghun ]
+  * [3e6f85b2] Update user information location for GPMS linkage
+  * [bc4edacf] Added repository usage settings (Debian Packages,Flathub,Gooroom)
+  * [b9af1202] Added desktop file delete when deleting flatpak application
+  * [76b209a9] Added default repository (flathub)
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Tue, 11 Feb 2020 11:29:09 +0900
+
 gooroom-software (3.30.6+5+grm2u1) unstable; urgency=medium
 
   [ donghun ]
