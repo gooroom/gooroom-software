@@ -138,14 +138,15 @@ gs_popular_tile_set_app (GsAppTile *app_tile, GsApp *app)
 	group = gs_app_get_desktop_group (app);
 	if (group == NULL) {
         categories = gs_app_get_categories (app);
-        if (categories)
-            group = g_ptr_array_index (categories, 0);
+        if (categories && 0 == categories->len)
+			return;
+        group = g_ptr_array_index (categories, 0);
 	}
 
     desktop_name = gs_utils_get_desktop_category_label (group);
 	if (desktop_name ==  NULL)
-	    desktop_name = group;
-    str = g_strdup (_(desktop_name));
+		desktop_name = group;
+	str = g_strdup (_(desktop_name));
 	gtk_label_set_label (GTK_LABEL (tile->category), str);
 }
 

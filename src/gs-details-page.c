@@ -1107,41 +1107,44 @@ _max_results_sort_cb (GsApp *app1, GsApp *app2, gpointer user_data)
 static void
 gs_details_page_refresh_similar (GsDetailsPage *self)
 {
-    GtkWidget *tile;
-    GPtrArray *categories;
-    GsCategory *category = NULL;
-    g_autoptr(GsPluginJob) plugin_job = NULL;
-    categories = gs_app_get_categories (self->app); 
-    category = gs_shell_get_category (self->shell, categories);
+	GtkWidget *tile;
+	GPtrArray *categories;
+	GsCategory *category = NULL;
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+	categories = gs_app_get_categories (self->app);
 
-   if (category == NULL)
-       return;
+	if (categories && 0 == categories->len)
+		return;
 
-    gs_container_remove_all (GTK_CONTAINER (self->box_similar));
- 
-    for (guint i = 0; i < N_TILES; i++) {
-        tile = gs_popular_tile_new (NULL);
-        gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
-    }
+	category = gs_shell_get_category (self->shell, categories);
+	if (category == NULL)
+		return;
 
-    g_object_set_data (G_OBJECT (self->similar_more), "details-category", category);
-    g_signal_connect_object (G_OBJECT (self->similar_more),"clicked",
-            G_CALLBACK (gs_details_page_similar_more_cb), self, 0);
+	gs_container_remove_all (GTK_CONTAINER (self->box_similar));
 
-    plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_CATEGORY_APPS,
-                     "category", category,
-                     "filter-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING,
-                     "refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON |
-                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
-                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_ORIGIN_HOSTNAME |
-                             GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE,
-                     NULL);
-    gs_plugin_job_set_sort_func (plugin_job, _max_results_sort_cb);
-    gs_plugin_loader_job_process_async (self->plugin_loader,
-                        plugin_job,
-                        self->cancellable,
-                        gs_details_page_refresh_similar_cb,
-                        self);
+	for (guint i = 0; i < N_TILES; i++) {
+		tile = gs_popular_tile_new (NULL);
+		gtk_container_add (GTK_CONTAINER (self->box_similar), tile);
+	}
+
+	g_object_set_data (G_OBJECT (self->similar_more), "details-category", category);
+	g_signal_connect_object (G_OBJECT (self->similar_more),"clicked",
+				G_CALLBACK (gs_details_page_similar_more_cb), self, 0);
+
+	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_CATEGORY_APPS,
+					"category", category,
+					"filter-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING,
+					"refine-flags", GS_PLUGIN_REFINE_FLAGS_REQUIRE_ICON |
+					GS_PLUGIN_REFINE_FLAGS_REQUIRE_RATING |
+					GS_PLUGIN_REFINE_FLAGS_REQUIRE_ORIGIN_HOSTNAME |
+					GS_PLUGIN_REFINE_FLAGS_REQUIRE_PROVENANCE,
+					NULL);
+	gs_plugin_job_set_sort_func (plugin_job, _max_results_sort_cb);
+	gs_plugin_loader_job_process_async (self->plugin_loader,
+					plugin_job,
+					self->cancellable,
+					gs_details_page_refresh_similar_cb,
+					self);
 }
 
 static void

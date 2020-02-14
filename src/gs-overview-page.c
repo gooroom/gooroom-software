@@ -282,41 +282,46 @@ out:
 static void
 gs_overview_page_get_recent_cb (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-	GsOverviewPage *self = GS_OVERVIEW_PAGE (user_data);
-	GsOverviewPagePrivate *priv = gs_overview_page_get_instance_private (self);
-	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
 	guint i,cnt;
 	GsApp *app;
 	GtkWidget *tile;
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
 
+	GsOverviewPage *self = GS_OVERVIEW_PAGE (user_data);
+	GsOverviewPagePrivate *priv = gs_overview_page_get_instance_private (self);
+	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
+
 	/* get recent apps */
 	list = gs_plugin_loader_job_process_finish (plugin_loader, res, &error);
 	if (list == NULL) {
-		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED))
+		if (!g_error_matches (error, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_CANCELLED)) {
 			g_warning ("failed to get recent apps: %s", error->message);
+		}
 		goto out;
 	}
 
-    /* Don't show apps from the category that's currently featured as the category of the day */
+	/* Don't show apps from the category that's currently featured as the category of the day */
 	gs_app_list_filter (list, filter_category, priv->category_of_day);
 
 	gs_container_remove_all (GTK_CONTAINER (priv->box_recent));
-    gtk_widget_set_visible (priv->box_recent, FALSE);
+	gtk_widget_set_visible (priv->box_recent, FALSE);
 	gtk_widget_set_visible (priv->recent_heading, FALSE);
 
-    cnt = 0;
+	cnt = 0;
 	for (i = 0; i < gs_app_list_length (list); i++) {
-        if (N_TILES <= i)
+        if (N_TILES <= i) {
             break;
+		}
 
-        app = gs_app_list_index (list, i);
+		app = gs_app_list_index (list, i);
+
 		tile = gs_popular_tile_new (app);
 		g_signal_connect (tile, "clicked",
 			  G_CALLBACK (app_tile_clicked), self);
 		gtk_container_add (GTK_CONTAINER (priv->box_recent), tile);
-        cnt++;
+
+		cnt++;
 	}
 
     if (0 < cnt) {
@@ -537,6 +542,7 @@ gs_overview_page_load (GsOverviewPage *self)
 {
 	GsOverviewPagePrivate *priv = gs_overview_page_get_instance_private (self);
 	priv->empty = TRUE;
+
 	if (!priv->loading_featured) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 
@@ -553,7 +559,7 @@ gs_overview_page_load (GsOverviewPage *self)
 		priv->action_cnt++;
 	}
 
-    if (!priv->loading_popular) {
+	if (!priv->loading_popular) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 
 		priv->loading_popular = TRUE;
@@ -586,7 +592,7 @@ gs_overview_page_load (GsOverviewPage *self)
 		priv->action_cnt++;
 	}
 
-    if (!priv->loading_recent) {
+	if (!priv->loading_recent) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 
 		priv->loading_recent = TRUE;
@@ -602,8 +608,8 @@ gs_overview_page_load (GsOverviewPage *self)
 						    self);
 		priv->action_cnt++;
 	}
-	
-    if (!priv->loading_categories) {
+
+	if (!priv->loading_categories) {
 		g_autoptr(GsPluginJob) plugin_job = NULL;
 		priv->loading_categories = TRUE;
 		plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_GET_CATEGORIES,
@@ -638,14 +644,13 @@ gs_overview_page_switch_to (GsPage *page, gboolean scroll_up)
 			   gs_shell_get_mode_string (priv->shell));
 		return;
 	}
-
+#if 0
 	/* we hid the search bar */
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "search_button"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
-
+#endif
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "buttonbox_main"));
 	gtk_widget_show (widget);
-
 	/* hide the expander */
 	if (scroll_up) {
 		adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (priv->scrolledwindow_overview));
