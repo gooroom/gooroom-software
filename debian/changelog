@@ -1,3 +1,12 @@
+gooroom-software (3.30.6+5+grm2u3) unstable; urgency=medium
+
+  [ donghun ]
+  * [1307c9bb] Fixed segmentation fault error
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Mon, 17 Feb 2020 10:04:03 +0900
+
 gooroom-software (3.30.6+5+grm2u2) unstable; urgency=medium
 
   [ donghun ]
