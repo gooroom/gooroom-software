@@ -39,6 +39,12 @@ typedef enum {
 	SUBCATEGORY_SORT_TYPE_NAME
 } SubcategorySortType;
 
+typedef enum {
+	GS_CATEGORY_PAGE_STATE_LOADING,
+	GS_CATEGORY_PAGE_STATE_READY,
+	GS_CATEGORY_PAGE_STATE_FAILED
+} GsCategoryPageState;
+
 struct _GsCategoryPage
 {
 	GsPage		 parent_instance;
@@ -66,6 +72,8 @@ struct _GsCategoryPage
 	GtkWidget	*subcats_sort_button_label;
 	GtkWidget	*sort_rating_button;
 	GtkWidget	*sort_name_button;
+	GtkWidget	*spinner_category;
+	GtkWidget	*stack_category;
 	GtkWidget	*featured_grid;
 	GtkWidget	*featured_heading;
 	GtkWidget	*header_filter_box;
@@ -74,6 +82,41 @@ struct _GsCategoryPage
 };
 
 G_DEFINE_TYPE (GsCategoryPage, gs_category_page, GS_TYPE_PAGE)
+
+static void
+gs_category_page_set_state (GsCategoryPage *self,
+                           GsCategoryPageState state)
+{
+	/* spinner */
+	switch (state) {
+	case GS_CATEGORY_PAGE_STATE_LOADING:
+		gs_start_spinner (GTK_SPINNER (self->spinner_category));
+		gtk_widget_show (self->spinner_category);
+		break;
+	case GS_CATEGORY_PAGE_STATE_READY:
+	case GS_CATEGORY_PAGE_STATE_FAILED:
+		gs_stop_spinner (GTK_SPINNER (self->spinner_category));
+		gtk_widget_hide (self->spinner_category); break;
+	default:
+		g_assert_not_reached ();
+	}
+
+	/* stack */
+	switch (state) {
+	case GS_CATEGORY_PAGE_STATE_LOADING:
+		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_category), "spinner");
+		break;
+	case GS_CATEGORY_PAGE_STATE_READY:
+		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_category), "ready");
+		break;
+	case GS_CATEGORY_PAGE_STATE_FAILED:
+		gtk_stack_set_visible_child_name (GTK_STACK (self->stack_category), "failed");
+		break;
+	default:
+		g_assert_not_reached ();
+	}
+}
+
 static void
 app_tile_clicked (GsAppTile *tile, gpointer data)
 {
@@ -176,6 +219,8 @@ gs_category_page_get_apps_cb (GObject *source_object,
 						       "clicked",
 						       G_CALLBACK (sort_button_clicked),
 						       self);
+
+	gs_category_page_set_state (self, GS_CATEGORY_PAGE_STATE_READY);
 }
 
 static gboolean
@@ -317,6 +362,8 @@ gs_category_page_reload (GsPage *page)
 
 	if (self->subcategory == NULL)
 		return;
+
+	gs_category_page_set_state (self, GS_CATEGORY_PAGE_STATE_LOADING);
 
 	if (self->cancellable != NULL) {
 		g_cancellable_cancel (self->cancellable);
@@ -532,6 +579,7 @@ static void
 gs_category_page_init (GsCategoryPage *self)
 {
 	gtk_widget_init_template (GTK_WIDGET (self));
+	gs_category_page_set_state (self, GS_CATEGORY_PAGE_STATE_LOADING);
 }
 
 static void
@@ -617,10 +665,12 @@ gs_category_page_class_init (GsCategoryPageClass *klass)
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, subcats_sort_button_label);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, sort_rating_button);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, sort_name_button);
+	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, spinner_category);
+	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, stack_category);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, featured_grid);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, featured_heading);
 	gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, header_filter_box);
-	
+
     gtk_widget_class_bind_template_child (widget_class, GsCategoryPage, category_heading);
 }
 
