@@ -1,3 +1,12 @@
+gooroom-software (3.30.6+5+grm2u4) unstable; urgency=medium
+
+  [ donghun ]
+  * [16c19552] [Bug:2029, 2269] Updated the sorting of the install information in the installed page and added spinner in the category page
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Tue, 07 Jul 2020 14:23:55 +0900
+
 gooroom-software (3.30.6+5+grm2u3) unstable; urgency=medium
 
   [ donghun ]
