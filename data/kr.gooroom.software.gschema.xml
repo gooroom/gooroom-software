@@ -1,7 +1,7 @@
 <schemalist>
   <schema id="kr.gooroom.software" path="/kr/gooroom/software/" gettext-domain="gooroom-software">
     <key name="compatible-projects" type="as">
-      <default>['GNOME', 'KDE', 'XFCE']</default>
+      <default>['GNOME']</default>
       <summary>A list of compatible projects</summary>
       <description>This is a list of compatible projects we should show such as GNOME, KDE and XFCE.</description>
     </key>
