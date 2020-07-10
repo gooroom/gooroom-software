@@ -1,3 +1,12 @@
+gooroom-software (3.30.6+5+grm2u6) unstable; urgency=medium
+
+  [ donghun ]
+  * [3baa8937] Added installation list updates after installation is complete
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Sat, 11 Jul 2020 08:57:39 +0900
+
 gooroom-software (3.30.6+5+grm2u5) unstable; urgency=medium
 
   [ donghun ]
