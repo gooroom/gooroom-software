@@ -3471,6 +3471,7 @@ gs_app_set_install_date (GsApp *app, guint64 install_date)
 	if (install_date == priv->install_date)
 		return;
 	priv->install_date = install_date;
+	gs_app_queue_notify (app, "install-date");
 }
 
 /**

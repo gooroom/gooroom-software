@@ -697,3 +697,21 @@ gs_plugin_refresh (GsPlugin *plugin,
 
 	return TRUE;
 }
+
+gboolean
+gs_plugin_reload_installed (GsPlugin *plugin,
+					GCancellable *cancellable,
+					GError **error)
+{
+	GsPluginData *priv = gs_plugin_get_data (plugin);
+	as_store_load (priv->store,
+					AS_STORE_LOAD_FLAG_IGNORE_INVALID |
+					AS_STORE_LOAD_FLAG_APP_INFO_SYSTEM |
+					AS_STORE_LOAD_FLAG_APP_INFO_USER |
+					AS_STORE_LOAD_FLAG_APPDATA |
+					AS_STORE_LOAD_FLAG_DESKTOP |
+					AS_STORE_LOAD_FLAG_APP_INSTALL,
+					cancellable,
+					error);
+	return TRUE;
+}

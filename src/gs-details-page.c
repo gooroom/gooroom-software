@@ -1380,7 +1380,8 @@ gs_details_page_load (GsDetailsPage *self)
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_RUNTIME |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_ADDONS |
 							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SCREENSHOTS |
-							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS,
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_CHANNELS |
+							 GS_PLUGIN_REFINE_FLAGS_REQUIRE_SIZE,
 					 NULL);
 	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
 					    self->cancellable,
@@ -1657,9 +1658,38 @@ gs_details_page_app_launch_button_cb (GtkWidget *widget, GsDetailsPage *self)
 }
 
 static void
+gs_page_reload_installed_cb (GObject *source,
+								 GAsyncResult *res,
+								 gpointer user_data)
+{
+	GsDetailsPage *self = GS_DETAILS_PAGE (user_data);
+	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source);
+	gboolean ret;
+	g_autoptr(GError) error = NULL;
+	ret = gs_plugin_loader_job_action_finish (plugin_loader,
+											res,
+											&error);
+	if (g_error_matches (error,
+			GS_PLUGIN_ERROR,
+			GS_PLUGIN_ERROR_CANCELLED)) {
+		g_debug ("%s", error->message);
+		return;
+	}
+
+	gs_details_page_reload (self);
+	return;
+}
+
+static void
 gs_details_page_app_installed (GsPage *page, GsApp *app)
 {
-	gs_details_page_reload (page);
+	g_autoptr(GsPluginJob) plugin_job = NULL;
+	GsDetailsPage *self = GS_DETAILS_PAGE (page);
+	plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_RELOAD_INSTALLED, NULL);
+	gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+								self->cancellable,
+								gs_page_reload_installed_cb,
+								self);
 }
 
 static void

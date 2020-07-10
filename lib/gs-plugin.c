@@ -1768,6 +1768,8 @@ gs_plugin_action_to_function_name (GsPluginAction action)
 		return "gs_plugin_app_purchase";
 	if (action == GS_PLUGIN_ACTION_SWITCH_CHANNEL)
 		return "gs_plugin_app_switch_channel";
+	if (action == GS_PLUGIN_ACTION_RELOAD_INSTALLED)
+		return "gs_plugin_reload_installed";
 	return NULL;
 }
 
@@ -1874,6 +1876,8 @@ gs_plugin_action_to_string (GsPluginAction action)
 		return "purchase";
 	if (action == GS_PLUGIN_ACTION_SWITCH_CHANNEL)
 		return "switch-channel";
+	if (action == GS_PLUGIN_ACTION_RELOAD_INSTALLED)
+		return "reload-installed";
 	return NULL;
 }
 
@@ -1978,6 +1982,8 @@ gs_plugin_action_from_string (const gchar *action)
 		return GS_PLUGIN_ACTION_PURCHASE;
 	if (g_strcmp0 (action, "switch-channel") == 0)
 		return GS_PLUGIN_ACTION_SWITCH_CHANNEL;
+	if (g_strcmp0 (action, "reload-installed") == 0)
+		return GS_PLUGIN_ACTION_RELOAD_INSTALLED;
 	return GS_PLUGIN_ACTION_UNKNOWN;
 }
 

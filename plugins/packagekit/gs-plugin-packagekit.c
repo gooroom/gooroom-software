@@ -214,6 +214,7 @@ gs_plugin_repo_enable (GsPlugin *plugin,
                        GCancellable *cancellable,
                        GError **error)
 {
+	guint64 mtime;
 	GsPluginData *priv = gs_plugin_get_data (plugin);
 	g_autoptr(GsPackagekitHelper) helper = gs_packagekit_helper_new (plugin);
 	g_autoptr(PkResults) results = NULL;
@@ -237,6 +238,10 @@ gs_plugin_repo_enable (GsPlugin *plugin,
 	/* state is known */
 	gs_app_set_state (app, AS_APP_STATE_INSTALLED);
 
+	/* install date */
+	mtime = pk_offline_get_results_mtime (error);
+	gs_app_set_install_date (app, mtime);
+
 	return TRUE;
 }
 
@@ -252,6 +257,7 @@ gs_plugin_app_install (GsPlugin *plugin,
 	g_autoptr(GsPackagekitHelper) helper = gs_packagekit_helper_new (plugin);
 	const gchar *package_id;
 	guint i, j;
+	guint64 mtime;
 	g_autofree gchar *local_filename = NULL;
 	g_auto(GStrv) package_ids = NULL;
 	g_autoptr(GPtrArray) array_package_ids = NULL;
@@ -310,6 +316,10 @@ gs_plugin_app_install (GsPlugin *plugin,
 
 		/* state is known */
 		gs_app_set_state (app, AS_APP_STATE_INSTALLED);
+
+		/* install date */
+		mtime = pk_offline_get_results_mtime (error);
+		gs_app_set_install_date (app, mtime);
 
 		/* if we remove the app again later, we should be able to
 		 * cancel the installation if we'd never installed it */
@@ -392,6 +402,10 @@ gs_plugin_app_install (GsPlugin *plugin,
 		/* state is known */
 		gs_app_set_state (app, AS_APP_STATE_INSTALLED);
 
+		/* install date */
+		mtime = pk_offline_get_results_mtime (error);
+		gs_app_set_install_date (app, mtime);
+
 		break;
 	case AS_APP_STATE_AVAILABLE_LOCAL:
 		if (gs_app_get_local_file (app) == NULL) {
@@ -417,6 +431,10 @@ gs_plugin_app_install (GsPlugin *plugin,
 
 		/* state is known */
 		gs_app_set_state (app, AS_APP_STATE_INSTALLED);
+
+		/* install date */
+		mtime = pk_offline_get_results_mtime (error);
+		gs_app_set_install_date (app, mtime);
 
 		/* get the new icon from the package */
 		gs_app_set_local_file (app, NULL);

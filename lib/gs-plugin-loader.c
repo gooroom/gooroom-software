@@ -773,6 +773,12 @@ gs_plugin_loader_call_vfunc (GsPluginLoaderHelper *helper,
 					   cancellable, &error_local);
 		}
 		break;
+	case GS_PLUGIN_ACTION_RELOAD_INSTALLED:
+		{
+			GsPluginSetupFunc plugin_func = func;
+			ret = plugin_func (plugin, cancellable, &error_local);
+		}
+		break;
 	default:
 		g_critical ("no handler for %s", helper->function_name);
 		break;
@@ -3237,6 +3243,7 @@ gs_plugin_loader_process_thread_cb (GTask *task,
 	case GS_PLUGIN_ACTION_SEARCH:
 	case GS_PLUGIN_ACTION_SETUP:
 	case GS_PLUGIN_ACTION_UPDATE:
+	case GS_PLUGIN_ACTION_RELOAD_INSTALLED:
 		if (!helper->anything_ran) {
 			g_set_error (&error,
 				     GS_PLUGIN_ERROR,

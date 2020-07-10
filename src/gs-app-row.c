@@ -275,7 +275,8 @@ gs_app_row_refresh (GsAppRow *app_row)
 	/* is this a missing search result from the extras page? */
 	missing_search_result = (gs_app_get_state (priv->app) == AS_APP_STATE_UNAVAILABLE &&
 	                         gs_app_get_url (priv->app, AS_URL_KIND_MISSING) != NULL);
-
+#if 0
+	//TODO Error, Label is missing
 	/* do a fill bar for the current progress */
 	switch (gs_app_get_state (priv->app)) {
 	case AS_APP_STATE_INSTALLING:
@@ -287,6 +288,7 @@ gs_app_row_refresh (GsAppRow *app_row)
 		gs_progress_button_set_show_progress (GS_PROGRESS_BUTTON (priv->button), FALSE);
 		break;
 	}
+#endif
 	/* name */
 	if (g_strcmp0 (gs_app_get_branch (priv->app), "master") == 0) {
 		g_autofree gchar *name = NULL;
@@ -300,37 +302,37 @@ gs_app_row_refresh (GsAppRow *app_row)
 	}
 
 	if (priv->show_update) {
-	    version = gs_app_get_update_version_ui (priv->app);
+		version = gs_app_get_update_version_ui (priv->app);
 	} else {
-	    version = gs_app_get_version_ui (priv->app);
+		version = gs_app_get_version_ui (priv->app);
 	}
-    gtk_widget_set_visible (priv->version_label, version != NULL);
+	gtk_widget_set_visible (priv->version_label, version != NULL);
 	version_lbl = g_strdup_printf ("%s %s", ver, version);
-    gtk_label_set_label (GTK_LABEL (priv->version_label), version_lbl);
-	
-    /* Detail_button */
-    if (priv->show_update) {
-        gtk_widget_show (priv->button_app_detail);
-	    gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_size);
-	    gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_date);
-    }
+	gtk_label_set_label (GTK_LABEL (priv->version_label), version_lbl);
+
+	/* Detail_button */
+	if (priv->show_update) {
+		gtk_widget_show (priv->button_app_detail);
+		gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_size);
+		gtk_container_remove (GTK_CONTAINER (priv->sub_box), priv->label_app_date);
+	}
 	/* pixbuf */
-    if (g_strcmp0 (gs_app_get_id (priv->app), "org.gnome.Software.OsUpdate") == 0 ) {
-        gtk_image_set_from_icon_name (GTK_IMAGE (priv->image), "software-os", 48); 
-	    gtk_container_remove (GTK_CONTAINER (priv->name_box), priv->sub_box);
-        gtk_widget_hide (priv->button_app_detail);
-        gtk_widget_show (priv->label_app_desc);
-        gtk_widget_set_margin_top (priv->label_app_desc, 4);
-        gtk_widget_set_margin_bottom (priv->label_app_desc, 0);
-    }
-    else {
-	    if (gs_app_get_pixbuf (priv->app) != NULL) {
-            GdkPixbuf *pixbuf;
-            pixbuf = gdk_pixbuf_scale_simple (gs_app_get_pixbuf (priv->app), 48, 48, GDK_INTERP_BILINEAR);
-		    gs_image_set_from_pixbuf (GTK_IMAGE (priv->image),
-					      pixbuf);
-        }
-    }
+	if (g_strcmp0 (gs_app_get_id (priv->app), "org.gnome.Software.OsUpdate") == 0 ) {
+		gtk_image_set_from_icon_name (GTK_IMAGE (priv->image), "software-os", 48);
+		gtk_container_remove (GTK_CONTAINER (priv->name_box), priv->sub_box);
+		gtk_widget_hide (priv->button_app_detail);
+		gtk_widget_show (priv->label_app_desc);
+		gtk_widget_set_margin_top (priv->label_app_desc, 4);
+		gtk_widget_set_margin_bottom (priv->label_app_desc, 0);
+	}
+	else {
+		if (gs_app_get_pixbuf (priv->app) != NULL) {
+			GdkPixbuf *pixbuf;
+			pixbuf = gdk_pixbuf_scale_simple (gs_app_get_pixbuf (priv->app), 48, 48, GDK_INTERP_BILINEAR);
+			gs_image_set_from_pixbuf (GTK_IMAGE (priv->image),
+						  pixbuf);
+		}
+	}
 	context = gtk_widget_get_style_context (priv->image);
 	if (missing_search_result)
 		gtk_style_context_add_class (context, "dimmer-label");
@@ -380,39 +382,45 @@ gs_app_row_refresh (GsAppRow *app_row)
 	}
 
 	/* show the install date */
-    if (!priv->show_update && priv->show_buttons) {
-        g_autoptr(GDateTime) dt = NULL;
-        g_autofree gchar *installed_date = NULL;
-        guint64 installed = gs_app_get_install_date (priv->app);
-        g_autofree gchar *date = NULL;
-        g_autofree gchar *installed_str = g_strdup (_("Installed"));
-        if (installed == 0 || installed == 1) {
-            date = g_strdup_printf ("%s", installed_str);
-        }
-        else {
-            dt = g_date_time_new_from_unix_utc ((gint64)installed);
-            installed_date = g_date_time_format (dt, "%x");
-            date = g_strdup_printf ("%s %s", installed_date, installed_str);
-        } 
-        gtk_label_set_label (GTK_LABEL (priv->label_app_date), date);
-        gtk_widget_show (priv->label_app_date);
-    }
-    else {
-        gtk_widget_hide (priv->label_app_date);
-    }
-    
-    /* show textview for description */
-    if (priv->show_update) {
-	    str = gs_app_row_get_description (app_row);
-	    if (str != NULL) {
-	    	gtk_label_set_label (GTK_LABEL (priv->label_app_desc), str->str);
-	    	gtk_label_set_line_wrap_mode (GTK_LABEL (priv->label_app_desc), PANGO_WRAP_WORD);
-	    	gtk_label_set_line_wrap (GTK_LABEL (priv->label_app_desc), TRUE);
-	    	g_string_free (str, TRUE);
-	    } else {
-	    	gtk_label_set_text (GTK_LABEL (priv->label_app_desc), NULL);
-	    }
-    }
+	if (!priv->show_update && priv->show_buttons) {
+		g_autoptr(GDateTime) dt = NULL;
+		g_autofree gchar *installed_date = NULL;
+		guint64 installed = gs_app_get_install_date (priv->app);
+		g_autofree gchar *date = NULL;
+		switch (gs_app_get_state (priv->app)) {
+		case AS_APP_STATE_INSTALLING:
+			date = g_strdup (_("Installing"));
+			break;
+		default:
+			if (installed == 0 || installed == 1) {
+				date = g_strdup_printf ("%s", g_strdup (_("Installed")));
+			}
+			else {
+				dt = g_date_time_new_from_unix_utc ((gint64)installed);
+				installed_date = g_date_time_format (dt, "%x");
+				date = g_strdup_printf ("%s %s", installed_date, g_strdup (_("Installed")));
+			}
+			break;
+		}
+		gtk_label_set_label (GTK_LABEL (priv->label_app_date), date);
+		gtk_widget_show (priv->label_app_date);
+	}
+	else {
+		gtk_widget_hide (priv->label_app_date);
+	}
+
+	/* show textview for description */
+	if (priv->show_update) {
+		str = gs_app_row_get_description (app_row);
+		if (str != NULL) {
+			gtk_label_set_label (GTK_LABEL (priv->label_app_desc), str->str);
+			gtk_label_set_line_wrap_mode (GTK_LABEL (priv->label_app_desc), PANGO_WRAP_WORD);
+			gtk_label_set_line_wrap (GTK_LABEL (priv->label_app_desc), TRUE);
+			g_string_free (str, TRUE);
+		} else {
+			gtk_label_set_text (GTK_LABEL (priv->label_app_desc), NULL);
+		}
+	}
 
 	/* show requires restart label */
 	if (priv->show_update && priv->show_buttons) {
@@ -526,6 +534,9 @@ gs_app_row_set_app (GsAppRow *app_row, GsApp *app)
 				 G_CALLBACK (gs_app_row_notify_props_changed_cb),
 				 app_row, 0);
 	g_signal_connect_object (priv->app, "notify::allow-cancel",
+				 G_CALLBACK (gs_app_row_notify_props_changed_cb),
+				 app_row, 0);
+	g_signal_connect_object (priv->app, "notify::install-date",
 				 G_CALLBACK (gs_app_row_notify_props_changed_cb),
 				 app_row, 0);
 	gs_app_row_refresh (app_row);

@@ -1052,6 +1052,20 @@ gboolean	 gs_plugin_auth_register		(GsPlugin	*plugin,
 							 GCancellable	*cancellable,
 							 GError		**error);
 
+/**
+ * gs_plugin_reload_installed:
+ * @plugin: a #GsPlugin
+ * @cancellable: a #GCancellable, or %NULL
+ * @error: a #GError, or %NULL
+ *
+ * Reload store after app installation
+ *
+ * Returns: %TRUE for success or if not relevant
+ **/
+gboolean	 gs_plugin_reload_installed		(GsPlugin	*plugin,
+							GCancellable	*cancellable,
+							GError		**error);
+
 G_END_DECLS
 
 #endif /* __GS_PLUGIN_VFUNCS_H */
