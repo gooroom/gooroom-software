@@ -53,6 +53,7 @@ gs_plugin_destroy (GsPlugin *plugin)
 	g_object_unref (priv->settings);
 }
 
+#ifndef USE_GOOROOM
 static gboolean
 gs_plugin_external_appstream_check (const gchar *appstream_path,
 					    guint cache_age)
@@ -69,7 +70,7 @@ gs_plugin_external_appstream_install (const gchar *appstream_file,
 {
 	g_autoptr(GSubprocess) subprocess = NULL;
 	const gchar *argv[] = { "pkexec",
-				LIBEXECDIR "/gnome-software-install-appstream",
+				LIBEXECDIR "/gooroom-software-install-appstream",
 				appstream_file, NULL};
 	g_debug ("Installing the appstream file %s in the system",
 		 appstream_file);
@@ -210,6 +211,7 @@ gs_plugin_external_appstream_refresh_sys (GsPlugin *plugin,
 	g_file_delete (tmp_file, cancellable, NULL);
 	return file_written;
 }
+#endif
 
 static gboolean
 gs_plugin_external_appstream_refresh_user (GsPlugin *plugin,
@@ -218,12 +220,10 @@ gs_plugin_external_appstream_refresh_user (GsPlugin *plugin,
 					   GCancellable *cancellable,
 					   GError **error)
 {
-	guint file_age;
 	g_autofree gchar *basename = NULL;
 	g_autofree gchar *fullpath = NULL;
 	g_autoptr(GFile) file = NULL;
 	g_autoptr(GsApp) app_dl = gs_app_new (gs_plugin_get_name (plugin));
-
 	/* check age */
 	basename = g_path_get_basename (url);
 	fullpath = g_build_filename (g_get_user_data_dir (),
@@ -231,13 +231,18 @@ gs_plugin_external_appstream_refresh_user (GsPlugin *plugin,
 				     "xmls",
 				     basename,
 				     NULL);
+#ifndef USE_GOOROOM
+	/* Gooroom
+	 * Gooroom YAML file cache not checked.
+	 * Requires download every time.*/
+	guint file_age;
 	file = g_file_new_for_path (fullpath);
 	file_age = gs_utils_get_file_age (file);
 	if (file_age < cache_age) {
 		g_debug ("skipping %s: cache age is older than file", fullpath);
 		return TRUE;
 	}
-
+#endif
 	/* download file */
 	gs_app_set_summary_missing (app_dl,
 				    /* TRANSLATORS: status text when downloading */
@@ -253,6 +258,9 @@ gs_plugin_external_appstream_refresh_url (GsPlugin *plugin,
 					  GCancellable *cancellable,
 					  GError **error)
 {
+#ifndef USE_GOOROOM
+	/* Gooroom
+	 * Use external appstream as user privileges */
 	GsPluginData *priv = gs_plugin_get_data (plugin);
 	if (g_settings_get_strv (priv->settings, "external-appstream-urls")) {
 		return gs_plugin_external_appstream_refresh_sys (plugin, url,
@@ -260,6 +268,7 @@ gs_plugin_external_appstream_refresh_url (GsPlugin *plugin,
 								 cancellable,
 								 error);
 	}
+#endif
 	return gs_plugin_external_appstream_refresh_user (plugin, url, cache_age,
 							  cancellable, error);
 }
@@ -277,12 +286,16 @@ gs_plugin_refresh (GsPlugin *plugin,
 					      "external-appstream-urls");
 	for (guint i = 0; appstream_urls[i] != NULL; ++i) {
 		g_autoptr(GError) local_error = NULL;
+#ifndef USE_GOOROOM
+		/* Gooroom
+		 * Gooroom YAML Store HTTPS Disabled */
 		if (!g_str_has_prefix (appstream_urls[i], "https")) {
 			g_warning ("Not considering %s as an external "
 				   "appstream source: please use an https URL",
 				   appstream_urls[i]);
 			continue;
 		}
+#endif
 		if (!gs_plugin_external_appstream_refresh_url (plugin,
 							       appstream_urls[i],
 							       cache_age,

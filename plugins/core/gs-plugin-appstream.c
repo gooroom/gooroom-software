@@ -167,10 +167,18 @@ gs_plugin_initialize (GsPlugin *plugin)
 	g_signal_connect (priv->store, "app-removed",
 			  G_CALLBACK (gs_plugin_appstream_store_app_removed_cb),
 			  plugin);
+#ifdef USE_GOOROOM
+	/* Gooroom
+	 * Remove AS_STORE_ADD_FLAG_USE_UNIQUE_ID for use with the Gooroom Meta Package */
+	as_store_set_add_flags (priv->store,
+				AS_STORE_ADD_FLAG_ONLY_NATIVE_LANGS |
+				AS_STORE_ADD_FLAG_USE_MERGE_HEURISTIC);
+#else
 	as_store_set_add_flags (priv->store,
 				AS_STORE_ADD_FLAG_USE_UNIQUE_ID |
 				AS_STORE_ADD_FLAG_ONLY_NATIVE_LANGS |
 				AS_STORE_ADD_FLAG_USE_MERGE_HEURISTIC);
+#endif
 	as_store_set_watch_flags (priv->store,
 				  AS_STORE_WATCH_FLAG_ADDED |
 				  AS_STORE_WATCH_FLAG_REMOVED);

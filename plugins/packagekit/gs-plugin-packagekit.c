@@ -522,12 +522,23 @@ gs_plugin_app_remove (GsPlugin *plugin,
 		return FALSE;
 	}
 	package_ids = g_new0 (gchar *, source_ids->len + 1);
+#ifdef USE_GOOROOM
+	for (i = 0; i < source_ids->len; i++) {
+		package_id = g_ptr_array_index (source_ids, i);
+		g_debug ("Removed PackageID : %s", package_id);
+		if (g_strstr_len (package_id, -1, ";installed") == NULL &&
+        gs_app_get_state (app) != AS_APP_STATE_INSTALLED)
+			continue;
+		package_ids[cnt++] = g_strdup (package_id);
+	}
+#else
 	for (i = 0; i < source_ids->len; i++) {
 		package_id = g_ptr_array_index (source_ids, i);
 		if (g_strstr_len (package_id, -1, ";installed") == NULL)
 			continue;
 		package_ids[cnt++] = g_strdup (package_id);
 	}
+#endif
 	if (cnt == 0) {
 		g_set_error_literal (error,
 				     GS_PLUGIN_ERROR,

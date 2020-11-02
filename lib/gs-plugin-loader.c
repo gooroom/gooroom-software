@@ -1255,13 +1255,31 @@ gs_plugin_loader_app_is_valid_installed (GsApp *app, gpointer user_data)
 		break;
 	}
 
+#ifdef USE_GOOROOM
+	/* sanity check */
+	/* Gooroom
+	 * Change to install state from locally installed apps even if they are not (for gooroom app) */
+	if (!gs_app_is_installed (app))
+	{
+#if 0
+        // Check only local apps
+		if (g_strcmp0 (gs_app_get_origin (app), "local") != 0)
+			return FALSE;
+#endif
+        // Remove Gooroom-SoftwareCenter
+		if (g_strcmp0 (gs_app_get_id (app), "kr.gooroom.Software.desktop") == 0)
+			return FALSE;
+
+		gs_app_set_state (app, AS_APP_STATE_INSTALLED);
+	}
+#else
 	/* sanity check */
 	if (!gs_app_is_installed (app)) {
 		g_autofree gchar *tmp = gs_app_to_string (app);
 		g_warning ("ignoring non-installed app %s", tmp);
 		return FALSE;
 	}
-
+#endif
 	return TRUE;
 }
 
@@ -1284,13 +1302,16 @@ gs_plugin_loader_app_is_valid (GsApp *app, gpointer user_data)
 		return FALSE;
 	}
 
+#ifndef USE_GOOROOM
 	/* don't show unknown state */
+	/* Gooroom
+	 * Enable apps with AS_APP_STATE_UNKNOWN status */
 	if (gs_app_get_state (app) == AS_APP_STATE_UNKNOWN) {
 		g_debug ("app invalid as state unknown %s",
 			 gs_plugin_loader_get_app_str (app));
 		return FALSE;
 	}
-
+#endif
 	/* don't show unconverted unavailables */
 	if (gs_app_get_kind (app) == AS_APP_KIND_UNKNOWN &&
 		gs_app_get_state (app) == AS_APP_STATE_UNAVAILABLE) {
@@ -1341,13 +1362,15 @@ gs_plugin_loader_app_is_valid (GsApp *app, gpointer user_data)
 			 gs_plugin_loader_get_app_str (app));
 		return FALSE;
 	}
+
+#ifndef USE_GOOROOM
 	if (gs_app_get_kind (app) == AS_APP_KIND_DESKTOP &&
 	    gs_app_get_pixbuf (app) == NULL) {
 		g_debug ("app invalid as no pixbuf %s",
 			 gs_plugin_loader_get_app_str (app));
 		return FALSE;
 	}
-
+#endif
 	/* ignore this crazy application */
 	if (g_strcmp0 (gs_app_get_id (app), "gnome-system-monitor-kde.desktop") == 0) {
 		g_debug ("Ignoring KDE version of %s", gs_app_get_id (app));

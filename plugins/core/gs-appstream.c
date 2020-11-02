@@ -47,6 +47,17 @@ gs_appstream_create_app (GsPlugin *plugin, AsApp *item, GError **error)
 		g_clear_object (&app);
 	}
 
+#ifdef USE_GOOROOM
+	/* Gooroom-3.0
+	 * Do not use cache for gooroom group packages (meta-package)
+	 * Delete group packages when deleting sub-packages.
+	 * In case of cache, group package cannot be checked. */
+	if (app != NULL && gs_app_has_category (app, "Group"))
+	{
+		g_clear_object (&app);
+	}
+#endif
+
 	if (app == NULL) {
 		app = gs_app_new (NULL);
 		gs_app_set_from_unique_id (app, unique_id);

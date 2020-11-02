@@ -2097,12 +2097,12 @@ msgstr "폴더에서 제거(_R)"
 #. TRANSLATORS: initial start
 #: src/gs-loading-page.c:75
 msgid "Software catalog is being downloaded"
-msgstr "소프트웨어 카탈로그를 다운로드하고 있습니다"
+msgstr "어플리케이션 목록 불러오는중.."
 
 #. TRANSLATORS: initial start
 #: src/gs-loading-page.c:79
 msgid "Software catalog is being loaded"
-msgstr "소프트웨어 카탈로그를 불러오는 중입니다"
+msgstr "어플리케이션 목록 불러오는중.."
 
 #: src/gs-loading-page.ui:7
 msgid "Loading page"
@@ -4117,6 +4117,16 @@ msgstr "참고 자료"
 msgid "Utilities"
 msgstr "유틸리티"
 
+#. TRANSLATORS: this is the menu spec main category for Consent
+#: plugins/core/gs-desktop-common.c:358
+msgid "nonfree"
+msgstr "사용권 동의 앱"
+
+#. TRANSLATORS: this is the menu spec main category for Group
+#: plugins/core/gs-desktop-common.c:360
+msgid "Group"
+msgstr "그룹 설치"
+
 #. TRANSLATORS: this is a group of updates that are not
 #. * packages and are not shown in the main list
 #: plugins/core/gs-plugin-generic-updates.c:73
@@ -4283,6 +4293,15 @@ msgstr "카테고리"
 msgid "_Deletes"
 msgstr "앱 삭제"
 
+#: src/gnome-software.ui
+msgid "_User Consent"
+msgstr "사용권 동의 앱"
+
+#: src/gnome-software.ui
+msgid "_Group"
+msgstr "그룹 설치"
+
+
 #: src/gs-overview-page.ui
 msgid "Popular Apps"
 msgstr "인기 앱"
@@ -4314,6 +4333,46 @@ msgstr "즉시"
 #: src/gs-updates-page.ui
 msgid "Update Restart"
 msgstr "재시동"
+
+#: src/gs-consent-page.ui
+msgid "Software License Agreement"
+msgstr "소프트웨어 사용권 동의서"
+
+#: src/gs-consent-page.ui
+msgid "Agree"
+msgstr "동의하기"
+
+#: src/gs-consent-page.ui
+msgid "Software License Agreement Guide"
+msgstr "사용권 동의 소프트웨어 안내"
+
+#: src/gs-consent-page.ui
+msgid "In addition to the basic software included in the Gooroom platform, the software additionally installed by the user has distribution conditions required by each development company. Users must comply with the terms of distribution. By agreeing to this license agreement, the user agrees to the terms of the distribution of the software installed later."
+msgstr "구름 플랫폼에서 기본 배포되는 소프트웨어 이외에 사용자 필요에 의해 설치하는 소프트웨어에는 각 개발사에서 요구하는 배포 조건이 있으며, 이를 사용하기 위해서는 해당 배포 조건을 따라야 합니다. 사용자는 본 사용권 동의서에 동의함으로써, 이후 설치되는 소프트웨어의 배포 조건에 동의하는 것으로 갈음합니다."
+
+#: src/gs-consent-page.ui
+msgid "contrib or non-free areas of Debian mirrors"
+msgstr "contrib / non-free 데비안 미러 사이트"
+
+#: src/gs-consent-page.ui
+msgid "The Debian project, as a pragmatic concession to its users, does make some packages available that do not meet our criteria for being free. These packages are not part of the official distribution, however, and are only available from the contrib or non-free areas of Debian mirrors or on third-party CD/DVD-ROMs"
+msgstr "데비안 프로젝트에서는 사용자의 실용적 필요 때문에 우리의 자유 소프트웨어의 기준에 맞지 않는 패키지도 사용할 수 있습니다. 이 패키지는 공식적인 배포판의 일부가 아니지만, 데비안 미러의 contrib나 non-free 미러 사이트 또는 서드파티 CD/DVD-ROM에서 구할 수 있>습니다."
+
+#: src/gs-consent-page.ui
+msgid "Debian - Copyrights and Software Licenses (Details)"
+msgstr "<a href='https://www.debian.org/releases/stable/amd64/ch01s08.ko.html'>Debian 저작권 및 소프트웨어 라이선스 정보 (자세히 보기)</a>"
+
+#: src/gs-consent-page.ui
+msgid "Devices/Drivers Firmware"
+msgstr "장치/드라이버 펌웨어"
+
+#: src/gs-consent-page.ui
+msgid "Many devices require a firmware to operate. Historically, firmware were built-into the device's ROM or Flash memory, but more and more often, the firmware has to be loaded into the device by the driver during the device initialization. Some of these firmware are free and open-source, and some of them are non-free."
+msgstr "많은 장치가 작동하려면 펌웨어가 필요합니다. 예전의 펌웨어는 장치의 ROM 또는 플래시 메모리에 내장되어있었지만, 점차적으로 (장치 초기화 중에) 드라이버가 펌웨어를 장치에 로드하게 되었습니다. 이러한 펌웨어 중 일부는 자유(free) SW이고 오픈소스이며 일부는 자>유(free) SW가 아닙니다."
+
+#: src/gs-consent-page.ui
+msgid "Debian Firmware (Details)"
+msgstr "<a href='https://wiki.debian.org/Firmware'>데비안 펌웨어 (자세히 보기)</a>"
 
 #~ msgid "_Restart & Update"
 #~ msgstr "다시 시작하고 업데이트(_R)"

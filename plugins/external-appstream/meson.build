@@ -1,7 +1,7 @@
 cargs = ['-DG_LOG_DOMAIN="GsPluginExternalAppstream"']
 
 executable(
-  'gnome-software-install-appstream',
+  'gooroom-software-install-appstream',
   sources : [
     'gs-external-appstream-utils.c',
     'gs-install-appstream.c',
