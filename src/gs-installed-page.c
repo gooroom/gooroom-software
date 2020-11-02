@@ -60,6 +60,10 @@ struct _GsInstalledPage
 	GtkWidget		*scrolledwindow_install;
 	GtkWidget		*spinner_install;
 	GtkWidget		*stack_install;
+
+	GtkWidget		*app_row;
+	GCancellable    *cancellable_refresh;
+	gboolean		 user_consent;
 };
 
 G_DEFINE_TYPE (GsInstalledPage, gs_installed_page, GS_TYPE_PAGE)
@@ -67,6 +71,8 @@ G_DEFINE_TYPE (GsInstalledPage, gs_installed_page, GS_TYPE_PAGE)
 static void gs_installed_page_pending_apps_changed_cb (GsPluginLoader *plugin_loader,
                                                        GsInstalledPage *self);
 static void set_selection_mode (GsInstalledPage *self, gboolean selection_mode);
+static void gs_installed_page_reload (GsPage *page);
+static void gs_installed_page_refresh (GsInstalledPage *self);
 
 static void
 gs_installed_page_invalidate (GsInstalledPage *self)
@@ -113,8 +119,10 @@ static void
 gs_installed_page_app_removed (GsPage *page, GsApp *app)
 {
 	GsInstalledPage *self = GS_INSTALLED_PAGE (page);
+#ifdef USE_GOOROOM
+    gs_installed_page_refresh (self);
+#else
 	g_autoptr(GList) children = NULL;
-
 	children = gtk_container_get_children (GTK_CONTAINER (self->list_box_install));
 	for (GList *l = children; l; l = l->next) {
 		GsAppRow *app_row = GS_APP_ROW (l->data);
@@ -122,6 +130,7 @@ gs_installed_page_app_removed (GsPage *page, GsApp *app)
 			gs_installed_page_unreveal_row (app_row);
 		}
 	}
+#endif
 }
 
 static void
@@ -152,12 +161,66 @@ gs_installed_page_invalidate_sort_idle (gpointer user_data)
 }
 
 static void
+gs_installed_page_refresh_cb (GsPluginLoader *plugin_loader,
+							  GAsyncResult *res,
+                              GsInstalledPage *self)
+{
+    g_autoptr(GError) error = NULL;
+    /* get the results */
+    gs_plugin_loader_job_action_finish (plugin_loader, res, &error);
+
+    /* get the new list */
+    gs_installed_page_reload (GS_PAGE(self));
+}
+
+static void
+gs_installed_page_refresh (GsInstalledPage *self)
+{
+    g_autoptr(GsPluginJob) plugin_job = NULL;
+
+    if (self->cancellable_refresh != NULL) {
+        g_cancellable_cancel (self->cancellable_refresh);
+        g_object_unref (self->cancellable_refresh);
+    }
+    self->cancellable_refresh = g_cancellable_new ();
+
+    plugin_job = gs_plugin_job_newv (GS_PLUGIN_ACTION_RELOAD_INSTALLED, NULL);
+
+    gs_plugin_loader_job_process_async (self->plugin_loader, plugin_job,
+                        self->cancellable_refresh,
+                        (GAsyncReadyCallback) gs_installed_page_refresh_cb,
+                        self);
+
+}
+#ifndef USE_GOOROOM
+static void
 gs_installed_page_notify_state_changed_cb (GsApp *app,
                                            GParamSpec *pspec,
                                            GsAppRow *app_row)
 {
 	g_idle_add (gs_installed_page_invalidate_sort_idle, g_object_ref (app_row));
 }
+#else
+static void
+gs_installed_page_notify_state_changed_cb (GsApp *app,
+                                           GParamSpec *pspec,
+                                           GsInstalledPage *self)
+{
+	AsAppState state = gs_app_get_state (app);
+	if (state == AS_APP_STATE_INSTALLED)
+	{
+		if (self->app_row)
+		{
+			g_object_unref (self->app_row);
+		}
+		gs_installed_page_refresh (self);
+	}
+	else
+	{
+		g_idle_add (gs_installed_page_invalidate_sort_idle, g_object_ref (self->app_row));
+	}
+}
+#endif
 
 static void selection_changed (GsInstalledPage *self);
 
@@ -171,7 +234,7 @@ should_show_installed_size (GsInstalledPage *self)
 static gboolean
 gs_installed_page_is_actual_app (GsApp *app)
 {
-    const gchar *origin;
+	const gchar *origin;
 
 	if (gs_app_get_description (app) != NULL)
 		return TRUE;
@@ -191,7 +254,6 @@ static void
 gs_installed_page_add_app (GsInstalledPage *self, GsAppList *list, GsApp *app)
 {
 	GtkWidget *app_row;
-
 	app_row = gs_app_row_new (app);
 	gs_app_row_set_show_folders (GS_APP_ROW (app_row), TRUE);
 	gs_app_row_set_show_buttons (GS_APP_ROW (app_row), TRUE);
@@ -200,9 +262,16 @@ gs_installed_page_add_app (GsInstalledPage *self, GsAppList *list, GsApp *app)
 		gs_app_row_set_show_source (GS_APP_ROW (app_row), TRUE);
 	g_signal_connect (app_row, "button-clicked",
 			  G_CALLBACK (gs_installed_page_app_remove_cb), self);
+#ifdef USE_GOOROOM
+	self->app_row = app_row;
+	g_signal_connect_object (app, "notify::state",
+				 G_CALLBACK (gs_installed_page_notify_state_changed_cb),
+				 self, 0);
+#else
 	g_signal_connect_object (app, "notify::state",
 				 G_CALLBACK (gs_installed_page_notify_state_changed_cb),
 				 app_row, 0);
+#endif
 	g_signal_connect_swapped (app_row, "notify::selected",
 				  G_CALLBACK (selection_changed), self);
 	gtk_container_add (GTK_CONTAINER (self->list_box_install), app_row);
@@ -249,10 +318,45 @@ gs_installed_page_get_installed_cb (GObject *source_object,
 			g_warning ("failed to get installed apps: %s", error->message);
 		goto out;
 	}
+
+#ifdef USE_GOOROOM
+	for (i = 0; i < gs_app_list_length (list); i++) {
+		app = gs_app_list_index (list, i);
+
+		/* Gooroom
+		 * Check if no desktop file exists */
+		if (gs_app_get_kind (app) == AS_APP_KIND_DESKTOP)
+		{
+		    const gchar *desktop_id = NULL;
+            g_autoptr(GAppInfo) appinfo = NULL;
+			desktop_id = gs_app_get_id (app);
+            appinfo = G_APP_INFO (gs_utils_get_desktop_app_info (desktop_id));
+            if (appinfo == NULL) {
+                g_warning ("no such desktop file: %s", desktop_id );
+				continue;
+            }
+		}
+		/* Gooroom
+		 * Check forn non-free */
+		if (!self->user_consent)
+		{
+			const gchar* origin = NULL;
+
+			if (gs_app_has_category (app, "nonfree"))
+				continue;
+
+			origin = gs_app_get_origin (app);
+			if (g_strcmp0 (origin, "debian-stable-non-free") == 0)
+				continue;
+		}
+		gs_installed_page_add_app (self, list, app);
+	}
+#else
 	for (i = 0; i < gs_app_list_length (list); i++) {
 		app = gs_app_list_index (list, i);
 		gs_installed_page_add_app (self, list, app);
 	}
+#endif
 out:
 	gs_installed_page_pending_apps_changed_cb (plugin_loader, self);
 }
@@ -323,6 +427,7 @@ gs_installed_page_switch_to (GsPage *page, gboolean scroll_up)
 {
 	GsInstalledPage *self = GS_INSTALLED_PAGE (page);
 	GtkWidget *widget;
+	gboolean user_consent;
 
 	if (gs_shell_get_mode (self->shell) != GS_SHELL_MODE_INSTALLED) {
 		g_warning ("Called switch_to(installed) when in mode %s",
@@ -343,6 +448,15 @@ gs_installed_page_switch_to (GsPage *page, gboolean scroll_up)
 	}
 	if (gs_shell_get_mode (self->shell) == GS_SHELL_MODE_INSTALLED) {
 		gs_grab_focus_when_mapped (self->scrolledwindow_install);
+	}
+
+	/* Gooroom
+	 * Renewal according to user consent settings */
+	user_consent = g_settings_get_boolean (self->settings, "user-consent");
+	if (user_consent != self->user_consent)
+	{
+		self->user_consent = user_consent;
+		self->cache_valid = FALSE;
 	}
 
 	/* no need to refresh */
@@ -838,10 +952,12 @@ gs_installed_page_init (GsInstalledPage *self)
 	self->sizegroup_desc = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 	self->sizegroup_button = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
+	self->user_consent = FALSE;
 	self->settings = g_settings_new ("kr.gooroom.software");
 	g_signal_connect_swapped (self->settings, "changed",
 				  G_CALLBACK (gs_shell_settings_changed_cb),
 				  self);
+	self->app_row = NULL;
 }
 
 GsInstalledPage *

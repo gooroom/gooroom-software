@@ -67,7 +67,8 @@ gooroom_software_sources = [
   'gs-updates-section.c',
   'gs-upgrade-banner.c',
   'gs-vendor.c',
-  'gs-feature-tile-small.c'
+  'gs-feature-tile-small.c',
+  'gs-consent-page.c'
 ]
 
 gooroom_software_dependencies = [

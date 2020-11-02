@@ -207,7 +207,7 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 			   gs_shell_get_mode_string (self->shell));
 		return;
 	}
-	
+
     /* not set, perhaps file-to-app */
 	if (self->app == NULL)
 		return;
@@ -217,6 +217,7 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 	/* install button */
 	switch (state) {
 	case AS_APP_STATE_AVAILABLE:
+	case AS_APP_STATE_UNKNOWN: // Add AS_APP_STATE_UNKNOWN from Gooroom
 	case AS_APP_STATE_AVAILABLE_LOCAL:
 		gtk_widget_set_visible (self->button_install, TRUE);
 		gtk_style_context_add_class (gtk_widget_get_style_context (self->button_install), "suggested-action");
@@ -237,7 +238,7 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 	case AS_APP_STATE_PURCHASING:
 		gtk_widget_set_visible (self->button_install, FALSE);
 		break;
-	case AS_APP_STATE_UNKNOWN:
+	//case AS_APP_STATE_UNKNOWN: // Remove AS_APP_STATE_UNKONWN from Gooroom
 	case AS_APP_STATE_INSTALLED:
 	case AS_APP_STATE_REMOVING:
 	case AS_APP_STATE_UPDATABLE:
@@ -286,7 +287,8 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 	case AS_APP_STATE_INSTALLED:
 	case AS_APP_STATE_UPDATABLE:
 	case AS_APP_STATE_UPDATABLE_LIVE:
-		if (!gs_app_has_quirk (self->app, AS_APP_QUIRK_NOT_LAUNCHABLE)) {
+		if (!gs_app_has_quirk (self->app, AS_APP_QUIRK_NOT_LAUNCHABLE) &&
+		    !gs_app_has_category (self->app, "Group")) { //Add group category check from Gooroom
 			gtk_widget_set_visible (self->button_details_launch, TRUE);
 		} else {
 			gtk_widget_set_visible (self->button_details_launch, FALSE);
@@ -1166,7 +1168,9 @@ gs_details_page_app_refine_cb (GObject *source,
 			   gs_app_get_id (self->app),
 			   error->message);
 	}
-
+#if 0
+	/* Gooroom
+	* Activate the UNKNOWN app in the Gooroom */
 	if (gs_app_get_kind (self->app) == AS_APP_KIND_UNKNOWN ||
 	    gs_app_get_state (self->app) == AS_APP_STATE_UNKNOWN) {
 		g_autofree gchar *str = NULL;
@@ -1178,7 +1182,7 @@ gs_details_page_app_refine_cb (GObject *source,
 		gs_details_page_set_state (self, GS_DETAILS_PAGE_STATE_FAILED);
 		return;
 	}
-
+#endif
 	/* show some debugging */
 	app_dump = gs_app_to_string (self->app);
 	g_debug ("%s", app_dump);
@@ -1659,16 +1663,14 @@ gs_details_page_app_launch_button_cb (GtkWidget *widget, GsDetailsPage *self)
 
 static void
 gs_page_reload_installed_cb (GObject *source,
-								 GAsyncResult *res,
-								 gpointer user_data)
+							 GAsyncResult *res,
+							 gpointer user_data)
 {
-	GsDetailsPage *self = GS_DETAILS_PAGE (user_data);
 	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source);
-	gboolean ret;
 	g_autoptr(GError) error = NULL;
-	ret = gs_plugin_loader_job_action_finish (plugin_loader,
-											res,
-											&error);
+	gs_plugin_loader_job_action_finish (plugin_loader,
+										res,
+										&error);
 	if (g_error_matches (error,
 			GS_PLUGIN_ERROR,
 			GS_PLUGIN_ERROR_CANCELLED)) {
@@ -1676,7 +1678,7 @@ gs_page_reload_installed_cb (GObject *source,
 		return;
 	}
 
-	gs_details_page_reload (self);
+	gs_details_page_reload (user_data);
 	return;
 }
 

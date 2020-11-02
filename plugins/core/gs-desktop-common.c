@@ -306,6 +306,22 @@ static const GsDesktopMap map_reference[] = {
 	{ NULL }
 };
 
+/* Gooroom Meta-Package(non-free)*/
+static const GsDesktopMap map_nonfree[] = {
+	{ "all",		NC_("Menu of non-free", "All"),
+					{ "nonfree",
+					  NULL } },
+	{ NULL }
+};
+
+/* Gooroom Meta-Package(Group) */
+static const GsDesktopMap map_group[] = {
+	{ "all",		NC_("Menu of Utilities", "All"),
+					{ "Group",
+					  NULL } },
+	{ NULL }
+};
+
 /* main categories */
 /* Please keep category name and subcategory context synchronized!!! */
 static const GsDesktopData msdata[] = {
@@ -338,6 +354,12 @@ static const GsDesktopData msdata[] = {
 				"view-dual-symbolic", "#d3d7c7", 0 },
 	/* TRANSLATORS: this is the menu spec main category for Utilities */
 	{ "utilities",		map_utilities,		N_("Utilities"),
+				"applications-utilities-symbolic", "#d3d7c7", 10 },
+	/* TRANSLATORS: this is the menu spec main category for Gooroom Meta-Package (non-free) */
+	{ "nonfree",	map_nonfree,		N_("nonfree"),
+				"applications-utilities-symbolic", "#d3d7c7", 10 },
+	/* TRANSLATORS: this is the menu spec main category for Gooroom Meta-Package (group) */
+	{ "group",		map_group,		N_("Group"),
 				"applications-utilities-symbolic", "#d3d7c7", 10 },
 	{ NULL }
 };

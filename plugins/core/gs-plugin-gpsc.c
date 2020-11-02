@@ -298,6 +298,7 @@ gs_plugin_destroy (GsPlugin *plugin)
         g_ptr_array_unref (priv->featuredList);
     if (priv->popularList != NULL)
         g_ptr_array_unref (priv->popularList);
+    g_object_unref (priv->settings);
 }
 
 gboolean

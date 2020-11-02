@@ -323,6 +323,64 @@
                         <property name="position">2</property>
                       </packing>
                     </child>
+
+                    <child>
+                      <object class="GtkToggleButton" id="button_group">
+                        <property name="width_request">200</property>
+                        <property name="height_request">34</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <child>
+                          <object class="GtkBox" id="button_gorup_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkImage" id="button_group_image">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="pixel_size">24</property>
+                                <property name="icon_name">software-menu-group</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="button_group_label">
+                                <property name="width_request">100</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <property name="label" translatable="yes" comments="Translators: A label for a button to show only updates which are available to install.">_Group</property>
+                                <property name="use_underline">True</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="main_menu_button_label"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">10</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="main_menu_button"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+
                     <child>
                       <object class="GtkToggleButton" id="button_updates">
                         <property name="width_request">200</property>
@@ -393,9 +451,10 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
+
                     <child>
                       <object class="GtkToggleButton" id="button_installed">
                         <property name="width_request">200</property>
@@ -451,9 +510,86 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">4</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
+
+                    <child>
+                      <object class="GtkSeparator">
+                        <property name="width_request">190</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">False</property>
+                        <property name="vexpand">True</property>
+                        <style>
+                          <class name="main_menu_separator"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                        <property name="non_homogeneous">True</property>
+                      </packing>
+                    </child>
+
+                    <child>
+                      <object class="GtkToggleButton" id="button_consent">
+                        <property name="width_request">200</property>
+                        <property name="height_request">34</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <child>
+                          <object class="GtkBox" id="button_consent_box">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkImage" id="button_consent_image">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="pixel_size">24</property>
+                                <property name="icon_name">software-menu-consent</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="button_consent_label">
+                                <property name="width_request">100</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">center</property>
+                                <property name="label" translatable="yes" comments="Translators: A label for a button to show only updates which are available to install.">_User Consent</property>
+                                <property name="use_underline">True</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="main_menu_button_label"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">10</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="main_menu_button"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
+
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -562,6 +698,15 @@
                           <packing>
                             <property name="name">extras</property>
                             <property name="position">8</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GsConsentPage" id="consent_page">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="name">consent</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                       </object>

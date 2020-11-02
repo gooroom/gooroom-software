@@ -4083,6 +4083,16 @@ msgstr "Reference"
 msgid "Utilities"
 msgstr "Utilities"
 
+#. TRANSLATORS: this is the menu spec main category for Consent
+#: plugins/core/gs-desktop-common.c:358
+msgid "nonfree"
+msgstr "User Consent App"
+
+#. TRANSLATORS: this is the menu spec main category for Group
+#: plugins/core/gs-desktop-common.c:360
+msgid "Group"
+msgstr "Group"
+
 #. TRANSLATORS: this is a group of updates that are not
 #. * packages and are not shown in the main list
 #: plugins/core/gs-plugin-generic-updates.c:65
@@ -4269,6 +4279,14 @@ msgstr "_Category"
 msgid "_Deletes"
 msgstr "_Deletes"
 
+#: src/gnome-software.ui
+msgid "_User Consent"
+msgstr "_User Consent"
+
+#: src/gnome-software.ui
+msgid "_Group"
+msgstr "_Group"
+
 #: src/gs-oveview-page.ui
 msgid "Popular Apps"
 msgstr "Popular Apps"
@@ -4300,6 +4318,46 @@ msgstr "Immediately"
 #: src/gs-updates-page.ui
 msgid "Update Restart"
 msgstr "Restart"
+
+#: src/gs-consent-page.ui
+msgid "Software License Agreement"
+msgstr "Software License Agreement"
+
+#: src/gs-consent-page.ui
+msgid "Agree"
+msgstr "Agree"
+
+#: src/gs-consent-page.ui
+msgid "Software License Agreement Guide"
+msgstr "Software License Agreement Guide"
+
+#: src/gs-consent-page.ui
+msgid "In addition to the basic software included in the Gooroom platform, the software additionally installed by the user has distribution conditions required by each development company. Users must comply with the terms of distribution. By agreeing to this license agreement, the user agrees to the terms of the distribution of the software installed later."
+msgstr "In addition to the basic software included in the Gooroom platform, the software additionally installed by the user has distribution conditions required by each development company. Users must comply with the terms of distribution. By agreeing to this license agreement, the user agrees to the terms of the distribution of the software installed later."
+
+#: src/gs-consent-page.ui
+msgid "contrib or non-free areas of Debian mirrors"
+msgstr "contrib or non-free areas of Debian mirrors"
+
+#: src/gs-consent-page.ui
+msgid "The Debian project, as a pragmatic concession to its users, does make some packages available that do not meet our criteria for being free. These packages are not part of the official distribution, however, and are only available from the contrib or non-free areas of Debian mirrors or on third-party CD/DVD-ROMs"
+msgstr "The Debian project, as a pragmatic concession to its users, does make some packages available that do not meet our criteria for being free. These packages are not part of the official distribution, however, and are only available from the contrib or non-free areas of Debian mirrors or on third-party CD/DVD-ROMs"
+
+#: src/gs-consent-page.ui
+msgid "Debian - Copyrights and Software Licenses (Details)"
+msgstr "<a href='https://www.debian.org/releases/stable/amd64/ch01s08.en.html'>Debian - Copyrights and Software Licenses (Details)</a>"
+
+#: src/gs-consent-page.ui
+msgid "Devices/Drivers Firmware"
+msgstr "Devices/Drivers Firmware"
+
+#: src/gs-consent-page.ui
+msgid "Many devices require a firmware to operate. Historically, firmware were built-into the device's ROM or Flash memory, but more and more often, the firmware has to be loaded into the device by the driver during the device initialization. Some of these firmware are free and open-source, and some of them are non-free."
+msgstr "Many devices require a firmware to operate. Historically, firmware were built-into the device's ROM or Flash memory, but more and more often, the firmware has to be loaded into the device by the driver during the device initialization. Some of these firmware are free and open-source, and some of them are non-free."
+
+#: src/gs-consent-page.ui
+msgid "Debian Firmware (Details)"
+msgstr "<a href='https://wiki.debian.org/Firmware'>Debian Firmware (Details)</a>"
 
 #~ msgid "The list of extra sources that have been previously enabled"
 #~ msgstr "The list of extra sources that have been previously enabled"

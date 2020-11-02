@@ -554,15 +554,27 @@ gs_category_page_set_category (GsCategoryPage *self, GsCategory *category)
 
 	/* this means we've come from the app-view -> back */
 	if (self->category == category)
-		return;
-
+	{
+		if (category == NULL)
+		{
+			gs_category_page_set_state (self, GS_CATEGORY_PAGE_STATE_FAILED);
+			return;
+		}
+	}
 	/* save this */
 	g_clear_object (&self->category);
-	self->category = g_object_ref (category);
 
-	/* find apps in this group */
-	gs_category_page_create_filter (self, category);
-
+	if (category == NULL)
+	{
+		self->category = NULL;
+		gs_category_page_set_state (self, GS_CATEGORY_PAGE_STATE_FAILED);
+	}
+	else
+	{
+		self->category = g_object_ref (category);
+		/* find apps in this group */
+		gs_category_page_create_filter (self, category);
+	}
 	/* scroll the list of apps to the beginning, otherwise it will show
 	 * with the previous scroll value */
 	adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scrolledwindow_category));
