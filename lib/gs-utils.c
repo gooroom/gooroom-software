@@ -1232,4 +1232,45 @@ gs_utils_get_desktop_category_label (const gchar *name)
 
     return desktop_name;
 }
+
+#define VERSION_PATH "/etc/gooroom/info"
+
+gboolean
+gs_utils_check_gooroom_version (const gchar *version)
+{
+    gboolean reval = FALSE;
+
+	FILE *fp;
+	gchar line[1024], *lineptr;
+
+    gchar *filename = g_strdup (VERSION_PATH);
+    if (!g_file_test (filename, G_FILE_TEST_EXISTS))
+    {
+        g_free (filename);
+        return reval;
+    }
+    else
+    {
+        if ((fp = g_fopen (filename, "r")) != NULL)
+        {
+            while (fgets (line, sizeof (line), fp) != NULL)
+            {
+                if (g_str_has_prefix(line, "CODENAME"))
+                {
+                    lineptr = line + 9;
+                    if (g_ascii_strncasecmp (lineptr, version, strlen(version)) == 0 )
+                    {
+					    reval = TRUE;
+                    }
+                    break;
+                }
+            }
+            fclose (fp);
+        }
+    }
+
+    g_free (filename);
+    return reval;
+}
+
 /* vim: set noexpandtab: */

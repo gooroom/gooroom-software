@@ -750,6 +750,8 @@ gs_page_remove_app (GsPage *page, GsApp *app, GCancellable *cancellable)
 	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
 						  "%s", message);
 
+    gtk_window_set_title (GTK_WINDOW (dialog), _("Remove"));
+
 	/* TRANSLATORS: this is button text to remove the application */
 	gtk_dialog_add_button (GTK_DIALOG (dialog), _("Remove"), GTK_RESPONSE_OK);
 

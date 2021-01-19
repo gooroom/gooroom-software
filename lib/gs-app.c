@@ -3166,8 +3166,12 @@ gs_app_set_size_installed (GsApp *app, guint64 size_installed)
 {
 	GsAppPrivate *priv = gs_app_get_instance_private (app);
 	g_return_if_fail (GS_IS_APP (app));
+
 	if (size_installed == priv->size_installed)
 		return;
+	if (size_installed == GS_APP_SIZE_UNKNOWABLE)
+	    return;
+
 	priv->size_installed = size_installed;
 }
 
@@ -4476,6 +4480,8 @@ static void
 gs_app_init (GsApp *app)
 {
 	GsAppPrivate *priv = gs_app_get_instance_private (app);
+	priv->size_installed = 0;
+	priv->size_download = 0;
 	priv->rating = -1;
 	priv->sources = g_ptr_array_new_with_free_func (g_free);
 	priv->source_ids = g_ptr_array_new_with_free_func (g_free);

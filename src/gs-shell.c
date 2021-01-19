@@ -91,6 +91,8 @@ typedef struct
 
 	GtkWidget		*category_menu;
 	GSettings		*settings;
+
+	gboolean		 enable_group;
 } GsShellPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (GsShell, gs_shell, G_TYPE_OBJECT)
@@ -450,21 +452,32 @@ gs_shell_change_mode (GsShell *shell,
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_updates"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_UPDATES);
 
+	gtk_widget_set_visible (widget, gs_plugin_loader_get_allow_updates (priv->plugin_loader) ||
+					mode == GS_SHELL_MODE_UPDATES);
+
 	if (!scroll_up) { /* menu popup active */
 		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_category"));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_CATEGORY);
 	}
 
-	/* Add group widget from Gooroom*/
-	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_group"));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_GROUP);
-	/* Add non-free widget from Gooroom*/
-	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_consent"));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_CONSENT);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_NONFREE);
+	if (priv->enable_group) {
+		/* Add group widget from Gooroom*/
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_group"));
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_GROUP);
+		/* Add non-free widget from Gooroom*/
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_consent"));
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_CONSENT);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), mode == GS_SHELL_MODE_NONFREE);
+	}
+	else {
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_group"));
+		gtk_widget_hide (widget);
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_consent"));
+		gtk_widget_hide (widget);
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_separator"));
+		gtk_widget_hide (widget);
+	}
 
-	gtk_widget_set_visible (widget, gs_plugin_loader_get_allow_updates (priv->plugin_loader) ||
-					mode == GS_SHELL_MODE_UPDATES);
 	priv->ignore_primary_buttons = FALSE;
 
 	/* switch page */
@@ -2173,19 +2186,22 @@ gs_shell_setup (GsShell *shell, GsPluginLoader *plugin_loader, GCancellable *can
 	g_signal_connect (widget, "clicked",
 			  G_CALLBACK (gs_overview_page_button_cb), shell);
 
-	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_group"));
-	g_object_set_data (G_OBJECT (widget),
-			   "gnome-software::overview-mode",
-			   GINT_TO_POINTER (GS_SHELL_MODE_GROUP));
-	g_signal_connect (widget, "clicked",
-			  G_CALLBACK (gs_overview_page_button_cb), shell);
+	if (priv->enable_group)
+	{
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_group"));
+		g_object_set_data (G_OBJECT (widget),
+						"gnome-software::overview-mode",
+						GINT_TO_POINTER (GS_SHELL_MODE_GROUP));
+						g_signal_connect (widget, "clicked",
+						G_CALLBACK (gs_overview_page_button_cb), shell);
 
-	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_consent"));
-	g_object_set_data (G_OBJECT (widget),
-			   "gnome-software::overview-mode",
-			   GINT_TO_POINTER (GS_SHELL_MODE_CONSENT));
-	g_signal_connect (widget, "clicked",
-			  G_CALLBACK (gs_overview_page_button_cb), shell);
+		widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_consent"));
+		g_object_set_data (G_OBJECT (widget),
+						"gnome-software::overview-mode",
+						GINT_TO_POINTER (GS_SHELL_MODE_CONSENT));
+						g_signal_connect (widget, "clicked",
+						G_CALLBACK (gs_overview_page_button_cb), shell);
+	}
 	/* category menu button */
 	widget = gtk_menu_new ();
 	style_context = gtk_widget_get_style_context (widget);
@@ -2481,6 +2497,7 @@ gs_shell_init (GsShell *shell)
 	priv->modal_dialogs = g_ptr_array_new_with_free_func ((GDestroyNotify) gtk_widget_destroy);
 	priv->search_clean = FALSE;
 	priv->settings = g_settings_new ("kr.gooroom.software");
+	priv->enable_group = gs_utils_check_gooroom_version (GOOROOM_VERSION);
 }
 
 GsShell *

@@ -549,7 +549,6 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 {
 	GtkStyleContext *style_context;
 	GtkWidget *para;
-	guint i;
 	g_auto(GStrv) split = NULL;
 
 	/* does the description exist? */
@@ -560,6 +559,26 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 	/* add each paragraph as a new GtkLabel which lets us get the 24px
 	 * paragraph spacing */
 	gs_container_remove_all (GTK_CONTAINER (self->box_details_description));
+
+#ifdef USE_GOOROOM
+	para = gtk_label_new (tmp);
+	gtk_label_set_line_wrap (GTK_LABEL (para), TRUE);
+	gtk_label_set_max_width_chars (GTK_LABEL (para), 40);
+	gtk_label_set_selectable (GTK_LABEL (para), TRUE);
+	gtk_widget_set_visible (para, TRUE);
+	gtk_widget_set_can_focus (para, FALSE);
+	g_object_set (para,
+		      "xalign", 0.0,
+		      NULL);
+
+	/* add style class for theming */
+	style_context = gtk_widget_get_style_context (para);
+	gtk_style_context_add_class (style_context,
+				     "application-details-description");
+
+	gtk_box_pack_start (GTK_BOX (self->box_details_description), para, FALSE, FALSE, 0);
+#else
+	guint i;
 	split = g_strsplit (tmp, "\n\n", -1);
 	for (i = 0; split[i] != NULL; i++) {
 		para = gtk_label_new (split[i]);
@@ -579,7 +598,7 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 
 		gtk_box_pack_start (GTK_BOX (self->box_details_description), para, FALSE, FALSE, 0);
 	}
-
+#endif
 	/* show the webapp warning */
 	if (gs_app_get_kind (self->app) == AS_APP_KIND_WEB_APP) {
 		GtkWidget *label;
@@ -587,6 +606,7 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 		label = gtk_label_new (_("This application can only be used when there is an active internet connection."));
 		gtk_widget_set_visible (label, TRUE);
 		gtk_label_set_xalign (GTK_LABEL (label), 0.f);
+		gtk_label_set_selectable (GTK_LABEL (label), FALSE);
 		gtk_style_context_add_class (gtk_widget_get_style_context (label),
 					     "application-details-webapp-warning");
 		gtk_box_pack_start (GTK_BOX (self->box_details_description),
@@ -647,25 +667,27 @@ gs_details_page_refresh_size (GsDetailsPage *self)
 		gtk_widget_hide (self->label_details_size_download_value);
 	}
 #endif
-    if (!gs_app_is_installed (self->app) &&
-	        gs_app_get_size_download (self->app) != GS_APP_SIZE_UNKNOWABLE) {
-	    	g_autofree gchar *size = NULL;
-	    	size = g_format_size (gs_app_get_size_download (self->app));
-	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
-	        gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Download Size"));
-	    }
-    else {
-	    if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
-	        gs_app_get_size_installed (self->app) != 0) {
-	    	g_autofree gchar *size = NULL;
-	    	size = g_format_size (gs_app_get_size_installed (self->app));
-	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
-	        gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Installed Size"));
-	    }
-        else {
-	    	gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), "0MB");
-        }
-    }
+	if (!gs_app_is_installed (self->app) &&
+		gs_app_get_size_download (self->app) != GS_APP_SIZE_UNKNOWABLE) {
+		g_autofree gchar *size = NULL;
+		size = g_format_size (gs_app_get_size_download (self->app));
+		gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
+		gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Download Size"));
+	}
+	else {
+		if (gs_app_get_size_installed (self->app) != GS_APP_SIZE_UNKNOWABLE &&
+			gs_app_get_size_installed (self->app) != 0) {
+			g_autofree gchar *size = NULL;
+			size = g_format_size (gs_app_get_size_installed (self->app));
+			gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
+			gtk_label_set_label (GTK_LABEL (self->label_details_size_download_title), _("Installed Size"));
+		}
+		else {
+			g_autofree gchar *size = NULL;
+			size = g_format_size (gs_app_get_size_download (self->app));
+			gtk_label_set_label (GTK_LABEL (self->label_details_size_download_value), size);
+		}
+	}
 	gtk_widget_hide (self->label_details_size_installed_title);
 	gtk_widget_hide (self->label_details_size_installed_value);
 	gtk_widget_show (self->label_details_size_download_title);
@@ -1739,6 +1761,7 @@ gs_details_page_label_widget (GsDetailsPage *self,
 			  self);
 	gtk_label_set_use_markup (GTK_LABEL (w), TRUE);
 	gtk_label_set_xalign (GTK_LABEL (w), 0.f);
+	gtk_label_set_selectable (GTK_LABEL (w), FALSE);
 	gtk_widget_set_visible (w, TRUE);
 	return w;
 }

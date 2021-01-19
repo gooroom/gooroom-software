@@ -2062,7 +2062,7 @@ msgstr "알 수 없음"
 
 #: src/gs-history-dialog.ui:6
 msgid "History"
-msgstr "역사"
+msgstr "업데이트 내역"
 
 #. TRANSLATORS: This is the header dividing the normal
 #. * applications and the system ones
@@ -4301,7 +4301,6 @@ msgstr "사용권 동의 앱"
 msgid "_Group"
 msgstr "그룹 설치"
 
-
 #: src/gs-overview-page.ui
 msgid "Popular Apps"
 msgstr "인기 앱"
@@ -4317,6 +4316,14 @@ msgstr "앱 정보"
 #: src/gs-detail-page.ui
 msgid "Similar Apps"
 msgstr "관련 앱"
+
+#: src/gs-installed-page.ui
+msgid "Delete Apps"
+msgstr "앱 삭제"
+
+#: src/gs-updates-page.ui
+msgid "Update Apps"
+msgstr "앱 업데이트"
 
 #: src/gs-app-row.c
 msgid "Intergrated Update"
@@ -4373,6 +4380,10 @@ msgstr "많은 장치가 작동하려면 펌웨어가 필요합니다. 예전의
 #: src/gs-consent-page.ui
 msgid "Debian Firmware (Details)"
 msgstr "<a href='https://wiki.debian.org/Firmware'>데비안 펌웨어 (자세히 보기)</a>"
+
+#: src/gnome-software.ui
+msgid "Please enter your search term"
+msgstr "검색어를 입력하세요"
 
 #~ msgid "_Restart & Update"
 #~ msgstr "다시 시작하고 업데이트(_R)"
