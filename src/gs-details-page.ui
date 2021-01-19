@@ -105,12 +105,12 @@
                                     <child>
                                       <object class="GtkLabel" id="application_details_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="valign">start</property>
                                         <property name="hexpand">True</property>
                                         <property name="margin_bottom">10</property>
                                         <property name="xalign">0</property>
-                                        <property name="selectable">True</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">20</property>
                                         <style>
@@ -127,11 +127,11 @@
                                     <child>
                                       <object class="GtkLabel" id="application_details_developer">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="valign">start</property>
                                         <property name="hexpand">True</property>
                                         <property name="xalign">0</property>
-                                        <property name="selectable">True</property>
                                         <property name="wrap">True</property>
                                         <property name="max_width_chars">20</property>
                                         <style>
@@ -149,12 +149,12 @@
                                     <child>
                                       <object class="GtkLabel" id="application_details_category">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="valign">start</property>
                                         <property name="hexpand">True</property>
                                         <property name="margin_bottom">16</property>
                                         <property name="xalign">0</property>
-                                        <property name="selectable">True</property>
                                         <property name="wrap">True</property>
                                         <property name="max-width-chars">60</property>
                                         <style>
@@ -250,6 +250,7 @@
                                             <child>
                                               <object class="GtkLabel" id="label_progress_percentage">
                                                 <property name="visible">True</property>
+                                                <property name="selectable">False</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="label">50%</property>
                                                 <style>
@@ -264,6 +265,7 @@
                                             <child>
                                               <object class="GtkLabel" id="label_progress_status">
                                                 <property name="visible">True</property>
+                                                <property name="selectable">False</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="label">Downloading</property>
                                                 <style>
@@ -411,6 +413,7 @@
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
+                                <property name="selectable">False</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="valign">start</property>
@@ -506,6 +509,7 @@
                         <child>
                           <object class="GtkLabel" id="application_details_details_title">
                             <property name="visible">True</property>
+                            <property name="selectable">False</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
                             <property name="valign">start</property>
@@ -545,6 +549,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_updated_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Updated</property>
                                         <property name="xalign">0</property>
@@ -563,10 +568,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_updated_value">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">May 12, 2012</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0</property>
                                         <accessibility>
@@ -595,6 +600,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_size_download_title">
                                         <property name="visible">False</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Download Size</property>
                                         <property name="xalign">0</property>
@@ -613,10 +619,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_size_download_value">
                                         <property name="visible">False</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">30 MB</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0</property>
                                       </object>
@@ -629,6 +635,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_size_installed_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Installed Size</property>
                                         <property name="xalign">0</property>
@@ -647,10 +654,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_size_installed_value">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">30 MB</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0</property>
                                       </object>
@@ -676,6 +683,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_category_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Category</property>
                                         <property name="xalign">0</property>
@@ -694,10 +702,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_category_value">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">Photos &amp; Video</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0</property>
                                         <accessibility>
@@ -726,6 +734,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_channel_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Channel</property>
                                         <property name="xalign">0</property>
@@ -744,10 +753,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_channel_value">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">stable</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0</property>
                                         <accessibility>
@@ -777,6 +786,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_license_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">License</property>
                                         <property name="xalign">0</property>
@@ -877,6 +887,7 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_developer_title">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Developer</property>
                                         <property name="xalign">0</property>
@@ -895,10 +906,10 @@
                                     <child>
                                       <object class="GtkLabel" id="label_details_developer_value">
                                         <property name="visible">True</property>
+                                        <property name="selectable">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="label">Gooroom</property>
-                                        <property name="selectable">True</property>
                                         <property name="xalign">0</property>
                                         <property name="yalign">0.5</property>
                                         <property name="wrap">True</property>
@@ -937,6 +948,7 @@
                             <child>
                               <object class="GtkLabel" id="similar_heading">
                                 <property name="visible">True</property>
+                                <property name="selectable">False</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Similar Apps</property>
@@ -966,6 +978,7 @@
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
+                                    <property name="selectable">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">More</property>
@@ -1027,6 +1040,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label_addons_title">
                                     <property name="visible">True</property>
+                                    <property name="selectable">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
                                     <property name="valign">start</property>
@@ -1041,6 +1055,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label_addons_uninstalled_app">
                                     <property name="visible">True</property>
+                                    <property name="selectable">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
@@ -1082,6 +1097,7 @@
                             <child>
                               <object class="GtkLabel" id="application_details_reviews_title">
                                 <property name="visible">True</property>
+                                <property name="selectable">False</property>
                                 <property name="margin_bottom">18</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
@@ -1173,6 +1189,7 @@
             <child>
               <object class="GtkLabel" id="label_failed">
                 <property name="visible">True</property>
+                <property name="selectable">False</property>
                 <property name="can_focus">False</property>
                 <property name="wrap">True</property>
                 <property name="max-width-chars">60</property>
@@ -1239,6 +1256,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">Free Software</property>
@@ -1255,6 +1273,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="max_width_chars">34</property>
@@ -1271,6 +1290,7 @@
         <child>
           <object class="GtkLabel" id="label_licenses_intro">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label">Users are bound by the following licenses:</property>
@@ -1315,6 +1335,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">Proprietary Software</property>
@@ -1331,6 +1352,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="max_width_chars">34</property>
@@ -1347,6 +1369,7 @@
         <child>
           <object class="GtkLabel" id="label_license_nonfree_details">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="use-markup">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
@@ -1377,6 +1400,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">Unknown Software License</property>
@@ -1393,6 +1417,7 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="max_width_chars">34</property>
@@ -1422,6 +1447,7 @@
         <child>
           <object class="GtkLabel" id="label_content_rating_title">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">The application was rated this way because it features:</property>
             <property name="xalign">0</property>
@@ -1435,6 +1461,7 @@
         <child>
           <object class="GtkLabel" id="label_content_rating_message">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="label">• Use of alcoholic beverages</property>
             <property name="xalign">0</property>
@@ -1448,6 +1475,7 @@
         <child>
           <object class="GtkLabel" id="label_content_rating_none">
             <property name="visible">True</property>
+            <property name="selectable">False</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">No details were available for this rating.</property>
           </object>

@@ -514,7 +514,6 @@ gs_screenshot_image_load_async (GsScreenshotImage *ssimg,
 			return;
 		}
 	}
-
 	/* if we're not showing a full-size image, we try loading a blurred
 	 * smaller version of it straight away */
 	if (!ssimg->showing_image &&
@@ -538,7 +537,6 @@ gs_screenshot_image_load_async (GsScreenshotImage *ssimg,
 		if (g_file_test (cachefn_thumb, G_FILE_TEST_EXISTS))
 			gs_screenshot_image_show_blurred (ssimg, cachefn_thumb);
 	}
-
 	/* re-request the cache filename, which might be different as it needs
 	 * to be writable this time */
 	g_free (ssimg->filename);

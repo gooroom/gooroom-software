@@ -185,7 +185,7 @@
                         <property name="can_focus">True</property>
                         <property name="max_length">100</property>
                         <property name="activates_default">True</property>
-                        <property name="placeholder_text" translatable="yes">검색어를 입력하세요.</property>
+                        <property name="placeholder_text" translatable="yes">Please enter your search term</property>
                         <style>
                           <class name="main_menu_search"/>
                         </style>
@@ -515,7 +515,7 @@
                     </child>
 
                     <child>
-                      <object class="GtkSeparator">
+                      <object class="GtkSeparator" id="button_separator">
                         <property name="width_request">190</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>

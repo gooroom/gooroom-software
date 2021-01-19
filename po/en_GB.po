@@ -2112,7 +2112,7 @@ msgstr "Unknown"
 
 #: src/gs-history-dialog.ui:6
 msgid "History"
-msgstr "History"
+msgstr "Update History"
 
 #. TRANSLATORS: This is the header dividing the normal
 #. * applications and the system ones
@@ -4303,6 +4303,14 @@ msgstr "App Info"
 msgid "Similar Apps"
 msgstr "Similar Apps"
 
+#: src/gs-installed-page.ui
+msgid "Delete Apps"
+msgstr "Delete Apps"
+
+#: src/gs-updates-page.ui
+msgid "Update Apps"
+msgstr "Update Apps"
+
 #: src/gs-app-row.c
 msgid "Intergrated Update"
 msgstr "Integrated Update"
@@ -4358,6 +4366,10 @@ msgstr "Many devices require a firmware to operate. Historically, firmware were 
 #: src/gs-consent-page.ui
 msgid "Debian Firmware (Details)"
 msgstr "<a href='https://wiki.debian.org/Firmware'>Debian Firmware (Details)</a>"
+
+#: src/gnome-software.ui
+msgid "Please enter your search term"
+msgstr "Please enter your search term"
 
 #~ msgid "The list of extra sources that have been previously enabled"
 #~ msgstr "The list of extra sources that have been previously enabled"

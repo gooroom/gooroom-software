@@ -92,6 +92,8 @@ gboolean	 gs_utils_error_convert_json_glib (GError	**perror);
 gboolean	 gs_utils_error_convert_appstream (GError	**perror);
 gboolean	 gs_utils_is_low_resolution	  (GtkWidget     *toplevel);
 
+gboolean	 gs_utils_check_gooroom_version (const gchar *version);
+
 gchar		*gs_utils_get_url_scheme	(const gchar	*url);
 gchar		*gs_utils_get_url_path		(const gchar	*url);
 gchar		*gs_utils_get_url_query_param	(const gchar	*url,
