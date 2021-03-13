@@ -69,6 +69,7 @@ gs_screenshot_image_get_screenshot (GsScreenshotImage *ssimg)
 static void
 gs_screenshot_image_set_error (GsScreenshotImage *ssimg, const gchar *message)
 {
+#if 0 /* Removed error message */
 	gint width, height;
 
 	gtk_stack_set_visible_child_name (GTK_STACK (ssimg->stack), "error");
@@ -78,6 +79,7 @@ gs_screenshot_image_set_error (GsScreenshotImage *ssimg, const gchar *message)
 		gtk_widget_hide (ssimg->label_error);
 	else
 		gtk_widget_show (ssimg->label_error);
+#endif
 	ssimg->showing_image = FALSE;
 }
 
