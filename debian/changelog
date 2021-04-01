@@ -1,3 +1,14 @@
+gooroom-software (3.30.6+5+grm2u7) unstable; urgency=medium
+
+  [ donghun ]
+  * [d1377f8a] [Bug:3092]Removed screenshot image error message
+  * [ad1d20d6] Added user consent installation and group installation function
+  * [9adeaaef] [Bug:2583,2598,2599,2902,3095,3096]applied gooroom-3.0 and fix errors
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Thu, 01 Apr 2021 10:00:32 +0900
+
 gooroom-software (3.30.6+5+grm2u6) unstable; urgency=medium
 
   [ donghun ]
