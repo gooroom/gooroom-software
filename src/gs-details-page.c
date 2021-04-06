@@ -564,7 +564,7 @@ gs_details_page_set_description (GsDetailsPage *self, const gchar *tmp)
 	para = gtk_label_new (tmp);
 	gtk_label_set_line_wrap (GTK_LABEL (para), TRUE);
 	gtk_label_set_max_width_chars (GTK_LABEL (para), 40);
-	gtk_label_set_selectable (GTK_LABEL (para), TRUE);
+	gtk_label_set_selectable (GTK_LABEL (para), FALSE);
 	gtk_widget_set_visible (para, TRUE);
 	gtk_widget_set_can_focus (para, FALSE);
 	g_object_set (para,
