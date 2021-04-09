@@ -1,3 +1,12 @@
+gooroom-software (3.30.6+5+grm2u8) unstable; urgency=medium
+
+  [ donghun ]
+  * [452da13a] [Bug:2902]Disable selection on the app detail page
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Fri, 09 Apr 2021 11:23:44 +0900
+
 gooroom-software (3.30.6+5+grm2u7) unstable; urgency=medium
 
   [ donghun ]
