@@ -2171,6 +2171,10 @@ msgstr "_Software Repositories"
 msgid "_About"
 msgstr "_About"
 
+#: src/gs-menus.ui:14
+msgid "_Help"
+msgstr "_Help"
+
 #: src/gs-menus.ui:18
 msgid "_Quit"
 msgstr "_Quit"

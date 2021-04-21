@@ -2124,6 +2124,10 @@ msgstr "업데이트 기본 설정(_U)"
 msgid "_About"
 msgstr "정보(_A)"
 
+#: src/gs-menus.ui:18
+msgid "_Help"
+msgstr "도움말(_H)"
+
 #: src/gs-menus.ui:22
 msgid "_Quit"
 msgstr "끝내기(_Q)"
