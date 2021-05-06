@@ -1,3 +1,10 @@
+gooroom-software (3.30.6+5+grm2u9) unstable; urgency=medium
+
+  [ boyeon.choi ]
+  * [ac3f9ec6] Enable the help grogram
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Thu, 06 May 2021 16:55:45 +0900
+
 gooroom-software (3.30.6+5+grm2u8) unstable; urgency=medium
 
   [ donghun ]
