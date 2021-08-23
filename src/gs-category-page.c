@@ -87,14 +87,19 @@ static void
 gs_category_page_set_state (GsCategoryPage *self,
                            GsCategoryPageState state)
 {
+        GtkWidget *widget;
+        widget = GTK_WIDGET (gtk_builder_get_object (self->builder, "button_category"));
+
 	/* spinner */
 	switch (state) {
 	case GS_CATEGORY_PAGE_STATE_LOADING:
 		gs_start_spinner (GTK_SPINNER (self->spinner_category));
 		gtk_widget_show (self->spinner_category);
+                gtk_widget_set_sensitive (widget, FALSE);
 		break;
 	case GS_CATEGORY_PAGE_STATE_READY:
 	case GS_CATEGORY_PAGE_STATE_FAILED:
+                gtk_widget_set_sensitive (widget, TRUE);
 		gs_stop_spinner (GTK_SPINNER (self->spinner_category));
 		gtk_widget_hide (self->spinner_category); break;
 	default:
