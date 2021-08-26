@@ -12,4 +12,3 @@ Keywords=Updates;Upgrade;Sources;Repositories;Preferences;Install;Uninstall;Prog
 StartupNotify=true
 MimeType=x-scheme-handler/appstream;x-scheme-handler/apt;x-scheme-handler/snap;
 X-GNOME-UsesNotifications=true
-DBusActivatable=true
