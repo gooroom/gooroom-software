@@ -588,7 +588,7 @@ flowboxchild {
     border-radius: 6px;
     -webkit-backdrop-filter: blur(10px);
     border: solid 1px #979797;
-    background-color: rgba(255,255,255,0.0);
+    background-color: rgba(255,255,255,1.0);
 }
 
 .main_category_menu_item {
