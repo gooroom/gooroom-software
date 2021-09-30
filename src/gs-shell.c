@@ -2208,7 +2208,7 @@ gs_shell_setup (GsShell *shell, GsPluginLoader *plugin_loader, GCancellable *can
 	gtk_style_context_remove_class (style_context, GTK_STYLE_CLASS_MENU);
 	gtk_style_context_remove_class (style_context, GTK_STYLE_CLASS_MENUBAR);
 	gtk_style_context_add_class (style_context, "main_category_menu");
-	gtk_widget_set_size_request (widget, 206, 312);
+	gtk_widget_set_size_request (widget, 216, 280);
 	priv->category_menu = widget;
 
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "button_category"));
