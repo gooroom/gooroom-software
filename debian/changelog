@@ -1,3 +1,10 @@
+gooroom-software (3.30.6+5+grm2u10) unstable; urgency=medium
+
+  [ heejun.jang ]
+  * [255e8b1e] Disable category button until the category contents are loaded completely
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Fri, 01 Oct 2021 20:13:20 +0900
+
 gooroom-software (3.30.6+5+grm2u9) unstable; urgency=medium
 
   [ boyeon.choi ]
