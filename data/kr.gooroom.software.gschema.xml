@@ -167,5 +167,9 @@
       <default>false</default>
       <summary>Set non-free application user consent</summary>
     </key>
+    <key name="id-update-list" type="a{ss}">
+      <default>{'org.openscad.OpenSCAD': 'openscad.desktop'}</default>
+      <summary>Update application id to recent version</summary>
+    </key>
   </schema>
 </schemalist>

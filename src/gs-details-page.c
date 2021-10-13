@@ -201,6 +201,9 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 	GsPrice *price;
 	g_autofree gchar *text = NULL;
 	GtkAdjustment *adj;
+        g_autoptr(GVariant) dictionary = NULL;
+        gchar *app_id = NULL;
+        gchar *update_id = NULL;
 
 	if (gs_shell_get_mode (self->shell) != GS_SHELL_MODE_DETAILS) {
 		g_warning ("Called switch_to(details) when in mode %s",
@@ -213,6 +216,14 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
 		return;
 
 	state = gs_app_get_state (self->app);
+        dictionary = g_settings_get_value (self->settings, "id-update-list");
+
+        app_id = gs_app_get_id (self->app);
+        if (dictionary != NULL && g_variant_lookup (dictionary, app_id, "&s", &update_id) && app_id != NULL)
+        {
+            gs_app_set_id (self->app, update_id);
+            g_variant_unref (dictionary);
+        }
 
 	/* install button */
 	switch (state) {
