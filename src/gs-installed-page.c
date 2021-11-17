@@ -300,6 +300,7 @@ gs_installed_page_get_installed_cb (GObject *source_object,
 	GsPluginLoader *plugin_loader = GS_PLUGIN_LOADER (source_object);
 	g_autoptr(GError) error = NULL;
 	g_autoptr(GsAppList) list = NULL;
+        gboolean is_already_exist = FALSE;
 
 	gs_stop_spinner (GTK_SPINNER (self->spinner_install));
 	gtk_stack_set_visible_child_name (GTK_STACK (self->stack_install), "view");
@@ -318,18 +319,19 @@ gs_installed_page_get_installed_cb (GObject *source_object,
 
 	for (i = 0; i < gs_app_list_length (list); i++) {
 		app = gs_app_list_index (list, i);
+                is_already_exist = FALSE;
 
 		/* Gooroom
 		 * Check if no desktop file exists */
 		if (gs_app_get_kind (app) == AS_APP_KIND_DESKTOP) {
 		    const gchar *desktop_id = NULL;
-            g_autoptr(GAppInfo) appinfo = NULL;
-			desktop_id = gs_app_get_id (app);
-            appinfo = G_APP_INFO (gs_utils_get_desktop_app_info (desktop_id));
-            if (appinfo == NULL) {
-                g_warning ("no such desktop file: %s", desktop_id );
-				continue;
-            }
+                    g_autoptr(GAppInfo) appinfo = NULL;
+                    desktop_id = gs_app_get_id (app);
+                    appinfo = G_APP_INFO (gs_utils_get_desktop_app_info (desktop_id));
+                    if (appinfo == NULL) {
+                        g_warning ("no such desktop file: %s", desktop_id );
+        				continue;
+                    }
 		}
 
 		if (self->enable_group) {
@@ -348,7 +350,27 @@ gs_installed_page_get_installed_cb (GObject *source_object,
 			}
 		}
 
-		gs_installed_page_add_app (self, list, app);
+                if (!g_str_has_suffix (gs_app_get_id (app), ".desktop")) {
+                    GsApp *app_temp;
+                    g_autofree gchar **app_id_split;
+                    gchar *app_id = NULL;
+                    gchar *app_unique_id = NULL;
+                    gchar *duplicate_check = NULL;
+
+                    app_unique_id = g_strdup (gs_app_get_unique_id (app));
+                    app_id_split = g_strsplit (app_unique_id, "/", -1);
+                   
+                    app_id = g_strconcat (g_strdup (app_id_split[g_strv_length (app_id_split) -2]), ".desktop", NULL);
+                    app_id_split[g_strv_length (app_id_split) - 2] = g_strdup (app_id); 
+                    duplicate_check = g_strjoinv ("/", app_id_split);
+                    app_temp = gs_app_list_lookup (list, duplicate_check);
+                    
+                    if (app_temp)
+                        is_already_exist = TRUE;
+                }
+
+                if (!is_already_exist)
+                    gs_installed_page_add_app (self, list, app);
 	}
 out:
 	gs_installed_page_pending_apps_changed_cb (plugin_loader, self);
