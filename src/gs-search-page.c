@@ -137,7 +137,14 @@ gs_search_page_get_search_cb (GObject *source_object,
 	gs_stop_spinner (GTK_SPINNER (self->spinner_search));
 	gtk_stack_set_visible_child_name (GTK_STACK (self->stack_search), "results");
 	for (i = 0; i < gs_app_list_length (list); i++) {
+                g_autoptr(GAppInfo) appinfo = NULL;
+                const gchar *app_id;
+
 		app = gs_app_list_index (list, i);
+                app_id = gs_app_get_id (app);
+                appinfo = G_APP_INFO (gs_utils_get_desktop_app_info (app_id));
+                if (appinfo == NULL && gs_app_get_state (app) == AS_APP_STATE_INSTALLED)
+                  continue;
 		app_row = gs_app_row_new (app);
 		if (!gs_app_has_quirk (app, AS_APP_QUIRK_PROVENANCE) ||
 		    gs_utils_list_has_app_fuzzy (list, app))
