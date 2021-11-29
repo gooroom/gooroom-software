@@ -171,10 +171,10 @@ gs_hiding_box_size_allocate (GtkWidget *widget, GtkAllocation *allocation)
 	gint x = 0, y = 0, i;
 	GList *child;
 	GtkWidget *child_widget;
-	gint childwidget_width, childwidget_height;
+	gint childwidget_width = 0, childwidget_height = 0;
 	gint spacing = box->spacing;
 	gint vspacing = box->vspacing;
-	gint children_width;
+	gint children_width = 0;
 	GtkAllocation clip, child_clip;
 
 	gtk_widget_set_allocation (widget, allocation);
