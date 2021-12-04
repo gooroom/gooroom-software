@@ -1,3 +1,21 @@
+gooroom-software (3.30.6+5+grm3u1) unstable; urgency=medium
+
+  [ donghun ]
+  * [3e3ece0a] Added user consent installation and group installation function
+  * [e368e98b] [Bug:2583,2598,2599,2902,3095,3096]applied gooroom-3.0 and fix errors
+  * [ae257f7e] Rebuild gooroom-2.0
+
+  [ heejun.jang ]
+  * [ad75922f] Rebase to Gooroom-3.0
+  * [c7f767e0] Updated catebory menu item background opacity
+  * [b4b91b68] [Bug:3965]Deleted empty space on category
+  * [a07f91b5] [Bug:3980]Update OpenSCAD application id to recent version
+  * [4fc17043] [Bug:4167]Fixed to do not show the duplicated applications
+  * [125dba55] [Bug:4296]Fixed to do not show the installed applications which do not have desktop file info in search page
+  * [e2eb6160] Fixed StaticAnalysis Severity High Issue - Uninitialized Variable
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Sat, 04 Dec 2021 17:20:23 +0900
+
 gooroom-software (3.30.6+5+grm2u6) unstable; urgency=medium
 
   [ donghun ]
