@@ -128,7 +128,7 @@
       <summary>The URI that explains nonfree and proprietary software</summary>
     </key>
     <key name="external-appstream-urls" type="as">
-      <default>['http://update.gooroom.kr/gooroom/dists/gooroom-2.0/main/gooroom-dep11/gooroom.yml.gz','http://update.gooroom.kr/gooroom/dists/gooroom-2.0/main/gooroom-dep11/gooroom-nonfree.yml.gz']</default>
+      <default>['http://update.gooroom.kr/gooroom/dists/gooroom-3.0/main/gooroom-dep11/gooroom.yml.gz','http://update.gooroom.kr/gooroom/dists/gooroom-3.0/main/gooroom-dep11/gooroom-nonfree.yml.gz']</default>
       <summary>A list of URLs pointing to appstream files that will be downloaded into an app-info folder</summary>
     </key>
     <key name="external-appstream-system-wide" type="b">
