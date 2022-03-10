@@ -317,6 +317,17 @@ prefs_activated (GSimpleAction *action, GVariant *parameter, gpointer app)
 }
 
 static void
+help_activated (GSimpleAction *action,
+                GVariant      *parameter,
+                gpointer       user_data)
+{
+        gtk_show_uri_on_window (GTK_WINDOW (user_data),
+                                "help:gooroom-help-software-center",
+                                gtk_get_current_event_time(),
+                                NULL);
+}
+
+static void
 about_activated (GSimpleAction *action,
 		 GVariant      *parameter,
 		 gpointer       user_data)
@@ -786,6 +797,7 @@ install_resources_activated (GSimpleAction *action,
 
 static GActionEntry actions[] = {
 	{ "about", about_activated, NULL, NULL, NULL },
+	{ "help", help_activated, NULL, NULL, NULL },
 	{ "quit", quit_activated, NULL, NULL, NULL },
 	{ "reboot-and-install", reboot_and_install, NULL, NULL, NULL },
 	{ "reboot", reboot_activated, NULL, NULL, NULL },
@@ -822,6 +834,22 @@ gs_application_update_software_sources_presence (GApplication *self)
 	enable_sources = g_settings_get_boolean (app->settings,
 						 ENABLE_REPOS_DIALOG_CONF_KEY);
 	g_simple_action_set_enabled (action, enable_sources);
+}
+
+static void
+gs_application_init_accelerators (GtkApplication *application)
+{
+        static const gchar * const accelmap[] = {
+                "app.help", "F1", NULL,
+                NULL
+        };
+
+        const gchar * const *it = accelmap;
+
+        for (it = accelmap; it[0]; it += g_strv_length ((gchar **)it) + 1) {
+                gtk_application_set_accels_for_action (GTK_APPLICATION (application), 
+                                                       it[0], &it[1]);
+        }
 }
 
 static void
@@ -918,6 +946,9 @@ gs_application_startup (GApplication *application)
 #endif
 	settings = g_settings_new ("kr.gooroom.software");
 	GS_APPLICATION (application)->settings = settings;
+
+        gs_application_init_accelerators (GTK_APPLICATION (app));
+
 	g_signal_connect_swapped (settings, "changed",
 				  G_CALLBACK (gs_application_settings_changed_cb),
 				  application);
