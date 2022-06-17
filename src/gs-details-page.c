@@ -137,6 +137,7 @@ struct _GsDetailsPage
     GtkWidget       *box_similar;
     GtkWidget       *similar_heading;
     GtkWidget       *similar_more;
+    GtkWidget       *similar_more_label;
 
     GtkWidget       *stack;
 };
@@ -219,6 +220,13 @@ gs_details_page_switch_to (GsPage *page, gboolean scroll_up)
         dictionary = g_settings_get_value (self->settings, "id-update-list");
 
         app_id = gs_app_get_id (self->app);
+        if (gs_app_get_categories (self->app)->len == 0) {
+          gtk_widget_set_visible (self->box_similar, FALSE);
+          gtk_widget_set_visible (self->similar_heading, FALSE);
+          gtk_widget_set_visible (self->similar_more, FALSE);
+          gtk_widget_set_visible (self->similar_more_label, FALSE);
+        }
+
         if (dictionary != NULL && g_variant_lookup (dictionary, app_id, "&s", &update_id) && app_id != NULL)
         {
             gs_app_set_id (self->app, update_id);
@@ -1048,6 +1056,7 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
     gtk_widget_set_visible (self->box_similar, FALSE);
     gtk_widget_set_visible (self->similar_more, FALSE);
     gtk_widget_set_visible (self->similar_heading, FALSE);
+    gtk_widget_set_visible (self->similar_more_label, FALSE);
 
     if (list == NULL)
         return;
@@ -1084,7 +1093,8 @@ gs_details_page_refresh_similar_cb (GObject *source_object,
     }
 
     if (N_TILES  < gs_app_list_length (list)) {
-        gtk_widget_set_visible (self->similar_more, TRUE);
+          gtk_widget_set_visible (self->similar_more, TRUE);
+          gtk_widget_set_visible (self->similar_more_label, TRUE);
     }
 }
 
@@ -2050,6 +2060,7 @@ gs_details_page_class_init (GsDetailsPageClass *klass)
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, box_similar);
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_heading);
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_more);
+    gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, similar_more_label);
 
     gtk_widget_class_bind_template_child (widget_class, GsDetailsPage, stack);
 }
