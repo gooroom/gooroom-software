@@ -1,3 +1,10 @@
+gooroom-software (3.30.6+5+grm3u4) unstable; urgency=medium
+
+  [ heejun.jang ]
+  * [1023f8ba] [HGOOROOM-180]Updated similar more button do not show when do not have category
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Mon, 20 Jun 2022 08:47:26 +0900
+
 gooroom-software (3.30.6+5+grm3u3) unstable; urgency=medium
 
   [ heejun.jang ]
