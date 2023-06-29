@@ -971,7 +971,7 @@ gs_installed_page_init (GsInstalledPage *self)
 				  G_CALLBACK (gs_shell_settings_changed_cb),
 				  self);
 	self->app_row = NULL;
-    self->enable_group = gs_utils_check_gooroom_version (GOOROOM_VERSION);
+	self->enable_group = gs_utils_check_gooroom_version (GOOROOM_VERSION) || gs_utils_check_gooroom_version (HGOOROOM_VERSION);
 
 }
 

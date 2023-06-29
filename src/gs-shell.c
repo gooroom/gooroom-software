@@ -2497,7 +2497,7 @@ gs_shell_init (GsShell *shell)
 	priv->modal_dialogs = g_ptr_array_new_with_free_func ((GDestroyNotify) gtk_widget_destroy);
 	priv->search_clean = FALSE;
 	priv->settings = g_settings_new ("kr.gooroom.software");
-	priv->enable_group = gs_utils_check_gooroom_version (GOOROOM_VERSION);
+	priv->enable_group = gs_utils_check_gooroom_version (GOOROOM_VERSION) || gs_utils_check_gooroom_version (HGOOROOM_VERSION);
 }
 
 GsShell *
