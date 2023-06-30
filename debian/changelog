@@ -1,3 +1,10 @@
+gooroom-software (3.30.6+5+grm3u5) unstable; urgency=medium
+
+  [ heejun.jang ]
+  * [ed68889e] update os info
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Fri, 30 Jun 2023 19:44:18 +0900
+
 gooroom-software (3.30.6+5+grm3u4) unstable; urgency=medium
 
   [ heejun.jang ]
