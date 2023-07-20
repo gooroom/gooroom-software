@@ -620,251 +620,263 @@
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkOverlay" id=" overlay">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="width-request">200</property>
+                    <!--property name="hscrollbar_policy">never</property-->
+                    <style>
+                      <class name="view"/>
+                    </style>
                     <child>
-                      <object class="GtkStack" id="stack_main">
+                      <object class="GtkOverlay" id=" overlay">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GsOverviewPage" id="overview_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">overview</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsInstalledPage" id="installed_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">installed</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsModeratePage" id="moderate_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">moderate</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsLoadingPage" id="loading_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">loading</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsSearchPage" id="search_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">search</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsUpdatesPage" id="updates_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">updates</property>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsDetailsPage" id="details_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">details</property>
-                            <property name="position">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsCategoryPage" id="category_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">category</property>
-                            <property name="position">7</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsExtrasPage" id="extras_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">extras</property>
-                            <property name="position">8</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GsConsentPage" id="consent_page">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="name">consent</property>
-                            <property name="position">9</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="index">-1</property>
-                      </packing>
-                    </child>
-                    <child type="overlay">
-                      <object class="GtkRevealer" id="notification_event">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="valign">start</property>
-                        <property name="hexpand">True</property>
-                        <child>
-                          <object class="GtkBox">
+                          <object class="GtkStack" id="stack_main">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="spacing">6</property>
                             <child>
-                              <object class="GtkLabel" id="label_events">
+                              <object class="GsOverviewPage" id="overview_page">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="margin_left">9</property>
-                                <property name="margin_right">9</property>
-                                <property name="margin_start">9</property>
-                                <property name="margin_end">9</property>
-                                <property name="label">Some Title</property>
-                                <property name="wrap">True</property>
-                                <property name="wrap_mode">word-char</property>
-                                <property name="max_width_chars">60</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="name">overview</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButtonBox">
+                              <object class="GsInstalledPage" id="installed_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">installed</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsModeratePage" id="moderate_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">moderate</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsLoadingPage" id="loading_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">loading</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsSearchPage" id="search_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">search</property>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsUpdatesPage" id="updates_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">updates</property>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsDetailsPage" id="details_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">details</property>
+                                <property name="position">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsCategoryPage" id="category_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">category</property>
+                                <property name="position">7</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsExtrasPage" id="extras_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">extras</property>
+                                <property name="position">8</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GsConsentPage" id="consent_page">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="name">consent</property>
+                                <property name="position">9</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="index">-1</property>
+                          </packing>
+                        </child>
+                        <child type="overlay">
+                          <object class="GtkRevealer" id="notification_event">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
+                            <property name="hexpand">True</property>
+                            <child>
+                              <object class="GtkBox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="layout_style">end</property>
+                                <property name="spacing">6</property>
                                 <child>
-                                  <object class="GtkButton" id="button_events_sources">
-                                    <property name="label" translatable="yes" comments="button in the info bar">Software Repositories</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
+                                  <object class="GtkLabel" id="label_events">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="margin_left">9</property>
+                                    <property name="margin_right">9</property>
+                                    <property name="margin_start">9</property>
+                                    <property name="margin_end">9</property>
+                                    <property name="label">Some Title</property>
+                                    <property name="wrap">True</property>
+                                    <property name="wrap_mode">word-char</property>
+                                    <property name="max_width_chars">60</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"/>
+                                    </attributes>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
+                                    <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="button_events_no_space">
-                                    <property name="label" translatable="yes" comments="button in the info bar">Examine Disk</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
+                                  <object class="GtkButtonBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="layout_style">end</property>
+                                    <child>
+                                      <object class="GtkButton" id="button_events_sources">
+                                        <property name="label" translatable="yes" comments="button in the info bar">Software Repositories</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_events_no_space">
+                                        <property name="label" translatable="yes" comments="button in the info bar">Examine Disk</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_events_network_settings">
+                                        <property name="label" translatable="yes" comments="button in the info bar">Network Settings</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_events_restart_required">
+                                        <property name="label" translatable="yes" comments="button in the info bar">Restart Now</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">3</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_events_more_info">
+                                        <property name="label" translatable="yes" comments="button in the info bar">More Information</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">4</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="button_events_network_settings">
-                                    <property name="label" translatable="yes" comments="button in the info bar">Network Settings</property>
+                                  <object class="GtkButton" id="button_events_dismiss">
+                                    <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="valign">start</property>
+                                    <property name="relief">none</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="icon_name">window-close-symbolic</property>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="flat"/>
+                                    </style>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
+                                    <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
-                                <child>
-                                  <object class="GtkButton" id="button_events_restart_required">
-                                    <property name="label" translatable="yes" comments="button in the info bar">Restart Now</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="button_events_more_info">
-                                    <property name="label" translatable="yes" comments="button in the info bar">More Information</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">4</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="button_events_dismiss">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="valign">start</property>
-                                <property name="relief">none</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">window-close-symbolic</property>
-                                  </object>
-                                </child>
                                 <style>
-                                  <class name="flat"/>
+                                  <class name="app-notification"/>
                                 </style>
                               </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
                             </child>
-                            <style>
-                              <class name="app-notification"/>
-                            </style>
                           </object>
                         </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
                 </child>
               </object>
               <packing>

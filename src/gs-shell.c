@@ -137,7 +137,7 @@ add_category (gpointer key, gpointer value, gpointer user_data)
 	style_context = gtk_widget_get_style_context (menu_item);
 	gtk_style_context_remove_class (style_context, GTK_STYLE_CLASS_MENUITEM);
 	gtk_style_context_add_class (style_context, "main_category_menu_item");
-	gtk_widget_set_size_request (menu_item, 170, 34);
+	gtk_widget_set_size_request (menu_item, 170, 25);
 
 	g_object_set_data (G_OBJECT (menu_item), "gnome-software::category-id", name);
 	g_object_set_data (G_OBJECT (menu_item), "gnome-software::category-value", value);

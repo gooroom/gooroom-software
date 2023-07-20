@@ -479,8 +479,8 @@ static void
 button_detail_toggled (GtkWidget *widget, GsAppRow *app_row)
 {
     gboolean visible = FALSE;
-	GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
-    visible = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+    GsAppRowPrivate *priv = gs_app_row_get_instance_private (app_row);
+    visible = !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
     
     if (visible)
         gtk_widget_hide (priv->label_app_desc);
