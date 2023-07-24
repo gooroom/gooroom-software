@@ -295,7 +295,6 @@
 }
 
 .application-details-title {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: 500;
     font-style: normal;
@@ -304,7 +303,6 @@
 }
 
 .application-details-label {
-    font-family: NotoSansCJKkr;
     font-size: 14px;
     font-weight: normal;
     font-style: normal;
@@ -567,7 +565,6 @@ flowboxchild {
 }
 
 .main_menu_button_label {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -592,7 +589,6 @@ flowboxchild {
 }
 
 .main_category_menu_item {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -611,7 +607,6 @@ flowboxchild {
 }
 
 .search-noresult {
-    font-family: NotoSansCJKkr;
     font-size: 16px;
     font-weight: normal;
     font-style: normal;
@@ -635,7 +630,6 @@ flowboxchild {
 }
 
 .overview-featured-app-label {
-    font-family: NotoSansCJKkr;
     font-size: 16px;
     font-weight: normal;
     font-style: normal;
@@ -644,7 +638,6 @@ flowboxchild {
 }
 
 .overview-title-label {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: 500;
     font-style: normal;
@@ -658,7 +651,6 @@ flowboxchild {
 }
 
 .overview-more-label {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -673,7 +665,6 @@ flowboxchild {
 }
 
 .overview-app-label {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -688,7 +679,6 @@ flowboxchild {
 }
 
 .details-progress-label {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -697,7 +687,6 @@ flowboxchild {
 }
 
 .category-title-label {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: 500;
     font-style: normal;
@@ -711,7 +700,6 @@ flowboxchild {
 }
 
 .installed-title-label {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: normal;
     font-style: normal;
@@ -748,7 +736,6 @@ flowboxchild {
 }
 
 .app-row-app-label {
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -757,7 +744,6 @@ flowboxchild {
 }
 
 .app-row-app-sub-label {
-    font-family: NotoSansCJKkr;
     font-size: 12px;
     font-weight: normal;
     font-style: normal;
@@ -776,7 +762,6 @@ flowboxchild {
 .app-row-app-button {
     border-radius: 6px;
     background-color: #d0021b;
-    font-family: NotoSansCJKkr;
     font-size: 13px;
     font-weight: normal;
     font-style: normal;
@@ -818,7 +803,6 @@ flowboxchild {
 }
 
 .consent-label {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: 500;
     font-style: normal;
@@ -829,7 +813,6 @@ flowboxchild {
 .consent-textview {
     border: none;
     font-size: 13px;
-    font-family: NotoSansCJKkr;
 }
 
 .loading-progressbar {
@@ -845,7 +828,6 @@ flowboxchild {
 }
 
 .loading-label {
-    font-family: NotoSansCJKkr;
     font-size: 20px;
     font-weight: 300;
     font-style: normal;
