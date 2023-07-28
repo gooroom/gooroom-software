@@ -1,3 +1,11 @@
+gooroom-software (3.30.6+5+grm3u6) unstable; urgency=medium
+
+  [ heejun.jang ]
+  * [e95f0e40] Update update-button show desc action, change window to scrolledwindow, resize category item size
+  * [052cf4b2] Update gooroom software to apply interface text change
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Fri, 28 Jul 2023 09:46:35 +0900
+
 gooroom-software (3.30.6+5+grm3u5) unstable; urgency=medium
 
   [ heejun.jang ]
