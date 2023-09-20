@@ -295,7 +295,8 @@
 }
 
 .application-details-title {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: 500;
     font-style: normal;
     font-stretch: normal;
@@ -303,7 +304,8 @@
 }
 
 .application-details-label {
-    font-size: 14px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 14px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -565,7 +567,8 @@ flowboxchild {
 }
 
 .main_menu_button_label {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     color: #000000;
@@ -589,15 +592,16 @@ flowboxchild {
 }
 
 .main_category_menu_item {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
     color: #000100;
-	margin-left: 5px;
-	margin-top: 2px;
-	margin-right: 5px;
-	margin-bottom: 2px;
+    margin-left: 5px;
+    margin-top: 2px;
+    margin-right: 5px;
+    margin-bottom: 2px;
 }
 
 .main_category_menu_item:hover {
@@ -607,7 +611,8 @@ flowboxchild {
 }
 
 .search-noresult {
-    font-size: 16px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 16px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -630,7 +635,8 @@ flowboxchild {
 }
 
 .overview-featured-app-label {
-    font-size: 16px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 16px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -638,7 +644,8 @@ flowboxchild {
 }
 
 .overview-title-label {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: 500;
     font-style: normal;
     font-stretch: normal;
@@ -651,7 +658,8 @@ flowboxchild {
 }
 
 .overview-more-label {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -665,7 +673,8 @@ flowboxchild {
 }
 
 .overview-app-label {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -679,7 +688,8 @@ flowboxchild {
 }
 
 .details-progress-label {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -687,7 +697,8 @@ flowboxchild {
 }
 
 .category-title-label {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: 500;
     font-style: normal;
     font-stretch: normal;
@@ -700,7 +711,8 @@ flowboxchild {
 }
 
 .installed-title-label {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -736,7 +748,8 @@ flowboxchild {
 }
 
 .app-row-app-label {
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -744,7 +757,8 @@ flowboxchild {
 }
 
 .app-row-app-sub-label {
-    font-size: 12px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 12px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -762,7 +776,8 @@ flowboxchild {
 .app-row-app-button {
     border-radius: 6px;
     background-color: #d0021b;
-    font-size: 13px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 13px; */
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
@@ -803,7 +818,8 @@ flowboxchild {
 }
 
 .consent-label {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: 500;
     font-style: normal;
     font-stretch: normal;
@@ -812,7 +828,8 @@ flowboxchild {
 
 .consent-textview {
     border: none;
-    font-size: 13px;
+/*    font-size: 13px;
+    font-family: NotoSansCJKkr; */
 }
 
 .loading-progressbar {
@@ -828,7 +845,8 @@ flowboxchild {
 }
 
 .loading-label {
-    font-size: 20px;
+/*    font-family: NotoSansCJKkr;
+    font-size: 20px; */
     font-weight: 300;
     font-style: normal;
     font-stretch: normal;
