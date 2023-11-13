@@ -1,3 +1,10 @@
+gooroom-software (3.30.6+5+grm3u7) unstable; urgency=medium
+
+  [ heejun.jang ]
+  * [cc94b14b] Update gooroom software to apply interface text size change and resize category item size
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Mon, 13 Nov 2023 16:27:57 +0900
+
 gooroom-software (3.30.6+5+grm3u6) unstable; urgency=medium
 
   [ heejun.jang ]
